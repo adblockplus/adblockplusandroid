@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <CheckBoxPreference
+        android:key="@string/pref_enabled"
+        android:summary="@string/pref_enabled_summary"
+        android:title="@string/pref_enabled_title" />
+    <CheckBoxPreference
+        android:dependency="@string/pref_enabled"
+        android:key="@string/pref_startatboot"
+        android:summary="@string/pref_startatboot_summary"
+        android:title="@string/pref_startatboot_title" />
+    <ListPreference
+        android:key="@string/pref_subscription"
+        android:title="@string/pref_subscription_title" />
+
+</PreferenceScreen>

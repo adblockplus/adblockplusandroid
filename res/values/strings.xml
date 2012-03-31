@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Adblock Plus</string>
+
+    <string name="notif_transparent">Filtering is done transparently</string>
+    <string name="notif_proxy">Filtering is done via proxy on port %d</string>
+    
+    <string name="synchronize_in_progress">downloading&#8230;</string>
+    <string name="synchronize_invalid_url">invalid url</string>
+    <string name="synchronize_connection_error">connection error</string>
+    <string name="synchronize_invalid_data">invalid data</string>
+    <string name="synchronize_checksum_mismatch">checksum mismatch</string>
+    <string name="synchronize_last_at">last update</string>
+    <string name="synchronize_never">not loaded</string>
+    
+    <string name="pref_enabled_title">Enable filtering</string>
+    <string name="pref_enabled_summary">Adblock filtering is enabled when marked</string>
+    <string name="pref_startatboot_title">Start at boot</string>
+    <string name="pref_startatboot_summary">Service will start automatically at boot time when marked</string>
+    <string name="pref_subscription_title">Filter subscription</string>
+
+</resources>
