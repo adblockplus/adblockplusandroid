@@ -417,8 +417,11 @@ public class ProxyService extends Service
 		{
 			try
 			{
-				if (sock != null)
-					sock.close();
+				synchronized (sock)
+				{
+					if (sock != null)
+						sock.close();
+				}
 			}
 			catch (IOException e)
 			{
@@ -440,11 +443,16 @@ public class ProxyService extends Service
 				return;
 			}
 			Socket client;
-			while (! sock.isClosed())
+			while (true)
 			{
 				try
 				{
-					client = sock.accept();
+					synchronized (sock)
+					{
+						if (sock.isClosed())
+							break;
+						client = sock.accept();
+					}
 					if (client != null)
 					{
 						Log.d(TAG, "new client");
