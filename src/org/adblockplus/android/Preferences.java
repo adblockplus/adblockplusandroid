@@ -37,13 +37,14 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		setContentView(R.layout.preferences);
 		addPreferencesFromResource(R.xml.preferences);
 		copyAssets();
-		AdblockPlus.getApplication().startEngine();
 	}
 
 	@Override
 	protected void onStart()
 	{
 		super.onStart();
+		AdblockPlus.getApplication().startEngine();
+		AdblockPlus.getApplication().startInteractive();
 	}
 
 	@Override
@@ -99,6 +100,11 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 	protected void onStop()
 	{
 		super.onStop();
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		boolean enabled = prefs.getBoolean(getString(R.string.pref_enabled), false);
+		AdblockPlus.getApplication().stopInteractive();
+		if (! enabled)
+			AdblockPlus.getApplication().stopEngine(true);
 	}
 
     private void setPrefSummary(Preference pref)

@@ -50,6 +50,7 @@ public class AdblockPlus extends Application
 	
 	private List<Subscription> subscriptions;
 	private JSThread js;
+	private boolean interactive = false;
 
 	private static AdblockPlus myself;
 
@@ -175,11 +176,13 @@ public class AdblockPlus extends Application
 	public void startInteractive()
 	{
 		// TODO not used
+		interactive = true;
 	}
 	
 	public void stopInteractive()
 	{
 		// TODO not used
+		interactive = false;
 	}
 	
 	public String checkLocalePrefixMatch(String[] prefixes)
@@ -198,19 +201,29 @@ public class AdblockPlus extends Application
 	
 	public void startEngine()
 	{
-		js.start();
+		if (js == null)
+		{
+			Log.e(TAG, "startEngine");
+			js = new JSThread(this);
+			js.start();
+		}
 	}
 	
-	public void stopEngine()
+	public void stopEngine(boolean implicitly)
 	{
-		js.stopEngine();
-		try
+		if ((implicitly || ! interactive) && js != null)
 		{
-			js.join();
-		}
-		catch (InterruptedException e)
-		{
-			e.printStackTrace();
+			Log.e(TAG, "stopEngine " + implicitly + " " + interactive);
+			js.stopEngine();
+			try
+			{
+				js.join();
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
+			}
+			js = null;
 		}
 	}
 
@@ -219,7 +232,6 @@ public class AdblockPlus extends Application
 	{
 		super.onCreate();
 		myself = this;
-		js = new JSThread(this);
 	}
 
 	private final Handler messageHandler = new Handler()
