@@ -103,6 +103,9 @@ public class ProxyService extends Service
 			}
 		}
 
+		// Start engine
+		AdblockPlus.getApplication().startEngine();
+		
 		// Start proxy
 		if (proxy == null)
 		{
@@ -127,17 +130,6 @@ public class ProxyService extends Service
 	{
 		super.onDestroy();
 
-		// Stop proxy thread
-		proxy.stopServer();
-		try
-		{
-			proxy.join();
-		}
-		catch (InterruptedException e)
-		{
-			e.printStackTrace();
-		}
-
 		// Stop IP redirecting
 		if (isTransparent)
 		{
@@ -149,6 +141,21 @@ public class ProxyService extends Service
 				}
 			}.start();
 		}
+
+		// Stop proxy thread
+		proxy.stopServer();
+		try
+		{
+			proxy.join();
+		}
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+
+		// Stop engine if not in interactive mode
+		AdblockPlus.getApplication().stopEngine(false);
+		
 		// Release service lock
 		stopForegroundCompat(R.string.app_name);
 	}
@@ -417,11 +424,8 @@ public class ProxyService extends Service
 		{
 			try
 			{
-				synchronized (sock)
-				{
-					if (sock != null)
-						sock.close();
-				}
+				if (sock != null)
+					sock.close();
 			}
 			catch (IOException e)
 			{
@@ -447,12 +451,7 @@ public class ProxyService extends Service
 			{
 				try
 				{
-					synchronized (sock)
-					{
-						if (sock.isClosed())
-							break;
-						client = sock.accept();
-					}
+					client = sock.accept();
 					if (client != null)
 					{
 						Log.d(TAG, "new client");
@@ -462,8 +461,10 @@ public class ProxyService extends Service
 				}
 				catch (Exception e)
 				{
-					// TODO Process exceptions
-					e.printStackTrace();
+					if (sock.isClosed())
+						break;
+					else
+						Log.e(TAG, "Proxy", e);
 				}
 			}
 		}
