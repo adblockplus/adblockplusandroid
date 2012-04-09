@@ -16,7 +16,7 @@ extern "C" {
 	JNIEXPORT jobject JNICALL Java_org_adblockplus_android_JSEngine_nativeGet(JNIEnv *pEnv, jobject pObj, jstring pKey, jlong pContext);
 	JNIEXPORT jobject JNICALL Java_org_adblockplus_android_JSEngine_nativePut(JNIEnv *pEnv, jobject pObj, jstring pKey, jobject pValue, jlong pContext);
 	JNIEXPORT void JNICALL Java_org_adblockplus_android_JSEngine_nativeCallback(JNIEnv *pEnv, jobject pObj, jlong pCallback, jobjectArray pParams, jlong pContext);
-	JNIEXPORT void JNICALL Java_org_adblockplus_android_JSEngine_nativeRunCallbacks(JNIEnv *pEnv, jobject pObj, jlong pContext);
+	JNIEXPORT jlong JNICALL Java_org_adblockplus_android_JSEngine_nativeRunCallbacks(JNIEnv *pEnv, jobject pObj, jlong pContext);
 };
 
 typedef struct __ObjMethod
@@ -230,7 +230,7 @@ JNIEXPORT void JNICALL Java_org_adblockplus_android_JSEngine_nativeCallback
 	}
 }
 
-JNIEXPORT void JNICALL Java_org_adblockplus_android_JSEngine_nativeRunCallbacks
+JNIEXPORT jlong JNICALL Java_org_adblockplus_android_JSEngine_nativeRunCallbacks
   (JNIEnv *pEnv, jobject pObj, jlong pContext)
 {
 	v8::HandleScope handle_scope;
@@ -238,12 +238,13 @@ JNIEXPORT void JNICALL Java_org_adblockplus_android_JSEngine_nativeRunCallbacks
 	v8::Persistent<v8::Context> context((v8::Context *) pContext);
 	v8::Context::Scope context_scope(context);
 
-	bool r = true;
-	while (r)
+	long r = 0;
+	while (r == 0)
 	{
 		v8::TryCatch try_catch;
 		r = RunNextCallback(context);
 		if (try_catch.HasCaught())
 			reportException(&try_catch);
 	}
+	return (jlong) r;
 }

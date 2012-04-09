@@ -19,5 +19,5 @@ extern v8::Handle<v8::Value> fileWriteImpl(const v8::Arguments& args);
 extern v8::Handle<v8::Value> httpSendImpl(const v8::Arguments& args);
 
 extern v8::Handle<v8::Value> setTimeoutImpl(const v8::Arguments& args);
-extern bool RunNextCallback(v8::Handle<v8::Context> context);
+extern long RunNextCallback(v8::Handle<v8::Context> context);
 extern void ClearQueue();
