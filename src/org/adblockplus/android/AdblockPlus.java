@@ -251,6 +251,7 @@ public class AdblockPlus extends Application
 		private volatile boolean run = true;
 		private Context context;
 		private final LinkedList<Runnable> queue = new LinkedList<Runnable>();
+		private long delay = -1;
 		
 		JSThread(Context context)
 		{
@@ -385,6 +386,20 @@ public class AdblockPlus extends Application
 			messageHandler.sendMessage(msg);
 		}
 		
+		//JS helper
+		@SuppressWarnings("unused")
+		public void notify(long delay)
+		{
+			if (this.delay < 0 || delay < this.delay)
+			{
+				this.delay = delay;
+		        synchronized (queue)
+		        {
+		        	queue.notify();
+		        }
+			}
+		}
+		
 		public Object evaluate(String script)
 		{
 			return jsEngine.evaluate(script);
@@ -398,6 +413,10 @@ public class AdblockPlus extends Application
 		public final void stopEngine()
 		{
 			run = false;
+	        synchronized (queue)
+	        {
+	            queue.notify();
+	        }
 		}
 
 	    public void execute(Runnable r)
@@ -501,12 +520,44 @@ public class AdblockPlus extends Application
 					Runnable r = null;
 					synchronized (queue)
 					{
+						// Log.e(TAG, "run " + queue.isEmpty() + " " + delay);
 						r = queue.poll();
 					}
 					if (r != null)
+					{
 						r.run();
+					}
+					else if (delay > 0)
+					{
+						synchronized (queue)
+						{
+							try
+							{
+								queue.wait(delay);
+							}
+							catch (InterruptedException e)
+							{
+							}
+						}
+						delay = 0;
+					}
+					else if (delay == 0)
+					{
+						delay = jsEngine.runCallbacks();
+					}
 					else
-						jsEngine.runCallbacks();
+					{
+						synchronized (queue)
+						{
+							try
+							{
+								queue.wait();
+							}
+							catch (InterruptedException e)
+							{
+							}
+						}
+					}
 				}
 				catch (Exception e)
 				{

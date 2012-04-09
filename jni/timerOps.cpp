@@ -30,13 +30,20 @@ v8::Handle<v8::Value> setTimeoutImpl(const v8::Arguments& args)
 
   queue.push_back(entry);
 
+  jlong jnum = entry->delay;
+
+  static jclass cls = jniEnv->GetObjectClass(jniCallback);
+  static jmethodID mid = jniEnv->GetMethodID(cls, "notify", "(J)V");
+  if (mid)
+    jniEnv->CallVoidMethod(jniCallback, mid, jnum);
+
   return v8::Undefined();
 }
 
-bool RunNextCallback(v8::Handle<v8::Context> context)
+long RunNextCallback(v8::Handle<v8::Context> context)
 {
   if (queue.size() == 0)
-    return false;
+    return -1;
 
   std::list<QueueEntry*>::iterator minEntry = queue.begin();
   for (std::list<QueueEntry*>::iterator it = minEntry; it != queue.end(); it++)
@@ -44,11 +51,13 @@ bool RunNextCallback(v8::Handle<v8::Context> context)
       minEntry = it;
 
   int64_t delay = (*minEntry)->delay;
-  if (delay >= 0)
+  if (delay > 0)
   {
-//    usleep(delay * 1000);
+	// Here we assume that we will be called next time after the specified delay,
+	// but it can happen earlier - should fix this.
     for (std::list<QueueEntry*>::iterator it = queue.begin(); it != queue.end(); it++)
       (*it)->delay -= delay;
+    return delay;
   }
 
   QueueEntry* entry = *minEntry;
@@ -58,7 +67,7 @@ bool RunNextCallback(v8::Handle<v8::Context> context)
   entry->callback.Dispose();
   delete entry;
 
-  return queue.size() > 0;
+  return 0;
 }
 
 void ClearQueue()

@@ -53,9 +53,9 @@ public class JSEngine
 		nativePut(name, value, context);
 	}
 
-	public void runCallbacks()
+	public long runCallbacks()
 	{
-		nativeRunCallbacks(context);
+		return nativeRunCallbacks(context);
 	}
 
 	public void callback(long callback, Object[] params)
@@ -68,7 +68,7 @@ public class JSEngine
 	private native Object nativeExecute(String script, long context);
 	private native Object nativeGet(String name, long context);
 	private native Object nativePut(String name, Object value, long context);
-	private native void nativeRunCallbacks(long context);
+	private native long nativeRunCallbacks(long context);
 	private native void nativeCallback(long callback, Object[] params, long context);
 
 	static
