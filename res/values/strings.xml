@@ -5,6 +5,9 @@
 
     <string name="notif_transparent">Filtering is done transparently</string>
     <string name="notif_proxy">Filtering is done via proxy on port %d</string>
+
+    <string name="msg_subscription_offer">We have selected a suitable subscription for you: \'%s\'. You can change it at any time in application settings.</string>
+    <string name="ok">OK</string>
     
     <string name="synchronize_in_progress">downloading&#8230;</string>
     <string name="synchronize_invalid_url">invalid url</string>

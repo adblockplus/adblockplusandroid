@@ -10,6 +10,7 @@ import java.util.List;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -53,28 +54,57 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		super.onResume();
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-		AdblockPlus application = AdblockPlus.getApplication();
+		final AdblockPlus application = AdblockPlus.getApplication();
 		
 		ListPreference subscriptionList = (ListPreference) findPreference(getString(R.string.pref_subscription));
 		List<Subscription> subscriptions = application.getSubscriptions();
 		String[] entries = new String[subscriptions.size()];
 		String[] entryValues = new String[subscriptions.size()];
-//		String current = getString(R.string.pref_subscription, (String) null);
-//		Subscription curSubscription = null;
+		String current = prefs.getString(getString(R.string.pref_subscription), (String) null);
 		int i = 0;
 		for (Subscription subscription : subscriptions)
 		{
 			entries[i] = subscription.title;
 			entryValues[i] = subscription.url;
-//			if (current.equals(provider.code))
-//				curProvider = provider;
 			i++;
 		}
 		subscriptionList.setEntries(entries);
 		subscriptionList.setEntryValues(entryValues);
+
+		if (current == null)
+		{
+			Subscription offer = application.offerSubscription();
+			current = offer.url;
+			if (offer != null)
+			{
+				subscriptionList.setValue(offer.url);
+	 			application.setSubscription(offer);
+	 			new AlertDialog.Builder(this)
+	 				.setTitle(R.string.app_name)
+	 				.setMessage(String.format(getString(R.string.msg_subscription_offer, offer.title)))
+	 				.setIcon(android.R.drawable.ic_dialog_info)
+	 				.setPositiveButton(R.string.ok, null)
+	 				.create()
+	 				.show();
+			}
+		}
+		
 		setPrefSummary(subscriptionList);
 		registerReceiver(statusReceiver, new IntentFilter(AdblockPlus.BROADCAST_SUBSCRIPTION_STATUS));
-		application.checkSubscriptions();
+
+		final String url = current;
+		
+		(new Thread() {
+			@Override
+			public void run()
+			{
+				if (!application.checkSubscriptions())
+				{
+					Subscription subscription = application.getSubscription(url);
+		 			application.setSubscription(subscription);
+				}
+			}
+		}).start();
 
 		boolean enabled = prefs.getBoolean(getString(R.string.pref_enabled), false);
 		if (enabled && ! isServiceRunning())
@@ -84,6 +114,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
             editor.commit();
             ((CheckBoxPreference) findPreference(getString(R.string.pref_enabled))).setChecked(false);
 		}
+				
 		prefs.registerOnSharedPreferenceChangeListener(this);
 	}
 
