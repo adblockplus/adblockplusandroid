@@ -408,12 +408,13 @@ function addSubscription(jsonSub)
 
 function checkSubscriptions()
 {
+  var hasSubscriptions = false;
   for (var i = 0; i < FilterStorage.subscriptions.length; i++)
   {
     var subscription = FilterStorage.subscriptions[i];
-    Android.print(subscription.title);
     if (subscription instanceof DownloadableSubscription)
     {
+      hasSubscriptions = true;
       updateSubscriptionStatus(subscription);
       if (!subscription.lastDownload)
       {
@@ -421,6 +422,7 @@ function checkSubscriptions()
       }
     }
   }
+  return hasSubscriptions;
 }
 
 function updateSubscriptionStatus(subscription)
@@ -471,7 +473,3 @@ FilterListener.startup();
 //Synchronizer.startup();
 
 FilterNotifier.addListener(onFilterChange);
-
-Android.showToast("ready");
-
-var hasSubscriptions = FilterStorage.subscriptions.some(function(subscription) {return subscription instanceof DownloadableSubscription});

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
@@ -137,16 +138,71 @@ public class AdblockPlus extends Application
 			}
 		}
 	}
-	
-	public void checkSubscriptions()
+
+	public Subscription offerSubscription()
 	{
-		js.execute(new Runnable(){
-			@Override
-			public void run()
+		Subscription selectedItem = null;
+		String selectedPrefix = null;
+		int matchCount = 0;
+		for (Subscription subscription : getSubscriptions())
+		{
+			if (selectedItem == null)
+				selectedItem = subscription;
+
+			String prefix = checkLocalePrefixMatch(subscription.prefixes);
+			if (prefix != null)
 			{
-				js.evaluate("checkSubscriptions()");
+				if (selectedPrefix == null || selectedPrefix.length() < prefix.length())
+				{
+					selectedItem = subscription;
+					selectedPrefix = prefix;
+					matchCount = 1;
+				}
+				else if (selectedPrefix != null && selectedPrefix.length() == prefix.length())
+				{
+					matchCount++;
+
+					// If multiple items have a matching prefix of the
+					// same length select one of the items randomly,
+					// probability should be the same for all items.
+					// So we replace the previous match here with
+					// probability 1/N (N being the number of matches).
+					if (Math.random() * matchCount < 1)
+					{
+						selectedItem = subscription;
+						selectedPrefix = prefix;
+					}
+				}
+			}
+		}
+		return selectedItem;
+	}
+	
+	public boolean checkSubscriptions()
+	{
+		Future<Boolean> future = js.submit(new Callable<Boolean>(){
+			@Override
+			public Boolean call() throws Exception
+			{
+				Boolean result = (Boolean) js.evaluate("checkSubscriptions()");
+				return result;
 			}
 		});
+		try
+		{
+			return future.get().booleanValue();
+		}
+		catch (InterruptedException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (ExecutionException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
 	}
 	
 	private class MatchesCallable implements Callable<Boolean>
@@ -448,65 +504,6 @@ public class AdblockPlus extends Application
 			try
 			{
 				jsEngine.evaluate("Android.load(\"start.js\");");
-				boolean hasSubscriptions = (Boolean) jsEngine.get("hasSubscriptions");
-				Log.e(TAG, "hasSubscriptions = " + hasSubscriptions);
-				
-				if (! hasSubscriptions)
-				{
-					List<Subscription> subscriptions = getSubscriptions();
-
-					Subscription selectedItem = null;
-					String selectedPrefix = null;
-					int matchCount = 0;
-					for (Subscription subscription : subscriptions)
-					{
-						if (selectedItem == null)
-							selectedItem = subscription;
-
-						String prefix = checkLocalePrefixMatch(subscription.prefixes);
-						if (prefix != null)
-						{
-							if (selectedPrefix == null || selectedPrefix.length() < prefix.length())
-							{
-								selectedItem = subscription;
-								selectedPrefix = prefix;
-								matchCount = 1;
-							}
-							else if (selectedPrefix != null && selectedPrefix.length() == prefix.length())
-							{
-								matchCount++;
-
-								// If multiple items have a matching prefix of the
-								// same length select one of the items randomly,
-								// probability should be the same for all items.
-								// So we replace the previous match here with
-								// probability 1/N (N being the number of matches).
-								if (Math.random() * matchCount < 1)
-								{
-									selectedItem = subscription;
-									selectedPrefix = prefix;
-								}
-							}
-						}
-					}
-
-					/*
-					Subscription test = new Subscription();
-					test.url = "https://easylist-downloads.adblockplus.org/exceptionrules.txt";
-					test.title = "Test";
-					test.homepage = "https://easylist-downloads.adblockplus.org/";
-					selectedItem = test;
-					*/
-					
-					if (selectedItem != null)
-					{
-						JSONObject jsonSub = new JSONObject();
-						jsonSub.put("url", selectedItem.url);
-						jsonSub.put("title", selectedItem.title);
-						jsonSub.put("homepage", selectedItem.homepage);
-						jsEngine.evaluate("addSubscription(\"" + StringEscapeUtils.escapeJavaScript(jsonSub.toString()) + "\")");
-					}
-				}
 			}
 			catch (Exception e)
 			{
