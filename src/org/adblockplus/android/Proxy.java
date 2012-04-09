@@ -22,7 +22,7 @@ public class Proxy implements Runnable
 	private static final int PORT_HTTP = 80;
 	private static final int PORT_HTTPS = 443;
 	
-	private static final int socketTimeout = 300000;
+	private static final int socketTimeout = 10000;
 
 	private final Socket client;
 
@@ -152,7 +152,7 @@ public class Proxy implements Runnable
 		StringBuffer header = new StringBuffer();
 		String data;
 		int pos;
-		int contentLength = 0;
+		int contentLength = -1;
 		int byteCount = 0;
 		boolean hostKnown = false;
 		boolean hostHeader = false;
