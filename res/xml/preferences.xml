@@ -12,7 +12,7 @@
         android:summary="@string/pref_startatboot_summary"
         android:title="@string/pref_startatboot_title" />
 
-    <ListPreference
+    <org.adblockplus.android.RefreshableListPreference
         android:key="@string/pref_subscription"
         android:title="@string/pref_subscription_title" />
 

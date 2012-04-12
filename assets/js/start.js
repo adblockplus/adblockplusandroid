@@ -406,6 +406,16 @@ function addSubscription(jsonSub)
   }
 }
 
+function refreshSubscriptions()
+{
+  for (var i = 0; i < FilterStorage.subscriptions.length; i++)
+  {
+    var subscription = FilterStorage.subscriptions[i];
+    if (subscription instanceof DownloadableSubscription)
+      Synchronizer.execute(subscription, true, true);
+  }
+}
+
 function checkSubscriptions()
 {
   var hasSubscriptions = false;

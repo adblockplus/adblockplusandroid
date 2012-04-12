@@ -139,6 +139,17 @@ public class AdblockPlus extends Application
 		}
 	}
 
+	public void refreshSubscription()
+	{
+		js.execute(new Runnable(){
+			@Override
+			public void run()
+			{
+				js.evaluate("refreshSubscriptions()");
+			}
+		});
+	}
+
 	public Subscription offerSubscription()
 	{
 		Subscription selectedItem = null;
