@@ -35,6 +35,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 		setContentView(R.layout.preferences);
 		addPreferencesFromResource(R.xml.preferences);
 		copyAssets();
@@ -90,7 +91,8 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		}
 		
 		setPrefSummary(subscriptionList);
-		registerReceiver(statusReceiver, new IntentFilter(AdblockPlus.BROADCAST_SUBSCRIPTION_STATUS));
+		registerReceiver(receiver, new IntentFilter(AdblockPlus.BROADCAST_SUBSCRIPTION_STATUS));
+		registerReceiver(receiver, new IntentFilter(ProxyService.BROADCAST_PROXY_FAILED));
 
 		final String url = current;
 		
@@ -107,12 +109,14 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		}).start();
 
 		boolean enabled = prefs.getBoolean(getString(R.string.pref_enabled), false);
-		if (enabled && ! isServiceRunning())
+		if (enabled)
 		{
-			SharedPreferences.Editor editor = prefs.edit();
-            editor.putBoolean(getString(R.string.pref_enabled), false);
-            editor.commit();
-            ((CheckBoxPreference) findPreference(getString(R.string.pref_enabled))).setChecked(false);
+			if (! isServiceRunning())
+			{
+				setNotEnabled();
+	            enabled = false;
+			}
+			findPreference(getString(R.string.pref_port)).setEnabled(! enabled);
 		}
 				
 		prefs.registerOnSharedPreferenceChangeListener(this);
@@ -124,7 +128,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		super.onPause();
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		prefs.unregisterOnSharedPreferenceChangeListener(this);
-		unregisterReceiver(statusReceiver);
+		unregisterReceiver(receiver);
 	}
 
 	@Override
@@ -150,6 +154,14 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
         }
 	}
 
+    private void setNotEnabled()
+    {
+		SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+        editor.putBoolean(getString(R.string.pref_enabled), false);
+        editor.commit();
+        ((CheckBoxPreference) findPreference(getString(R.string.pref_enabled))).setChecked(false);
+    }
+    
 	private boolean isServiceRunning()
 	{
 		ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
@@ -208,6 +220,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		if (getString(R.string.pref_enabled).equals(key))
 		{
 			boolean enabled = sharedPreferences.getBoolean(key, false);
+			findPreference(getString(R.string.pref_port)).setEnabled(! enabled);
 			if (enabled && ! isServiceRunning())
 				startService(new Intent(this, ProxyService.class));
 			else if (!enabled && isServiceRunning())
@@ -225,47 +238,63 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		setPrefSummary(pref);
 	}
 	
-	private BroadcastReceiver statusReceiver = new BroadcastReceiver()
+	private BroadcastReceiver receiver = new BroadcastReceiver()
 	{
 		@Override
 		public void onReceive(final Context context, Intent intent)
 		{
+			String action = intent.getAction();
 			Bundle extra = intent.getExtras();
-			final String text = extra.getString("text");
-			final long time = extra.getLong("time");
-			runOnUiThread(new Runnable() {
-				public void run()
-                {
-					ListPreference subscriptionList = (ListPreference) findPreference(getString(R.string.pref_subscription));
-			        CharSequence summary = subscriptionList.getEntry();
-			        StringBuilder builder = new StringBuilder();
-			        if (summary != null)
-			        {
-			        	builder.append(summary);
-			        	if (text != "")
-			        	{
-			        		builder.append(" (");
-			        		int id = getResources().getIdentifier(text, "string", getPackageName());
-			        		if (id > 0)
-			        			builder.append(getString(id, text));
-			        		else
-			        			builder.append(text);
-			        		if (time > 0)
-			        		{
-			        			builder.append(": ");
-			        			Calendar calendar = Calendar.getInstance();
-			        			calendar.setTimeInMillis(time);
-			        			Date date = calendar.getTime();
-			        			builder.append(DateFormat.getDateFormat(context).format(date));
-			        			builder.append(" ");
-			        			builder.append(DateFormat.getTimeFormat(context).format(date));
-			        		}
-			        		builder.append(")");
-			        	}
-			        	subscriptionList.setSummary(builder.toString());
-			        }
-                }
-			});
+			if (action.equals(ProxyService.BROADCAST_PROXY_FAILED))
+			{
+				String msg = extra.getString("msg");
+	 			new AlertDialog.Builder(Preferences.this)
+ 				.setTitle(R.string.error)
+ 				.setMessage(msg)
+ 				.setIcon(android.R.drawable.ic_dialog_alert)
+ 				.setPositiveButton(R.string.ok, null)
+ 				.create()
+ 				.show();
+				setNotEnabled();
+			}
+			if (action.equals(AdblockPlus.BROADCAST_SUBSCRIPTION_STATUS))
+			{
+				final String text = extra.getString("text");
+				final long time = extra.getLong("time");
+				runOnUiThread(new Runnable() {
+					public void run()
+	                {
+						ListPreference subscriptionList = (ListPreference) findPreference(getString(R.string.pref_subscription));
+				        CharSequence summary = subscriptionList.getEntry();
+				        StringBuilder builder = new StringBuilder();
+				        if (summary != null)
+				        {
+				        	builder.append(summary);
+				        	if (text != "")
+				        	{
+				        		builder.append(" (");
+				        		int id = getResources().getIdentifier(text, "string", getPackageName());
+				        		if (id > 0)
+				        			builder.append(getString(id, text));
+				        		else
+				        			builder.append(text);
+				        		if (time > 0)
+				        		{
+				        			builder.append(": ");
+				        			Calendar calendar = Calendar.getInstance();
+				        			calendar.setTimeInMillis(time);
+				        			Date date = calendar.getTime();
+				        			builder.append(DateFormat.getDateFormat(context).format(date));
+				        			builder.append(" ");
+				        			builder.append(DateFormat.getTimeFormat(context).format(date));
+				        		}
+				        		builder.append(")");
+				        	}
+				        	subscriptionList.setSummary(builder.toString());
+				        }
+	                }
+				});
+			}
 		}
 	};
 }

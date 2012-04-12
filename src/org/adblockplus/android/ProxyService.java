@@ -17,13 +17,17 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
+import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.Toast;
 
 public class ProxyService extends Service
 {
@@ -45,11 +49,11 @@ public class ProxyService extends Service
 	public final static int DEFAULT_TIMEOUT = 3000;
 	public final static int EXECUTION_ERROR = -99;
 
-	private final static int ERR_PROXY_FAILED = 1;
+	public final static String BROADCAST_PROXY_FAILED = "org.adblockplus.android.proxy.failure";
 
 	private final static String CMD_IPTABLES_RETURN = "iptables -t nat -m owner --uid-owner {{UID}} -A OUTPUT -p tcp -j RETURN\n";
-	private final static String CMD_IPTABLES_REDIRECT_ADD_HTTP = "iptables -t nat -A OUTPUT -p tcp --dport 80 -j REDIRECT --to 2416\n";
-	private final static String CMD_IPTABLES_DNAT_ADD_HTTP = "iptables -t nat -A OUTPUT -p tcp --dport 80 -j DNAT --to-destination 127.0.0.1:2416\n";
+	private final static String CMD_IPTABLES_REDIRECT_ADD_HTTP = "iptables -t nat -A OUTPUT -p tcp --dport 80 -j REDIRECT --to {{PORT}}\n";
+	private final static String CMD_IPTABLES_DNAT_ADD_HTTP = "iptables -t nat -A OUTPUT -p tcp --dport 80 -j DNAT --to-destination 127.0.0.1:{{PORT}}\n";
 
 	private static final Class<?>[] mSetForegroundSignature = new Class[] { boolean.class };
 	private static final Class<?>[] mStartForegroundSignature = new Class[] { int.class, Notification.class };
@@ -64,7 +68,7 @@ public class ProxyService extends Service
 	private Object[] mStopForegroundArgs = new Object[1];
 
 	private ProxyThread proxy = null;
-	private int proxyPort = 2416;
+	private int proxyPort;
 
 	private int hasRedirectSupport = -1;
 	private int isRoot = -1;
@@ -82,6 +86,18 @@ public class ProxyService extends Service
 
 		initForegroundCompat();
 
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		String port = prefs.getString(getString(R.string.pref_port), null);
+		try
+		{
+			proxyPort = port != null ? Integer.valueOf(port): getResources().getInteger(R.integer.def_port);
+		}
+		catch (NumberFormatException e)
+		{
+			Toast.makeText(this, getString(R.string.msg_badport) + ": " + port, Toast.LENGTH_LONG).show();
+			proxyPort = getResources().getInteger(R.integer.def_port);
+		}
+
 		if (isRoot())
 		{
 			runRootCommand("chmod 700 " + DEFAULT_IPTABLES + "\n", DEFAULT_TIMEOUT);
@@ -92,7 +108,7 @@ public class ProxyService extends Service
 				StringBuffer cmd = new StringBuffer();
 				int uid = getPackageManager().getPackageInfo(getPackageName(), 0).applicationInfo.uid;
 				cmd.append(CMD_IPTABLES_RETURN.replace("{{UID}}", String.valueOf(uid)));
-				cmd.append(hasRedirectSupport > 0 ? CMD_IPTABLES_REDIRECT_ADD_HTTP : CMD_IPTABLES_DNAT_ADD_HTTP);
+				cmd.append(hasRedirectSupport > 0 ? CMD_IPTABLES_REDIRECT_ADD_HTTP.replace("{{PORT}}", String.valueOf(proxyPort)) : CMD_IPTABLES_DNAT_ADD_HTTP.replace("{{PORT}}", String.valueOf(proxyPort)));
 				String rules = cmd.toString().replace("iptables", getIptables());
 				runRootCommand(rules, DEFAULT_TIMEOUT);
 				isTransparent = true;
@@ -105,7 +121,9 @@ public class ProxyService extends Service
 
 		// Start engine
 		AdblockPlus.getApplication().startEngine();
-		
+
+		registerReceiver(receiver, new IntentFilter(ProxyService.BROADCAST_PROXY_FAILED));
+
 		// Start proxy
 		if (proxy == null)
 		{
@@ -129,6 +147,8 @@ public class ProxyService extends Service
 	public void onDestroy()
 	{
 		super.onDestroy();
+
+		unregisterReceiver(receiver);
 
 		// Stop IP redirecting
 		if (isTransparent)
@@ -416,6 +436,18 @@ public class ProxyService extends Service
 		return binder;
 	}
 
+	private BroadcastReceiver receiver = new BroadcastReceiver()
+	{
+		@Override
+		public void onReceive(final Context context, Intent intent)
+		{
+			if (intent.getAction().equals(ProxyService.BROADCAST_PROXY_FAILED))
+			{
+				stopSelf();
+			}
+		}
+	};
+
 	private final class ProxyThread extends Thread
 	{
 		ServerSocket sock = null;
@@ -440,9 +472,9 @@ public class ProxyService extends Service
 			{
 				sock = new ServerSocket(proxyPort);
 			}
-			catch (IOException e)
+			catch (Exception e)
 			{
-				messageHandler.sendEmptyMessage(ERR_PROXY_FAILED);
+				sendBroadcast(new Intent(BROADCAST_PROXY_FAILED).putExtra("msg", e.getMessage()));
 				Log.e(TAG, null, e);
 				return;
 			}
@@ -469,13 +501,6 @@ public class ProxyService extends Service
 			}
 		}
 	}
-
-	private final Handler messageHandler = new Handler() {
-		public void handleMessage(Message msg)
-		{
-			ProxyService.this.stopSelf();
-		}
-	};
 
 	private final class ScriptRunner extends Thread
 	{

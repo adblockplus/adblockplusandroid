@@ -6,12 +6,22 @@
         android:summary="@string/pref_enabled_summary"
         android:title="@string/pref_enabled_title" />
     <CheckBoxPreference
+        android:defaultValue="@bool/def_startatboot"
         android:dependency="@string/pref_enabled"
         android:key="@string/pref_startatboot"
         android:summary="@string/pref_startatboot_summary"
         android:title="@string/pref_startatboot_title" />
+
     <ListPreference
         android:key="@string/pref_subscription"
         android:title="@string/pref_subscription_title" />
+
+    <EditTextPreference
+        android:defaultValue="@integer/def_port"
+        android:enabled="false"
+        android:inputType="number"
+        android:key="@string/pref_port"
+        android:summary="@string/pref_port_summary"
+        android:title="@string/pref_port_title" />
 
 </PreferenceScreen>
