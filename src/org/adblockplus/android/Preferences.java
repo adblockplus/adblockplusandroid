@@ -26,6 +26,7 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.View;
 
 public class Preferences extends PreferenceActivity implements OnSharedPreferenceChangeListener
 {
@@ -57,7 +58,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 
 		final AdblockPlus application = AdblockPlus.getApplication();
 		
-		ListPreference subscriptionList = (ListPreference) findPreference(getString(R.string.pref_subscription));
+		RefreshableListPreference subscriptionList = (RefreshableListPreference) findPreference(getString(R.string.pref_subscription));
 		List<Subscription> subscriptions = application.getSubscriptions();
 		String[] entries = new String[subscriptions.size()];
 		String[] entryValues = new String[subscriptions.size()];
@@ -89,6 +90,14 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 	 				.show();
 			}
 		}
+		
+		subscriptionList.setOnRefreshClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v)
+			{
+				application.refreshSubscription();
+			}
+		});
 		
 		setPrefSummary(subscriptionList);
 		registerReceiver(receiver, new IntentFilter(AdblockPlus.BROADCAST_SUBSCRIPTION_STATUS));
