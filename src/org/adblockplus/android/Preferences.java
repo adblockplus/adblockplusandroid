@@ -109,15 +109,12 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		}).start();
 
 		boolean enabled = prefs.getBoolean(getString(R.string.pref_enabled), false);
-		if (enabled)
+		if (enabled && ! isServiceRunning())
 		{
-			if (! isServiceRunning())
-			{
-				setNotEnabled();
-	            enabled = false;
-			}
-			findPreference(getString(R.string.pref_port)).setEnabled(! enabled);
+			setNotEnabled();
+            enabled = false;
 		}
+		findPreference(getString(R.string.pref_port)).setEnabled(! enabled);
 				
 		prefs.registerOnSharedPreferenceChangeListener(this);
 	}
