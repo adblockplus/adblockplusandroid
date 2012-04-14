@@ -16,6 +16,20 @@
         android:key="@string/pref_subscription"
         android:title="@string/pref_subscription_title" />
 
+    <ListPreference
+        android:defaultValue="0"
+        android:dialogTitle="@string/pref_refresh_title"
+        android:entries="@array/refresh_names"
+        android:entryValues="@array/refresh_values"
+        android:key="@string/pref_refresh"
+        android:title="@string/pref_refresh_title" />
+
+    <CheckBoxPreference
+        android:defaultValue="@bool/def_wifirefresh"
+        android:key="@string/pref_wifirefresh"
+        android:summary="@string/pref_wifirefresh_summary"
+        android:title="@string/pref_wifirefresh_title" />
+
     <EditTextPreference
         android:defaultValue="@integer/def_port"
         android:enabled="false"
