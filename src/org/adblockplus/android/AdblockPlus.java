@@ -34,6 +34,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -58,6 +60,17 @@ public class AdblockPlus extends Application
 	public static AdblockPlus getApplication()
 	{
 		return myself;
+	}
+
+	public static boolean isConnected(Context context)
+	{
+	    ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+	    NetworkInfo networkInfo = null;
+	    if (connectivityManager != null)
+	    {
+	        networkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+	    }
+	    return networkInfo == null ? false : networkInfo.isConnected();
 	}
 
 	public List<Subscription> getSubscriptions()

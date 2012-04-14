@@ -24,6 +24,9 @@
     <string name="pref_startatboot_title">Start at boot</string>
     <string name="pref_startatboot_summary">Service will start automatically at boot time when marked</string>
     <string name="pref_subscription_title">Filter subscription</string>
+    <string name="pref_refresh_title">Subscription refresh</string>
+    <string name="pref_wifirefresh_title">Refresh over WiFi only</string>
+    <string name="pref_wifirefresh_summary">Automatic refreshes will be performed only over WiFi connections</string>
     <string name="pref_port_title">Proxy port</string>
     <string name="pref_port_summary">Port for local ad filtering proxy</string>
 
