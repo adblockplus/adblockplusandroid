@@ -180,7 +180,7 @@ public class Proxy implements Runnable
 					pos = uri.indexOf("://");
 					if (pos >= 0)
 					{
-						data = data.replace(uri.substring(0, uri.indexOf("/", pos + 4) - 1), "");
+						data = data.replace(uri.substring(0, uri.indexOf("/", pos + 4)), "");
 						hostKnown = true;
 					}
 				}
