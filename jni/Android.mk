@@ -1,7 +1,5 @@
 LOCAL_PATH := $(call my-dir)
 
-V8_HOME			:= /home/andrey/Workspace/v8
-
 include $(CLEAR_VARS)
 
 LOCAL_MODULE		:= v8-base
