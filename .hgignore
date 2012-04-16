@@ -1,0 +1,10 @@
+syntax: glob
+
+ant.properties
+local.properties
+build.xml
+proguard.cfg
+bin
+libs
+obj
+gen
