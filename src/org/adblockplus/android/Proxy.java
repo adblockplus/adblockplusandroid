@@ -53,7 +53,10 @@ public class Proxy implements Runnable
 			int pos = uri.indexOf("://");
 			if (pos >= 0)
 			{
-				hostName = uri.substring(pos + 3, uri.indexOf("/", pos + 4));
+				int end = uri.indexOf("/", pos + 4);
+				if (end < 0)
+					end = uri.length();
+				hostName = uri.substring(pos + 3, end);
 			}
 			
 			pos = hostName.indexOf(":");
