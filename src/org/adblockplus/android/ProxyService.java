@@ -10,9 +10,10 @@ import java.io.OutputStreamWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Properties;
 
+import sunlabs.brazil.server.Server;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -67,7 +68,8 @@ public class ProxyService extends Service
 	private Object[] mStartForegroundArgs = new Object[2];
 	private Object[] mStopForegroundArgs = new Object[1];
 
-	private ProxyThread proxy = null;
+//	private ProxyThread proxy = null;
+	private ProxyServer proxy = null;
 	private int proxyPort;
 
 	private int hasRedirectSupport = -1;
@@ -127,7 +129,74 @@ public class ProxyService extends Service
 		// Start proxy
 		if (proxy == null)
 		{
-			proxy = new ProxyThread();
+			ServerSocket listen = null;
+			try
+			{
+				listen = new ServerSocket(proxyPort, 1024);
+			}
+			catch (IOException e)
+			{
+				sendBroadcast(new Intent(BROADCAST_PROXY_FAILED).putExtra("msg", e.getMessage()));
+				Log.e(TAG, null, e);
+				return;
+			}
+
+			Properties config = new Properties();
+			config.put("handler", "main");
+			config.put("main.prefix", "");
+			config.put("main.class", "sunlabs.brazil.server.ChainHandler");
+			if (isTransparent)
+			{
+				config.put("main.handlers", "urlmodifier adblock proxy");
+				config.put("urlmodifier.class", "org.adblockplus.brazil.TransparentProxyHandler");
+			}
+			else
+			{
+				config.put("main.handlers", "adblock https proxy");
+				config.put("https.class", "org.paw.handler.SSLConnectionHandler");
+			}
+			config.put("adblock.class", "org.adblockplus.brazil.RequestHandler");
+			config.put("proxy.class", "sunlabs.brazil.proxy.ProxyHandler");
+            /*
+            This is for future - when we will need to filter content
+            config.put("main.handlers", "... filter");
+            config.put("filter.class", "sunlabs.brazil.filter.FilterHandler");
+            config.put("filter.handler", "proxy");
+            config.put("filter.prefix", "");
+            config.put("filter.filters", "standard");
+            config.put("standard.class", "org.paw.filter.StandardFilter");
+            */
+            
+            /*
+            if(!filters.isEmpty() && !passThrough) {
+                useFilters += " repack";
+                this.config.put("repack.class", "org.paw.filter.RepackFilter");
+            }
+
+
+            if (proxyHost != null && proxyPort != null) {
+                this.config.put("proxy.proxyHost", proxyHost);
+                this.config.put("proxy.proxyPort", proxyPort);
+                
+                if(https) {
+                	this.config.put("https.proxyHost", proxyHost);
+                    this.config.put("https.proxyPort", proxyPort);
+                }
+                
+                if(proxyUser != null && proxyPasswd != null) {
+                	// Base64 encode user:password
+                	String proxyPasswdBase64 = "Basic " + new String(Base64.encodeBase64((proxyUser + ":" + proxyPasswd).getBytes()));
+                	this.config.put("proxy.auth", proxyPasswdBase64);
+                	if(https) {
+                		this.config.put("https.auth", proxyPasswdBase64);
+                	}
+                }
+            }
+            */
+
+			proxy = new ProxyServer();
+			proxy.logLevel = Server.LOG_DIAGNOSTIC;
+			proxy.setup(listen, config.getProperty("handler"), config);
 			proxy.start();
 		}
 		
@@ -162,16 +231,8 @@ public class ProxyService extends Service
 			}.start();
 		}
 
-		// Stop proxy thread
-		proxy.stopServer();
-		try
-		{
-			proxy.join();
-		}
-		catch (InterruptedException e)
-		{
-			e.printStackTrace();
-		}
+		// Stop proxy server
+		proxy.close();
 
 		// Stop engine if not in interactive mode
 		AdblockPlus.getApplication().stopEngine(false);
@@ -447,57 +508,30 @@ public class ProxyService extends Service
 			}
 		}
 	};
-
-	private final class ProxyThread extends Thread
+	
+	private final class ProxyServer extends Server
 	{
-		ServerSocket sock = null;
-
-		public final void stopServer()
+	    @Override
+		public void close()
 		{
 			try
 			{
-				if (sock != null)
-					sock.close();
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-			}
-		}
-
-		@Override
-		public final void run()
-		{
-			try
-			{
-				sock = new ServerSocket(proxyPort);
+				listen.close();
+				this.interrupt();
+				this.join();
 			}
 			catch (Exception e)
 			{
-				sendBroadcast(new Intent(BROADCAST_PROXY_FAILED).putExtra("msg", e.getMessage()));
-				Log.e(TAG, null, e);
-				return;
 			}
-			Socket client;
-			while (true)
+			log(LOG_WARNING, null, "server stopped");
+		}
+
+	    @Override
+		public void log(int level, Object obj, String message)
+		{
+			if (level <= logLevel)
 			{
-				try
-				{
-					client = sock.accept();
-					if (client != null)
-					{
-						Log.d(TAG, "new client");
-						Thread t = new Thread(new Proxy(client));
-						t.start();
-					}
-				}
-				catch (Exception e)
-				{
-					if (sock.isClosed())
-						break;
-					else
-						Log.e(TAG, "Proxy", e);
-				}
+				Log.println(7 - level, obj != null ? obj.toString() : TAG, message);
 			}
 		}
 	}
