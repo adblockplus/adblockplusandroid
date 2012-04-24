@@ -14,6 +14,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -32,6 +34,7 @@ import org.xml.sax.SAXException;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.net.ConnectivityManager;
@@ -40,6 +43,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -51,9 +55,12 @@ public class AdblockPlus extends Application
 
 	public final static String BROADCAST_SUBSCRIPTION_STATUS = "org.adblockplus.android.subscription.status";
 	
+	private final static long REFRESH_PERIOD = 60 * 60 * 1000;
+	
 	private List<Subscription> subscriptions;
 	private JSThread js;
 	private boolean interactive = false;
+	private Timer refreshTimer = null;
 
 	private static AdblockPlus myself;
 
@@ -202,13 +209,25 @@ public class AdblockPlus extends Application
 		return selectedItem;
 	}
 	
-	public boolean checkSubscriptions()
+	public void checkSubscriptions()
+	{
+		Log.e(TAG, "checkSubsdcriptions()");
+		js.execute(new Runnable(){
+			@Override
+			public void run()
+			{
+				js.evaluate("checkSubscriptions()");
+			}
+		});
+	}
+
+	public boolean verifySubscriptions()
 	{
 		Future<Boolean> future = js.submit(new Callable<Boolean>(){
 			@Override
 			public Boolean call() throws Exception
 			{
-				Boolean result = (Boolean) js.evaluate("checkSubscriptions()");
+				Boolean result = (Boolean) js.evaluate("verifySubscriptions()");
 				return result;
 			}
 		});
@@ -241,6 +260,13 @@ public class AdblockPlus extends Application
 		@Override
 		public Boolean call() throws Exception
 		{
+			// SCRIPT
+		    // OTHER
+		    // IMAGE
+		    // STYLESHEET
+		    // SUBDOCUMENT
+		    // MEDIA
+		    // FONT
 			Boolean result = (Boolean) js.evaluate("defaultMatcher.matchesAny('" + url + "', 'SCRIPT', null, false) != null;");
 			return result;
 		}
@@ -286,6 +312,7 @@ public class AdblockPlus extends Application
 			Log.e(TAG, "startEngine");
 			js = new JSThread(this);
 			js.start();
+			updateRefresh(true);
 		}
 	}
 	
@@ -294,6 +321,7 @@ public class AdblockPlus extends Application
 		if ((implicitly || ! interactive) && js != null)
 		{
 			Log.e(TAG, "stopEngine " + implicitly + " " + interactive);
+			stopRefresh();
 			js.stopEngine();
 			try
 			{
@@ -306,7 +334,50 @@ public class AdblockPlus extends Application
 			js = null;
 		}
 	}
+	
+	public void updateRefresh()
+	{
+		updateRefresh(false);
+	}
 
+	private void updateRefresh(boolean starting)
+	{
+		final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		final int refresh = Integer.valueOf(prefs.getString(getString(R.string.pref_refresh), "0"));
+		final boolean wifionly = prefs.getBoolean(getString(R.string.pref_wifirefresh), getResources().getBoolean(R.bool.def_wifirefresh));
+		if (refresh == 1 && starting && (! wifionly || isConnected(this)))
+		{
+			refreshSubscription();
+		}
+		else if (refresh == 2 && refreshTimer == null)
+		{
+			refreshTimer = new Timer();
+			refreshTimer.schedule(new TimerTask() {
+				@Override
+				public void run()
+				{
+					if (! wifionly || isConnected(AdblockPlus.this))
+						checkSubscriptions();					
+					
+				}
+			}, 100, REFRESH_PERIOD);
+		}
+		else if (refresh < 2)
+		{
+			stopRefresh();
+		}
+	}
+	
+	private void stopRefresh()
+	{
+		if (refreshTimer != null)
+		{
+			refreshTimer.cancel();
+			refreshTimer.purge();
+			refreshTimer = null;
+		}
+	}
+	
 	@Override
 	public void onCreate()
 	{

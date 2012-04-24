@@ -100,17 +100,6 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		});
 		
 		int refresh = Integer.valueOf(prefs.getString(getString(R.string.pref_refresh), "0"));
-		boolean wifionly = prefs.getBoolean(getString(R.string.pref_wifirefresh), getResources().getBoolean(R.bool.def_wifirefresh));
-		switch (refresh)
-		{
-			case 1:
-				if (! wifionly || AdblockPlus.isConnected(this))
-					application.refreshSubscription();
-				break;
-			case 2:
-				//TODO add periodic refresh
-				break;
-		}
 		findPreference(getString(R.string.pref_wifirefresh)).setEnabled(refresh > 0);
 		
 		setPrefSummary(subscriptionList);
@@ -125,7 +114,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 			@Override
 			public void run()
 			{
-				if (!application.checkSubscriptions())
+				if (!application.verifySubscriptions())
 				{
 					Subscription subscription = application.getSubscription(url);
 		 			application.setSubscription(subscription);
@@ -259,6 +248,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		{
 			int refresh = Integer.valueOf(sharedPreferences.getString(getString(R.string.pref_refresh), "0"));
 			findPreference(getString(R.string.pref_wifirefresh)).setEnabled(refresh > 0);
+			AdblockPlus.getApplication().updateRefresh();
 		}
 
 		Preference pref = findPreference(key);

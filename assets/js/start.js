@@ -124,6 +124,7 @@ var Prefs =
   data_directory: _datapath,
   savestats: false,
   privateBrowsing: false,
+  subscriptions_autoupdate: true,
   subscriptions_fallbackerrors: 5,
   subscriptions_fallbackurl: "https://adblockplus.org/getSubscription?version=%VERSION%&url=%SUBSCRIPTION%&downloadURL=%URL%&error=%ERROR%&channelStatus=%CHANNELSTATUS%&responseStatus=%RESPONSESTATUS%",
   addListener: function() {}
@@ -418,6 +419,11 @@ function refreshSubscriptions()
 
 function checkSubscriptions()
 {
+  Synchronizer.checkSubscriptions();
+}
+
+function verifySubscriptions()
+{
   var hasSubscriptions = false;
   for (var i = 0; i < FilterStorage.subscriptions.length; i++)
   {
@@ -480,6 +486,5 @@ Android.load("Matcher.jsm");
 Android.load("Synchronizer.jsm");
 
 FilterListener.startup();
-//Synchronizer.startup();
 
 FilterNotifier.addListener(onFilterChange);
