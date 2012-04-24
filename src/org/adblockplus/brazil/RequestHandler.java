@@ -1,8 +1,11 @@
 package org.adblockplus.brazil;
 
 import java.io.IOException;
+import java.net.URL;
 
 import org.adblockplus.android.AdblockPlus;
+
+import com.google.common.net.InternetDomainName;
 
 import android.util.Log;
 
@@ -28,16 +31,34 @@ public class RequestHandler implements Handler
 	public boolean respond(Request request) throws IOException
 	{
 		boolean block = false;
+		boolean thirdParty = false;
 		try
 		{
-			block = application.matches(request.url);
+			String referrer = request.getRequestHeader("referer");
+			if (referrer != null)
+			{
+				URL reqUrl = new URL(request.url);
+				URL refUrl = new URL(referrer);
+				InternetDomainName requestDomain = InternetDomainName.from(reqUrl.getHost());
+				InternetDomainName referrerDomain = InternetDomainName.from(refUrl.getHost());
+				
+				if (requestDomain.hasPublicSuffix() && referrerDomain.hasPublicSuffix())
+				{
+					thirdParty = ! requestDomain.topPrivateDomain().equals(referrerDomain.topPrivateDomain());
+				}
+				else
+				{
+					thirdParty = true;
+				}
+			}
+			block = application.matches(request.url, thirdParty);
 		}
 		catch (Exception e)
 		{
 			Log.e(prefix, "Filter error", e);
 			return false;
 		}
-		request.log(Server.LOG_LOG, prefix, block + ": " + request.url);
+		request.log(Server.LOG_LOG, prefix, block + ": " + request.url + ", " + thirdParty);
 		if (block)
 		{
 			request.sendError(403, "Blocked by Adblock Plus");
