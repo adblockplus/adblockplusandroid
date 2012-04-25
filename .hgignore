@@ -5,6 +5,6 @@ local.properties
 build.xml
 proguard.cfg
 bin
-libs
+libs/armeabi
 obj
 gen
