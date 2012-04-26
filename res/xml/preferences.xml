@@ -17,7 +17,7 @@
         android:title="@string/pref_subscription_title" />
 
     <ListPreference
-        android:defaultValue="0"
+        android:defaultValue="@integer/def_refresh"
         android:dialogTitle="@string/pref_refresh_title"
         android:entries="@array/refresh_names"
         android:entryValues="@array/refresh_values"
