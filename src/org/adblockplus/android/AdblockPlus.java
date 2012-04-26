@@ -251,27 +251,27 @@ public class AdblockPlus extends Application
 	private class MatchesCallable implements Callable<Boolean>
 	{
 		private String url;
-		private String contentType;
-		private boolean thirdParty;
+		private String referrer;
+		private String accept;
 		
-		MatchesCallable(String url, String contentType, boolean thirdParty)
+		MatchesCallable(String url, String referrer, String accept)
 		{
 			this.url = url;
-			this.contentType = contentType;
-			this.thirdParty = thirdParty;
+			this.referrer = referrer != null ? referrer : "";
+			this.accept = accept != null ? accept : "";
 		}
 		
 		@Override
 		public Boolean call() throws Exception
 		{
-			Boolean result = (Boolean) js.evaluate("defaultMatcher.matchesAny('" + url + "', '" + contentType + "', null, " + thirdParty + ") != null;");
+			Boolean result = (Boolean) js.evaluate("matchesAny('" + url + "', '" + referrer + "', '" + accept + "');");
 			return result;
 		}
 	}
 	
-	public boolean matches(String url, String contentType, boolean thirdParty) throws Exception
+	public boolean matches(String url, String referrer, String accept) throws Exception
 	{
-		Callable<Boolean> callable = new MatchesCallable(url, contentType, thirdParty);		
+		Callable<Boolean> callable = new MatchesCallable(url, referrer, accept);
 		Future<Boolean> future = js.submit(callable);		
 		return future.get().booleanValue();
 	}
