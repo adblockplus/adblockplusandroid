@@ -1,6 +1,8 @@
 package org.adblockplus.brazil;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.adblockplus.android.AdblockPlus;
 
@@ -28,13 +30,24 @@ public class RequestHandler implements Handler
 		boolean block = false;
 		try
 		{
-			block = application.matches(request.url, request.getRequestHeader("referer"), request.getRequestHeader("accept"));
+			String reqHost = null;
+			String refHost = null;
+			try
+			{
+				reqHost = (new URL(request.url)).getHost();
+				refHost = (new URL(request.getRequestHeader("referer"))).getHost();
+			}
+			catch (MalformedURLException e)
+			{
+			}
+			block = application.matches(request.url, request.query, reqHost, refHost, request.getRequestHeader("accept"));
 		}
 		catch (Exception e)
 		{
 			Log.e(prefix, "Filter error", e);
 			return false;
 		}
+		request.log(Server.LOG_LOG, prefix, request.query);
 		request.log(Server.LOG_LOG, prefix, block + ": " + request.url);
 		if (block)
 		{

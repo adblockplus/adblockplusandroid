@@ -4,34 +4,6 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
-// Extracts a domain name from a URL
-function extractDomainFromURL(url)
-{
-  if (!url)
-    return "";
-
-  if (extractDomainFromURL._lastURL == url)
-    return extractDomainFromURL._lastDomain;
-
-  var x = url.substr(url.indexOf("://") + 3);
-  x = x.substr(0, x.indexOf("/"));
-  x = x.substr(x.indexOf("@") + 1);
-  if (x.indexOf("[") == 0 && x.indexOf("]") > 0)
-  {
-    x = x.substring(1,x.indexOf("]"));
-  }
-  else
-  {
-    colPos = x.indexOf(":");
-    if (colPos >= 0)
-      x = x.substr(0, colPos);
-  }
-
-  extractDomainFromURL._lastURL = url;
-  extractDomainFromURL._lastDomain = x;
-  return x;
-}
-
 /**
  * Checks whether a request is third party for the given document, uses
  * information from the public suffix list to determine the effective domain
@@ -540,7 +512,7 @@ function unloadOptions()
   FilterNotifier.removeListener(onFilterChange);
 }
 
-function matchesAny(url, referrer, accept)
+function matchesAny(url, query, reqHost, refHost, accept)
 {
   var contentType = null;
   var thirdParty = false;
@@ -568,14 +540,14 @@ function matchesAny(url, referrer, accept)
   if (contentType == null)
     contentType = "OTHER";
   
-  if (referrer != "")
+  if (refHost != "")
   {
-    var reqDomain = extractDomainFromURL(url);
-    var docDomain = extractDomainFromURL(referrer);
-  
-    thirdParty = isThirdParty(reqDomain, docDomain);
+    thirdParty = isThirdParty(reqHost, refHost);
   }
   
+  if (query != "")
+  	url = url + "?" + query;
+
   return defaultMatcher.matchesAny(url, contentType, null, thirdParty) != null;
 }
 
