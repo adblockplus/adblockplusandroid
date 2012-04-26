@@ -4,6 +4,53 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
+// Extracts a domain name from a URL
+function extractDomainFromURL(url)
+{
+  if (!url)
+    return "";
+
+  if (extractDomainFromURL._lastURL == url)
+    return extractDomainFromURL._lastDomain;
+
+  var x = url.substr(url.indexOf("://") + 3);
+  x = x.substr(0, x.indexOf("/"));
+  x = x.substr(x.indexOf("@") + 1);
+  if (x.indexOf("[") == 0 && x.indexOf("]") > 0)
+  {
+    x = x.substring(1,x.indexOf("]"));
+  }
+  else
+  {
+    colPos = x.indexOf(":");
+    if (colPos >= 0)
+      x = x.substr(0, colPos);
+  }
+
+  extractDomainFromURL._lastURL = url;
+  extractDomainFromURL._lastDomain = x;
+  return x;
+}
+
+/**
+ * Checks whether a request is third party for the given document, uses
+ * information from the public suffix list to determine the effective domain
+ * name for the document.
+ */
+function isThirdParty(requestHost, documentHost)
+{
+  // Remove trailing dots
+  requestHost = requestHost.replace(/\.+$/, "");
+  documentHost = documentHost.replace(/\.+$/, "");
+
+  // Extract domain name - leave IP addresses unchanged, otherwise leave only base domain
+  var documentDomain = getBaseDomain(documentHost);
+  if (requestHost.length > documentDomain.length)
+    return (requestHost.substr(requestHost.length - documentDomain.length - 1) != "." + documentDomain);
+  else
+    return (requestHost != documentDomain);
+}
+
 function reportError(exp)
 {
   Android.print("Error: " + exp);
@@ -22,7 +69,6 @@ function MatcherPatch()
   var newFunction = origFunction.replace(/\bFilter\.knownFilters\[(.*?)\];/g, "Filter.fromText($1);");
   eval("Matcher.prototype._checkEntryMatch = " + newFunction);
 }
-
 
 var window = this;
 
@@ -382,12 +428,18 @@ var ElemHide =
   fromCache: function() {}
 };
 
+/**
+ * Removes all subscriptions from storage.
+ */
 function clearSubscriptions()
 {
   while (FilterStorage.subscriptions.length)
     FilterStorage.removeSubscription(FilterStorage.subscriptions[0]);
 }
 
+/**
+ * Adds selected subscription to storage.
+ */
 function addSubscription(jsonSub)
 {
   var newSub = JSON.parse(jsonSub);
@@ -407,6 +459,9 @@ function addSubscription(jsonSub)
   }
 }
 
+/**
+ * Forces subscriptions refresh.
+ */
 function refreshSubscriptions()
 {
   for (var i = 0; i < FilterStorage.subscriptions.length; i++)
@@ -417,11 +472,17 @@ function refreshSubscriptions()
   }
 }
 
+/**
+ * Initiates subscriptions expiration check.
+ */
 function checkSubscriptions()
 {
   Synchronizer.checkSubscriptions();
 }
 
+/**
+ * Verifies that subscriptions are loaded and returns flag od subscription presence.
+ */
 function verifySubscriptions()
 {
   var hasSubscriptions = false;
@@ -441,6 +502,9 @@ function verifySubscriptions()
   return hasSubscriptions;
 }
 
+/**
+ * Callback for subscription status updates.
+ */
 function updateSubscriptionStatus(subscription)
 {
   var status = "";
@@ -476,6 +540,45 @@ function unloadOptions()
   FilterNotifier.removeListener(onFilterChange);
 }
 
+function matchesAny(url, referrer, accept)
+{
+  var contentType = null;
+  var thirdParty = false;
+  
+  if (accept != "")
+  {
+    if (accept.indexOf("text/css") != -1)
+      contentType = "STYLESHEET";
+    else if (accept.indexOf("image/*" != -1))
+      contentType = "IMAGE";
+  }
+
+  if (contentType == null)
+  {
+    var lurl = url.toLowerCase();
+    if (/\.js$/.test(lurl))
+      contentType = "SCRIPT";
+    else if (/\.css$/.test(lurl))
+      contentType = "STYLESHIT";
+    else if (/\.(?:gif|png|jpe?g|bmp|ico)$/.test(lurl))
+      contentType = "IMAGE";
+    else if (/\.(?:ttf|woff)$/.test(lurl))
+      contentType = "FONT";
+  }
+  if (contentType == null)
+    contentType = "OTHER";
+  
+  if (referrer != "")
+  {
+    var reqDomain = extractDomainFromURL(url);
+    var docDomain = extractDomainFromURL(referrer);
+  
+    thirdParty = isThirdParty(reqDomain, docDomain);
+  }
+  
+  return defaultMatcher.matchesAny(url, contentType, null, thirdParty) != null;
+}
+
 Android.load("XMLHttpRequest.jsm");
 Android.load("FilterNotifier.jsm");
 Android.load("FilterClasses.jsm");
@@ -486,5 +589,8 @@ Android.load("Matcher.jsm");
 Android.load("Synchronizer.jsm");
 
 FilterListener.startup();
-
 FilterNotifier.addListener(onFilterChange);
+
+Android.load("publicSuffixList.js");
+Android.load("punycode.js");
+Android.load("basedomain.js");
