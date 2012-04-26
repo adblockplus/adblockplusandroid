@@ -559,7 +559,7 @@ function matchesAny(url, referrer, accept)
     if (/\.js$/.test(lurl))
       contentType = "SCRIPT";
     else if (/\.css$/.test(lurl))
-      contentType = "STYLESHIT";
+      contentType = "STYLESHEET";
     else if (/\.(?:gif|png|jpe?g|bmp|ico)$/.test(lurl))
       contentType = "IMAGE";
     else if (/\.(?:ttf|woff)$/.test(lurl))
