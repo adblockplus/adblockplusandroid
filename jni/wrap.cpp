@@ -44,7 +44,7 @@ jobject NewDate(JNIEnv *pEnv, v8::Handle<v8::Date> date)
 	return pEnv->NewObject(cls, cid, value);
 }
 
-jobject wrap(JNIEnv *pEnv, v8::Handle<v8::Value> value)
+jobject wrapJSObject(JNIEnv *pEnv, v8::Handle<v8::Value> value)
 {
   v8::HandleScope handle_scope;
 
@@ -62,7 +62,7 @@ jobject wrap(JNIEnv *pEnv, v8::Handle<v8::Value> value)
   return NULL;
 }
 
-v8::Handle<v8::Value> wrap(JNIEnv *pEnv, jobject value)
+v8::Handle<v8::Value> wrapJavaObject(JNIEnv *pEnv, jobject value)
 {
 	v8::HandleScope handle_scope;
 	v8::TryCatch try_catch;
@@ -70,7 +70,7 @@ v8::Handle<v8::Value> wrap(JNIEnv *pEnv, jobject value)
 	if (value == NULL)
 		return handle_scope.Close(v8::Null());
 
-	v8::Handle < v8::Value > result;
+	v8::Handle<v8::Value> result;
 
 	jclass cls = pEnv->GetObjectClass(value);
 
@@ -129,7 +129,7 @@ v8::Handle<v8::Value> wrap(JNIEnv *pEnv, jobject value)
 			for (size_t i=0; i<len; i++)
 			{
 				jobject item = pEnv->GetObjectArrayElement((jobjectArray) value, i);
-				items->Set(i, wrap(pEnv, item));
+				items->Set(i, wrapJavaObject(pEnv, item));
 				pEnv->DeleteLocalRef(item);
 			}
 

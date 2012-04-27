@@ -60,7 +60,6 @@ public class AdblockPlus extends Application
 	private List<Subscription> subscriptions;
 	private JSThread js;
 	private boolean interactive = false;
-	private Timer refreshTimer = null;
 
 	private static AdblockPlus myself;
 
@@ -209,18 +208,6 @@ public class AdblockPlus extends Application
 		return selectedItem;
 	}
 	
-	public void checkSubscriptions()
-	{
-		Log.e(TAG, "checkSubsdcriptions()");
-		js.execute(new Runnable(){
-			@Override
-			public void run()
-			{
-				js.evaluate("checkSubscriptions()");
-			}
-		});
-	}
-
 	public boolean verifySubscriptions()
 	{
 		Future<Boolean> future = js.submit(new Callable<Boolean>(){
@@ -313,7 +300,14 @@ public class AdblockPlus extends Application
 			Log.e(TAG, "startEngine");
 			js = new JSThread(this);
 			js.start();
-			updateRefresh(true);
+
+			final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+			final int refresh = Integer.valueOf(prefs.getString(getString(R.string.pref_refresh), Integer.toString(getResources().getInteger(R.integer.def_refresh))));
+			final boolean wifionly = prefs.getBoolean(getString(R.string.pref_wifirefresh), getResources().getBoolean(R.bool.def_wifirefresh));
+			if (refresh == 1 && (! wifionly || isConnected(this)))
+			{
+				refreshSubscription();
+			}
 		}
 	}
 	
@@ -322,7 +316,6 @@ public class AdblockPlus extends Application
 		if ((implicitly || ! interactive) && js != null)
 		{
 			Log.e(TAG, "stopEngine " + implicitly + " " + interactive);
-			stopRefresh();
 			js.stopEngine();
 			try
 			{
@@ -333,49 +326,6 @@ public class AdblockPlus extends Application
 				e.printStackTrace();
 			}
 			js = null;
-		}
-	}
-	
-	public void updateRefresh()
-	{
-		updateRefresh(false);
-	}
-
-	private void updateRefresh(boolean starting)
-	{
-		final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		final int refresh = Integer.valueOf(prefs.getString(getString(R.string.pref_refresh), "0"));
-		final boolean wifionly = prefs.getBoolean(getString(R.string.pref_wifirefresh), getResources().getBoolean(R.bool.def_wifirefresh));
-		if (refresh == 1 && starting && (! wifionly || isConnected(this)))
-		{
-			refreshSubscription();
-		}
-		else if (refresh == 2 && refreshTimer == null)
-		{
-			refreshTimer = new Timer();
-			refreshTimer.schedule(new TimerTask() {
-				@Override
-				public void run()
-				{
-					if (! wifionly || isConnected(AdblockPlus.this))
-						checkSubscriptions();					
-					
-				}
-			}, 100, REFRESH_PERIOD);
-		}
-		else if (refresh < 2)
-		{
-			stopRefresh();
-		}
-	}
-	
-	private void stopRefresh()
-	{
-		if (refreshTimer != null)
-		{
-			refreshTimer.cancel();
-			refreshTimer.purge();
-			refreshTimer = null;
 		}
 	}
 	
@@ -485,6 +435,16 @@ public class AdblockPlus extends Application
 			return versionName;
 		}
 
+		// JS helper
+		@SuppressWarnings("unused")
+		public boolean canAutoupdate()
+		{
+			final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+			final int refresh = Integer.valueOf(prefs.getString(getString(R.string.pref_refresh), Integer.toString(context.getResources().getInteger(R.integer.def_refresh))));
+			final boolean wifionly = prefs.getBoolean(getString(R.string.pref_wifirefresh), getResources().getBoolean(R.bool.def_wifirefresh));
+			return refresh == 2 && (! wifionly || isConnected(context));
+		}
+		
 		// JS helper
 		@SuppressWarnings("unused")
 		public void httpSend(final String method, final String url, final String[][] headers, final boolean async, final long callback)

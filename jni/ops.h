@@ -7,6 +7,7 @@ extern jobject jniCallback;
 extern v8::Handle<v8::Value> loadImpl(const v8::Arguments& args);
 extern v8::Handle<v8::Value> printImpl(const v8::Arguments& args);
 extern v8::Handle<v8::Value> setStatusImpl(const v8::Arguments& args);
+extern v8::Handle<v8::Value> canAutoupdateImpl(const v8::Arguments& args);
 extern v8::Handle<v8::Value> showToastImpl(const v8::Arguments& args);
 
 extern v8::Handle<v8::Value> fileExistsImpl(const v8::Arguments& args);

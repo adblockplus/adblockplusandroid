@@ -34,10 +34,6 @@
       timer.initWithCallback(callback, INITIAL_DELAY * MILLISECONDS_IN_SECOND, Ci.nsITimer.TYPE_REPEATING_SLACK);
     }
     ,
-    checkSubscriptions: function () {
-      checkSubscriptions();
-    }
-    ,
     isExecuting: function (url) {
       return url in executing;
     }
