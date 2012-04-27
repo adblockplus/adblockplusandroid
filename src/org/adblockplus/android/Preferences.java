@@ -248,7 +248,6 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		{
 			int refresh = Integer.valueOf(sharedPreferences.getString(getString(R.string.pref_refresh), "0"));
 			findPreference(getString(R.string.pref_wifirefresh)).setEnabled(refresh > 0);
-			AdblockPlus.getApplication().updateRefresh();
 		}
 
 		Preference pref = findPreference(key);

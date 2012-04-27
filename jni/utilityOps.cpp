@@ -1,6 +1,7 @@
 #include <string>
 #include <android/log.h>
 #include "ops.h"
+#include "wrap.h"
 
 v8::Handle<v8::Value> loadImpl(const v8::Arguments& args)
 {
@@ -21,11 +22,12 @@ v8::Handle<v8::Value> loadImpl(const v8::Arguments& args)
 		result = (jstring) jniEnv->CallObjectMethod(jniCallback, mid, jstr);
 	jniEnv->DeleteLocalRef(jstr);
 
-	int length = jniEnv->GetStringLength(result);
+	/*
 	const char* src = jniEnv->GetStringUTFChars(result, 0);
-	v8::Handle<v8::String> source = v8::String::New(src, length);
+	v8::Handle<v8::String> source = v8::String::New(src, jniEnv->GetStringLength(result));
 	jniEnv->ReleaseStringUTFChars(result, src);
-
+	*/
+	v8::Handle<v8::String> source = v8::Handle<v8::String>::Cast(wrapJavaObject(jniEnv, result));
 	v8::Handle<v8::Script> script = v8::Script::Compile(source, args[0]);
 	if (!script.IsEmpty())
 		script->Run();
@@ -59,6 +61,18 @@ v8::Handle<v8::Value> setStatusImpl(const v8::Arguments& args)
   jniEnv->DeleteLocalRef(jstr);
 
   return v8::Undefined();
+}
+
+v8::Handle<v8::Value> canAutoupdateImpl(const v8::Arguments& args)
+{
+	v8::HandleScope handle_scope;
+
+	jboolean result;
+	jclass cls = jniEnv->GetObjectClass(jniCallback);
+	jmethodID mid = jniEnv->GetMethodID(cls, "canAutoupdate", "()Z");
+	if (mid)
+		result = jniEnv->CallBooleanMethod(jniCallback, mid);
+	return wrapJavaObject(jniEnv, NewBoolean(jniEnv, result));
 }
 
 v8::Handle<v8::Value> showToastImpl(const v8::Arguments& args)

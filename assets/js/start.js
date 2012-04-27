@@ -142,7 +142,7 @@ var Prefs =
   data_directory: _datapath,
   savestats: false,
   privateBrowsing: false,
-  subscriptions_autoupdate: true,
+  get subscriptions_autoupdate() { return Android.canAutoupdate() },
   subscriptions_fallbackerrors: 5,
   subscriptions_fallbackurl: "https://adblockplus.org/getSubscription?version=%VERSION%&url=%SUBSCRIPTION%&downloadURL=%URL%&error=%ERROR%&channelStatus=%CHANNELSTATUS%&responseStatus=%RESPONSESTATUS%",
   addListener: function() {}
@@ -445,14 +445,6 @@ function refreshSubscriptions()
 }
 
 /**
- * Initiates subscriptions expiration check.
- */
-function checkSubscriptions()
-{
-  Synchronizer.checkSubscriptions();
-}
-
-/**
  * Verifies that subscriptions are loaded and returns flag od subscription presence.
  */
 function verifySubscriptions()
@@ -561,6 +553,7 @@ Android.load("Matcher.jsm");
 Android.load("Synchronizer.jsm");
 
 FilterListener.startup();
+Synchronizer.startup();
 FilterNotifier.addListener(onFilterChange);
 
 Android.load("publicSuffixList.js");

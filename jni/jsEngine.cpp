@@ -30,6 +30,7 @@ static ObjMethod methods[] =
 { "load", loadImpl },
 { "print", printImpl },
 { "showToast", showToastImpl },
+{ "canAutoupdate", canAutoupdateImpl },
 { "setStatus", setStatusImpl },
 { "fileExists", fileExistsImpl },
 { "fileLastModified", fileLastModifiedImpl },
@@ -149,7 +150,7 @@ JNIEXPORT jobject JNICALL Java_org_adblockplus_android_JSEngine_nativeExecute
 		}
 		else
 		{
-			return wrap(pEnv, result);
+			return wrapJSObject(pEnv, result);
 		}
 	}
 }
@@ -175,7 +176,7 @@ JNIEXPORT jobject JNICALL Java_org_adblockplus_android_JSEngine_nativeGet
 		}
 		else
 		{
-			return wrap(pEnv, value);
+			return wrapJSObject(pEnv, value);
 		}
 	}
 }
@@ -194,7 +195,7 @@ JNIEXPORT jobject JNICALL Java_org_adblockplus_android_JSEngine_nativePut
 	v8::Handle<v8::String> name = v8::String::New(key.c_str(), key.size());
 
 //	v8::Handle<v8::Value> value = obj->Get(name);
-	obj->Set(name, wrap(pEnv, pValue));
+	obj->Set(name, wrapJavaObject(pEnv, pValue));
 
 	return NULL;
 //	return env.HasCaught() ? NULL : env.Wrap(value);
@@ -216,7 +217,7 @@ JNIEXPORT void JNICALL Java_org_adblockplus_android_JSEngine_nativeCallback
 	for (int i = 0; i < pnum; i++)
 	{
 		jobject param = pEnv->GetObjectArrayElement(pParams, i);
-		args[i] = wrap(pEnv, param);
+		args[i] = wrapJavaObject(pEnv, param);
 		pEnv->DeleteLocalRef(param);
 	}
 
