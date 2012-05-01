@@ -2,12 +2,13 @@
 <resources>
 
     <string name="app_name">Adblock Plus</string>
-
+    
     <string name="notif_transparent">Filtering is done transparently</string>
     <string name="notif_proxy">Filtering is done via proxy on port %d</string>
-
+    
     <string name="msg_subscription_offer">We have selected a suitable subscription for you: \'%s\'. You can change it at any time in application settings.</string>
     <string name="msg_badport">Bad port value</string>
+    
     <string name="ok">OK</string>
     <string name="error">Error</string>
     
@@ -27,7 +28,12 @@
     <string name="pref_refresh_title">Subscription refresh</string>
     <string name="pref_wifirefresh_title">Refresh over WiFi only</string>
     <string name="pref_wifirefresh_summary">Automatic refreshes will be performed only over WiFi connections</string>
-    <string name="pref_port_title">Proxy port</string>
+    <string name="pref_port_title">Local proxy port</string>
     <string name="pref_port_summary">Port for local ad filtering proxy</string>
+    <string name="pref_proxy_title">Upstream proxy</string>
+    <string name="pref_proxyhost_title">Host</string>
+    <string name="pref_proxyport_title">Port</string>
+    <string name="pref_proxyuser_title">User</string>
+    <string name="pref_proxypass_title">Password</string>
 
 </resources>

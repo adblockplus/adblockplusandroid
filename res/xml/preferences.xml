@@ -35,7 +35,31 @@
         android:enabled="false"
         android:inputType="number"
         android:key="@string/pref_port"
+        android:singleLine="true"
         android:summary="@string/pref_port_summary"
         android:title="@string/pref_port_title" />
+
+    <PreferenceCategory android:title="@string/pref_proxy_title" >
+        <EditTextPreference
+            android:inputType="text"
+            android:key="@string/pref_proxyhost"
+            android:singleLine="true"
+            android:title="@string/pref_proxyhost_title" />
+        <EditTextPreference
+            android:inputType="number"
+            android:key="@string/pref_proxyport"
+            android:singleLine="true"
+            android:title="@string/pref_proxyport_title" />
+        <EditTextPreference
+            android:inputType="text"
+            android:key="@string/pref_proxyuser"
+            android:singleLine="true"
+            android:title="@string/pref_proxyuser_title" />
+        <EditTextPreference
+            android:inputType="textPassword"
+            android:key="@string/pref_proxypass"
+            android:singleLine="true"
+            android:title="@string/pref_proxypass_title" />
+    </PreferenceCategory>
 
 </PreferenceScreen>

@@ -21,10 +21,13 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
+import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
@@ -121,8 +124,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		int refresh = Integer.valueOf(prefs.getString(getString(R.string.pref_refresh), "0"));
 		findPreference(getString(R.string.pref_wifirefresh)).setEnabled(refresh > 0);
 
-		setPrefSummary(subscriptionList);
-		setPrefSummary(findPreference(getString(R.string.pref_refresh)));
+		initSummaries(getPreferenceScreen());
 
 		registerReceiver(receiver, new IntentFilter(AdblockPlus.BROADCAST_SUBSCRIPTION_STATUS));
 		registerReceiver(receiver, new IntentFilter(ProxyService.BROADCAST_PROXY_FAILED));
@@ -147,7 +149,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 			setNotEnabled();
 			enabled = false;
 		}
-		findPreference(getString(R.string.pref_port)).setEnabled(!enabled);
+		setDependingEnabled(!enabled);
 
 		prefs.registerOnSharedPreferenceChangeListener(this);
 	}
@@ -182,8 +184,25 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 				pref.setSummary(summary);
 			}
 		}
+		if (pref instanceof EditTextPreference)
+		{
+			CharSequence summary = ((EditTextPreference) pref).getText();
+			if (summary != null)
+			{
+				pref.setSummary(summary);
+			}
+		}
 	}
 
+	private void setDependingEnabled(boolean enabled)
+	{
+		findPreference(getString(R.string.pref_port)).setEnabled(enabled);
+		findPreference(getString(R.string.pref_proxyhost)).setEnabled(enabled);
+		findPreference(getString(R.string.pref_proxyport)).setEnabled(enabled);
+		findPreference(getString(R.string.pref_proxyuser)).setEnabled(enabled);
+		findPreference(getString(R.string.pref_proxypass)).setEnabled(enabled);
+	}
+	
 	private void setNotEnabled()
 	{
 		SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
@@ -250,7 +269,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		if (getString(R.string.pref_enabled).equals(key))
 		{
 			boolean enabled = sharedPreferences.getBoolean(key, false);
-			findPreference(getString(R.string.pref_port)).setEnabled(!enabled);
+			setDependingEnabled(!enabled);
 			if (enabled && !isServiceRunning())
 				startService(new Intent(this, ProxyService.class));
 			else if (!enabled && isServiceRunning())
@@ -272,6 +291,23 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		Preference pref = findPreference(key);
 		setPrefSummary(pref);
 	}
+
+	private void initSummaries(PreferenceGroup preference)
+    {
+    	for (int i=preference.getPreferenceCount()-1; i>=0; i--)
+    	{
+    		Preference pref = preference.getPreference(i);
+
+    		if (pref instanceof PreferenceGroup || pref instanceof PreferenceScreen)
+            {
+    			initSummaries((PreferenceGroup) pref);
+            }
+    		else
+    		{
+               	setPrefSummary(pref);
+    		}
+    	}
+    }
 
 	private BroadcastReceiver receiver = new BroadcastReceiver() {
 		@Override

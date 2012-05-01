@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 import sunlabs.brazil.server.Server;
+import sunlabs.brazil.util.Base64;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -70,7 +71,7 @@ public class ProxyService extends Service
 
 //	private ProxyThread proxy = null;
 	private ProxyServer proxy = null;
-	private int proxyPort;
+	private int port;
 
 	private int hasRedirectSupport = -1;
 	private int isRoot = -1;
@@ -89,15 +90,15 @@ public class ProxyService extends Service
 		initForegroundCompat();
 
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		String port = prefs.getString(getString(R.string.pref_port), null);
+		String p = prefs.getString(getString(R.string.pref_port), null);
 		try
 		{
-			proxyPort = port != null ? Integer.valueOf(port): getResources().getInteger(R.integer.def_port);
+			port = p != null ? Integer.valueOf(p): getResources().getInteger(R.integer.def_port);
 		}
 		catch (NumberFormatException e)
 		{
-			Toast.makeText(this, getString(R.string.msg_badport) + ": " + port, Toast.LENGTH_LONG).show();
-			proxyPort = getResources().getInteger(R.integer.def_port);
+			Toast.makeText(this, getString(R.string.msg_badport) + ": " + p, Toast.LENGTH_LONG).show();
+			port = getResources().getInteger(R.integer.def_port);
 		}
 
 		if (isRoot())
@@ -110,7 +111,7 @@ public class ProxyService extends Service
 				StringBuffer cmd = new StringBuffer();
 				int uid = getPackageManager().getPackageInfo(getPackageName(), 0).applicationInfo.uid;
 				cmd.append(CMD_IPTABLES_RETURN.replace("{{UID}}", String.valueOf(uid)));
-				cmd.append(hasRedirectSupport > 0 ? CMD_IPTABLES_REDIRECT_ADD_HTTP.replace("{{PORT}}", String.valueOf(proxyPort)) : CMD_IPTABLES_DNAT_ADD_HTTP.replace("{{PORT}}", String.valueOf(proxyPort)));
+				cmd.append(hasRedirectSupport > 0 ? CMD_IPTABLES_REDIRECT_ADD_HTTP.replace("{{PORT}}", String.valueOf(port)) : CMD_IPTABLES_DNAT_ADD_HTTP.replace("{{PORT}}", String.valueOf(port)));
 				String rules = cmd.toString().replace("iptables", getIptables());
 				runRootCommand(rules, DEFAULT_TIMEOUT);
 				isTransparent = true;
@@ -132,7 +133,7 @@ public class ProxyService extends Service
 			ServerSocket listen = null;
 			try
 			{
-				listen = new ServerSocket(proxyPort, 1024);
+				listen = new ServerSocket(port, 1024);
 			}
 			catch (IOException e)
 			{
@@ -157,6 +158,7 @@ public class ProxyService extends Service
 			}
 			config.put("adblock.class", "org.adblockplus.brazil.RequestHandler");
 			config.put("proxy.class", "sunlabs.brazil.proxy.ProxyHandler");
+			//config.put("proxy.proxylog", "yes");
             /*
             This is for future - when we will need to filter content
             config.put("main.handlers", "... filter");
@@ -167,32 +169,40 @@ public class ProxyService extends Service
             config.put("standard.class", "org.paw.filter.StandardFilter");
             */
             
-            /*
+			/*
             if(!filters.isEmpty() && !passThrough) {
                 useFilters += " repack";
                 this.config.put("repack.class", "org.paw.filter.RepackFilter");
             }
-
-
-            if (proxyHost != null && proxyPort != null) {
-                this.config.put("proxy.proxyHost", proxyHost);
-                this.config.put("proxy.proxyPort", proxyPort);
-                
-                if(https) {
-                	this.config.put("https.proxyHost", proxyHost);
-                    this.config.put("https.proxyPort", proxyPort);
-                }
-                
-                if(proxyUser != null && proxyPasswd != null) {
-                	// Base64 encode user:password
-                	String proxyPasswdBase64 = "Basic " + new String(Base64.encodeBase64((proxyUser + ":" + proxyPasswd).getBytes()));
-                	this.config.put("proxy.auth", proxyPasswdBase64);
-                	if(https) {
-                		this.config.put("https.auth", proxyPasswdBase64);
-                	}
-                }
-            }
             */
+
+			String proxyHost = prefs.getString(getString(R.string.pref_proxyhost), null);
+			String proxyPort = prefs.getString(getString(R.string.pref_proxyport), null);
+			String proxyUser = prefs.getString(getString(R.string.pref_proxyuser), null);
+			String proxyPass = prefs.getString(getString(R.string.pref_proxypass), null);
+
+			if (proxyHost != null && proxyPort != null)
+			{
+				config.put("proxy.proxyHost", proxyHost);
+				config.put("proxy.proxyPort", proxyPort);
+
+				if (! isTransparent)
+				{
+					config.put("https.proxyHost", proxyHost);
+					config.put("https.proxyPort", proxyPort);
+				}
+
+				if (proxyUser != null && proxyPass != null)
+				{
+					// Base64 encode user:password
+					String proxyAuth = "Basic " + new String(Base64.encode(proxyUser + ":" + proxyPass));
+					config.put("proxy.auth", proxyAuth);
+					if (! isTransparent)
+					{
+						config.put("https.auth", proxyAuth);
+					}
+				}
+			}
 
 			proxy = new ProxyServer();
 			proxy.logLevel = Server.LOG_DIAGNOSTIC;
@@ -203,7 +213,7 @@ public class ProxyService extends Service
 		// Lock service
 		String msg = getString(isTransparent ? R.string.notif_transparent : R.string.notif_proxy);
 		if (! isTransparent)
-			msg = String.format(msg, proxyPort);
+			msg = String.format(msg, port);
 		Notification notification = new Notification();
 		notification.when = 0;
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, Preferences.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK), 0);
