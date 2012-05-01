@@ -269,13 +269,25 @@ public class AdblockPlus extends Application
 	
 	public void startInteractive()
 	{
-		// TODO not used
+		js.execute(new Runnable(){
+			@Override
+			public void run()
+			{
+				js.evaluate("startInteractive()");
+			}
+		});
 		interactive = true;
 	}
 	
 	public void stopInteractive()
 	{
-		// TODO not used
+		js.execute(new Runnable(){
+			@Override
+			public void run()
+			{
+				js.evaluate("stopInteractive()");
+			}
+		});
 		interactive = false;
 	}
 	

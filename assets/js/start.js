@@ -499,7 +499,12 @@ function onFilterChange(action, subscription, param1, param2)
   }
 }
 
-function unloadOptions()
+function startInteractive()
+{
+	FilterNotifier.addListener(onFilterChange);
+}
+
+function stopInteractive()
 {
   FilterNotifier.removeListener(onFilterChange);
 }
@@ -554,7 +559,6 @@ Android.load("Synchronizer.jsm");
 
 FilterListener.startup();
 Synchronizer.startup();
-FilterNotifier.addListener(onFilterChange);
 
 Android.load("publicSuffixList.js");
 Android.load("punycode.js");
