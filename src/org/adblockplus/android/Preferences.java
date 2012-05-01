@@ -17,6 +17,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -39,7 +40,25 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 		setContentView(R.layout.preferences);
 		addPreferencesFromResource(R.xml.preferences);
-		copyAssets();
+
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+		String lastVersion = prefs.getString(getString(R.string.pref_version), "");
+		try
+		{
+			String thisVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+			if (!lastVersion.equals(thisVersion))
+			{
+				copyAssets();
+				SharedPreferences.Editor editor = prefs.edit();
+				editor.putString(getString(R.string.pref_version), thisVersion);
+				editor.commit();
+			}
+		}
+		catch (NameNotFoundException e)
+		{
+			copyAssets();
+		}
 	}
 
 	@Override
@@ -57,7 +76,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
 		final AdblockPlus application = AdblockPlus.getApplication();
-		
+
 		RefreshableListPreference subscriptionList = (RefreshableListPreference) findPreference(getString(R.string.pref_subscription));
 		List<Subscription> subscriptions = application.getSubscriptions();
 		String[] entries = new String[subscriptions.size()];
@@ -80,17 +99,17 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 			if (offer != null)
 			{
 				subscriptionList.setValue(offer.url);
-	 			application.setSubscription(offer);
-	 			new AlertDialog.Builder(this)
-	 				.setTitle(R.string.app_name)
-	 				.setMessage(String.format(getString(R.string.msg_subscription_offer, offer.title)))
-	 				.setIcon(android.R.drawable.ic_dialog_info)
-	 				.setPositiveButton(R.string.ok, null)
-	 				.create()
-	 				.show();
+				application.setSubscription(offer);
+				new AlertDialog.Builder(this)
+					.setTitle(R.string.app_name)
+					.setMessage(String.format(getString(R.string.msg_subscription_offer, offer.title)))
+					.setIcon(android.R.drawable.ic_dialog_info)
+					.setPositiveButton(R.string.ok, null)
+					.create()
+					.show();
 			}
 		}
-		
+
 		subscriptionList.setOnRefreshClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v)
@@ -98,18 +117,18 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 				application.refreshSubscription();
 			}
 		});
-		
+
 		int refresh = Integer.valueOf(prefs.getString(getString(R.string.pref_refresh), "0"));
 		findPreference(getString(R.string.pref_wifirefresh)).setEnabled(refresh > 0);
-		
+
 		setPrefSummary(subscriptionList);
 		setPrefSummary(findPreference(getString(R.string.pref_refresh)));
-		
+
 		registerReceiver(receiver, new IntentFilter(AdblockPlus.BROADCAST_SUBSCRIPTION_STATUS));
 		registerReceiver(receiver, new IntentFilter(ProxyService.BROADCAST_PROXY_FAILED));
 
 		final String url = current;
-		
+
 		(new Thread() {
 			@Override
 			public void run()
@@ -117,19 +136,19 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 				if (!application.verifySubscriptions())
 				{
 					Subscription subscription = application.getSubscription(url);
-		 			application.setSubscription(subscription);
+					application.setSubscription(subscription);
 				}
 			}
 		}).start();
 
 		boolean enabled = prefs.getBoolean(getString(R.string.pref_enabled), false);
-		if (enabled && ! isServiceRunning())
+		if (enabled && !isServiceRunning())
 		{
 			setNotEnabled();
-            enabled = false;
+			enabled = false;
 		}
-		findPreference(getString(R.string.pref_port)).setEnabled(! enabled);
-				
+		findPreference(getString(R.string.pref_port)).setEnabled(!enabled);
+
 		prefs.registerOnSharedPreferenceChangeListener(this);
 	}
 
@@ -149,30 +168,30 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean enabled = prefs.getBoolean(getString(R.string.pref_enabled), false);
 		AdblockPlus.getApplication().stopInteractive();
-		if (! enabled)
+		if (!enabled)
 			AdblockPlus.getApplication().stopEngine(true);
 	}
 
-    private void setPrefSummary(Preference pref)
+	private void setPrefSummary(Preference pref)
 	{
-        if (pref instanceof ListPreference)
-        {
-	        CharSequence summary = ((ListPreference) pref).getEntry();
-	        if (summary != null)
-	        {
-	        	pref.setSummary(summary);
-	        }
-        }
+		if (pref instanceof ListPreference)
+		{
+			CharSequence summary = ((ListPreference) pref).getEntry();
+			if (summary != null)
+			{
+				pref.setSummary(summary);
+			}
+		}
 	}
 
-    private void setNotEnabled()
-    {
+	private void setNotEnabled()
+	{
 		SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
-        editor.putBoolean(getString(R.string.pref_enabled), false);
-        editor.commit();
-        ((CheckBoxPreference) findPreference(getString(R.string.pref_enabled))).setChecked(false);
-    }
-    
+		editor.putBoolean(getString(R.string.pref_enabled), false);
+		editor.commit();
+		((CheckBoxPreference) findPreference(getString(R.string.pref_enabled))).setChecked(false);
+	}
+
 	private boolean isServiceRunning()
 	{
 		ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
@@ -186,7 +205,6 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 
 	private void copyAssets()
 	{
-		// TODO Copy only if version changed
 		AssetManager assetManager = getAssets();
 		String[] files = null;
 		try
@@ -203,6 +221,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 			OutputStream out = null;
 			try
 			{
+				Log.d(TAG, "Copy: install/" + files[i]);
 				in = assetManager.open("install/" + files[i]);
 				out = new FileOutputStream(ProxyService.BASE + files[i]);
 				byte[] buffer = new byte[1024];
@@ -231,8 +250,8 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		if (getString(R.string.pref_enabled).equals(key))
 		{
 			boolean enabled = sharedPreferences.getBoolean(key, false);
-			findPreference(getString(R.string.pref_port)).setEnabled(! enabled);
-			if (enabled && ! isServiceRunning())
+			findPreference(getString(R.string.pref_port)).setEnabled(!enabled);
+			if (enabled && !isServiceRunning())
 				startService(new Intent(this, ProxyService.class));
 			else if (!enabled && isServiceRunning())
 				stopService(new Intent(this, ProxyService.class));
@@ -242,7 +261,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 			String current = sharedPreferences.getString(key, null);
 			AdblockPlus application = AdblockPlus.getApplication();
 			Subscription subscription = application.getSubscription(current);
- 			application.setSubscription(subscription);
+			application.setSubscription(subscription);
 		}
 		if (getString(R.string.pref_refresh).equals(key))
 		{
@@ -253,9 +272,8 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		Preference pref = findPreference(key);
 		setPrefSummary(pref);
 	}
-	
-	private BroadcastReceiver receiver = new BroadcastReceiver()
-	{
+
+	private BroadcastReceiver receiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, Intent intent)
 		{
@@ -264,13 +282,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 			if (action.equals(ProxyService.BROADCAST_PROXY_FAILED))
 			{
 				String msg = extra.getString("msg");
-	 			new AlertDialog.Builder(Preferences.this)
- 				.setTitle(R.string.error)
- 				.setMessage(msg)
- 				.setIcon(android.R.drawable.ic_dialog_alert)
- 				.setPositiveButton(R.string.ok, null)
- 				.create()
- 				.show();
+				new AlertDialog.Builder(Preferences.this).setTitle(R.string.error).setMessage(msg).setIcon(android.R.drawable.ic_dialog_alert).setPositiveButton(R.string.ok, null).create().show();
 				setNotEnabled();
 			}
 			if (action.equals(AdblockPlus.BROADCAST_SUBSCRIPTION_STATUS))
@@ -279,36 +291,36 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 				final long time = extra.getLong("time");
 				runOnUiThread(new Runnable() {
 					public void run()
-	                {
+					{
 						ListPreference subscriptionList = (ListPreference) findPreference(getString(R.string.pref_subscription));
-				        CharSequence summary = subscriptionList.getEntry();
-				        StringBuilder builder = new StringBuilder();
-				        if (summary != null)
-				        {
-				        	builder.append(summary);
-				        	if (text != "")
-				        	{
-				        		builder.append(" (");
-				        		int id = getResources().getIdentifier(text, "string", getPackageName());
-				        		if (id > 0)
-				        			builder.append(getString(id, text));
-				        		else
-				        			builder.append(text);
-				        		if (time > 0)
-				        		{
-				        			builder.append(": ");
-				        			Calendar calendar = Calendar.getInstance();
-				        			calendar.setTimeInMillis(time);
-				        			Date date = calendar.getTime();
-				        			builder.append(DateFormat.getDateFormat(context).format(date));
-				        			builder.append(" ");
-				        			builder.append(DateFormat.getTimeFormat(context).format(date));
-				        		}
-				        		builder.append(")");
-				        	}
-				        	subscriptionList.setSummary(builder.toString());
-				        }
-	                }
+						CharSequence summary = subscriptionList.getEntry();
+						StringBuilder builder = new StringBuilder();
+						if (summary != null)
+						{
+							builder.append(summary);
+							if (text != "")
+							{
+								builder.append(" (");
+								int id = getResources().getIdentifier(text, "string", getPackageName());
+								if (id > 0)
+									builder.append(getString(id, text));
+								else
+									builder.append(text);
+								if (time > 0)
+								{
+									builder.append(": ");
+									Calendar calendar = Calendar.getInstance();
+									calendar.setTimeInMillis(time);
+									Date date = calendar.getTime();
+									builder.append(DateFormat.getDateFormat(context).format(date));
+									builder.append(" ");
+									builder.append(DateFormat.getTimeFormat(context).format(date));
+								}
+								builder.append(")");
+							}
+							subscriptionList.setSummary(builder.toString());
+						}
+					}
 				});
 			}
 		}
