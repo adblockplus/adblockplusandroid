@@ -148,15 +148,16 @@ public class ProxyService extends Service
 			config.put("main.class", "sunlabs.brazil.server.ChainHandler");
 			if (isTransparent)
 			{
-				config.put("main.handlers", "urlmodifier adblock proxy");
+				config.put("main.handlers", "urlmodifier adblock");
 				config.put("urlmodifier.class", "org.adblockplus.brazil.TransparentProxyHandler");
 			}
 			else
 			{
-				config.put("main.handlers", "adblock https proxy");
+				config.put("main.handlers", "https adblock");
 				config.put("https.class", "org.paw.handler.SSLConnectionHandler");
 			}
 			config.put("adblock.class", "org.adblockplus.brazil.RequestHandler");
+			config.put("adblock.handler", "proxy");
 			config.put("proxy.class", "sunlabs.brazil.proxy.ProxyHandler");
 			//config.put("proxy.proxylog", "yes");
             /*
@@ -176,12 +177,12 @@ public class ProxyService extends Service
             }
             */
 
-			String proxyHost = prefs.getString(getString(R.string.pref_proxyhost), null);
-			String proxyPort = prefs.getString(getString(R.string.pref_proxyport), null);
-			String proxyUser = prefs.getString(getString(R.string.pref_proxyuser), null);
-			String proxyPass = prefs.getString(getString(R.string.pref_proxypass), null);
+			String proxyHost = prefs.getString(getString(R.string.pref_proxyhost), "");
+			String proxyPort = prefs.getString(getString(R.string.pref_proxyport), "");
+			String proxyUser = prefs.getString(getString(R.string.pref_proxyuser), "");
+			String proxyPass = prefs.getString(getString(R.string.pref_proxypass), "");
 
-			if (proxyHost != null && proxyPort != null)
+			if (! proxyHost.equals("") && ! proxyPort.equals(""))
 			{
 				config.put("proxy.proxyHost", proxyHost);
 				config.put("proxy.proxyPort", proxyPort);
@@ -192,7 +193,7 @@ public class ProxyService extends Service
 					config.put("https.proxyPort", proxyPort);
 				}
 
-				if (proxyUser != null && proxyPass != null)
+				if (! proxyUser.equals("") && ! proxyPass.equals(""))
 				{
 					// Base64 encode user:password
 					String proxyAuth = "Basic " + new String(Base64.encode(proxyUser + ":" + proxyPass));

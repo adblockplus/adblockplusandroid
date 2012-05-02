@@ -389,16 +389,30 @@ FakeTimer.prototype =
   }
 };
 
-var ElemHide =
+function ElemHidePatch()
 {
-  init: function() {},
-  apply: function() {},
-  add: function() {},
-  remove: function() {},
-  clear: function() {},
-  toCache: function() {},
-  fromCache: function() {}
-};
+  /**
+   * Returns a list of selectors to be applied on a particular domain. With
+   * specificOnly parameter set to true only the rules listing specific domains
+   * will be considered.
+   */
+  ElemHide.getSelectorsForDomain = function(/**String*/ domain, /**Boolean*/ specificOnly)
+  {
+    var result = [];
+    for (var key in filterByKey)
+    {
+      var filter = Filter.knownFilters[filterByKey[key]];
+      if (specificOnly && (!filter.domains || filter.domains[""]))
+        continue;
+
+      if (filter.isActiveOnDomain(domain))
+        result.push(filter.selector);
+    }
+    return result;
+  };
+
+  ElemHide.init = function() {};
+}
 
 /**
  * Removes all subscriptions from storage.
@@ -501,7 +515,7 @@ function onFilterChange(action, subscription, param1, param2)
 
 function startInteractive()
 {
-	FilterNotifier.addListener(onFilterChange);
+  FilterNotifier.addListener(onFilterChange);
 }
 
 function stopInteractive()
@@ -555,6 +569,7 @@ Android.load("SubscriptionClasses.jsm");
 Android.load("FilterStorage.jsm");
 Android.load("FilterListener.jsm");
 Android.load("Matcher.jsm");
+Android.load("ElemHide.jsm");
 Android.load("Synchronizer.jsm");
 
 FilterListener.startup();
