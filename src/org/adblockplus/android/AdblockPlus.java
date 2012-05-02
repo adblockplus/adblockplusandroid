@@ -235,6 +235,33 @@ public class AdblockPlus extends Application
 		return false;
 	}
 	
+	public String getSelectorsForDomain(final String domain)
+	{
+		Future<String> future = js.submit(new Callable<String>(){
+			@Override
+			public String call() throws Exception
+			{
+				String result = (String) js.evaluate("ElemHide.getSelectorsForDomain('" + domain + "')");
+				return result;
+			}
+		});
+		try
+		{
+			return future.get();
+		}
+		catch (InterruptedException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (ExecutionException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	private class MatchesCallable implements Callable<Boolean>
 	{
 		private String url;
