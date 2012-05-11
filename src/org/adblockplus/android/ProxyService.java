@@ -157,9 +157,7 @@ public class ProxyService extends Service
 				config.put("https.class", "org.paw.handler.SSLConnectionHandler");
 			}
 			config.put("adblock.class", "org.adblockplus.brazil.RequestHandler");
-			config.put("adblock.handler", "proxy");
-			config.put("proxy.class", "sunlabs.brazil.proxy.ProxyHandler");
-			config.put("proxy.proxylog", "yes");
+			//config.put("adblock.proxylog", "yes");
 
 			String proxyHost = prefs.getString(getString(R.string.pref_proxyhost), "");
 			String proxyPort = prefs.getString(getString(R.string.pref_proxyport), "");
@@ -168,8 +166,8 @@ public class ProxyService extends Service
 
 			if (! proxyHost.equals("") && ! proxyPort.equals(""))
 			{
-				config.put("proxy.proxyHost", proxyHost);
-				config.put("proxy.proxyPort", proxyPort);
+				config.put("adblock.proxyHost", proxyHost);
+				config.put("adblock.proxyPort", proxyPort);
 
 				if (! isTransparent)
 				{
@@ -181,7 +179,7 @@ public class ProxyService extends Service
 				{
 					// Base64 encode user:password
 					String proxyAuth = "Basic " + new String(Base64.encode(proxyUser + ":" + proxyPass));
-					config.put("proxy.auth", proxyAuth);
+					config.put("adblock.auth", proxyAuth);
 					if (! isTransparent)
 					{
 						config.put("https.auth", proxyAuth);
