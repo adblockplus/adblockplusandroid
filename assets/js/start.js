@@ -408,7 +408,10 @@ function ElemHidePatch()
       if (filter.isActiveOnDomain(domain))
         result.push(filter.selector);
     }
-    return result;
+    if (result.length)
+      return "<style type=\"text/css\">" + result.join() + " { display: none !important }</style>";
+    else
+      return null;
   };
 
   ElemHide.init = function() {};
@@ -573,7 +576,7 @@ Android.load("ElemHide.jsm");
 Android.load("Synchronizer.jsm");
 
 FilterListener.startup();
-Synchronizer.startup();
+//Synchronizer.startup();
 
 Android.load("publicSuffixList.js");
 Android.load("punycode.js");

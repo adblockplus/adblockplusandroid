@@ -6,12 +6,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.adblockplus.android.AdblockPlus;
+import org.paw.util.Pack;
 
 import sunlabs.brazil.server.ChainHandler;
 import sunlabs.brazil.server.Handler;
 import sunlabs.brazil.server.Request;
 import sunlabs.brazil.server.Server;
 import sunlabs.brazil.util.MatchString;
+import sunlabs.brazil.util.http.MimeHeaders;
 import android.util.Log;
 
 /**
@@ -94,39 +96,32 @@ public class RequestHandler implements Handler
 			return true;
 		}
 
-		String selectors = null;
-		String type = request.headers.get("Content-Type");
-		
-		if (type != null && type.toLowerCase().startsWith("text/html"))
+		FilterStream out = new FilterStream(request.out);
+		out.reqHost = reqHost;
+		request.out = out;
+		try
 		{
-			selectors = application.getSelectorsForDomain(reqHost);
-		}
-		
-		if (selectors != null)
-		{
-			FilterStream out = new FilterStream(request.out);
-			request.out = out;
-
-			try
+			if (handler.respond(request) == false)
 			{
-				if (handler.respond(request) == false)
-					return false;
-				return out.applyFilters(request, selectors);
+				return false;
 			}
-			finally
-			{
-				out.restore(request);
-			}
+			if (out.shouldFilter)
+				return out.applyFilters(request);
+			else
+				return true;
 		}
-		else
+		finally
 		{
-			return handler.respond(request);
+			out.restore(request);
 		}
 	}
 
 	private class FilterStream extends Request.HttpOutputStream
 	{
 		Request.HttpOutputStream old;
+		String selectors;
+		String reqHost;
+		boolean shouldFilter = false;
 
 		public FilterStream(Request.HttpOutputStream old)
 		{
@@ -134,20 +129,93 @@ public class RequestHandler implements Handler
 			this.old = old;
 		}
 
-		public boolean applyFilters(Request request, String selectors) throws IOException
+		public void sendHeaders(Request request) throws IOException
+		{
+			String type = request.responseHeaders.get("Content-Type");
+
+			selectors = null;
+			if (type != null && type.toLowerCase().startsWith("text/html"))
+			{
+				selectors = application.getSelectorsForDomain(reqHost);
+			}
+			if (selectors == null)
+			{
+				restore(request);
+				old.sendHeaders(request);
+			}
+			else
+			{
+				shouldFilter = true;
+			}
+		}
+
+		public boolean applyFilters(Request request) throws IOException
 		{
 			request.out.flush();
 			restore(request);
-
+			
 			byte[] content = ((ByteArrayOutputStream) out).toByteArray();
-			if (selectors != null)
+			
+			String encodingHeader = request.responseHeaders.get("Content-Encoding");
+			if (encodingHeader != null)
 			{
+				encodingHeader = encodingHeader.toLowerCase();
+				if (encodingHeader.equals("gzip") || encodingHeader.equals("x-gzip"))
+				{
+					content = Pack.unzipData(content);
+					request.responseHeaders.remove("Content-Encoding");
+				}
+				else if (encodingHeader.equals("compress") || encodingHeader.equals("x-compress"))
+				{
+					content = Pack.deCompressData(content);
+					request.responseHeaders.remove("Content-Encoding");
+				}
+				else
+				{
+					selectors = null;
+				}
+			}
+			
+			boolean chunked = false;
+			encodingHeader = request.responseHeaders.get("Transfer-Encoding");
+			if (encodingHeader != null)
+			{
+				if (encodingHeader.toLowerCase().equals("chunked"))
+					chunked = true;
+				else
+					selectors = null;
+			}
+			
+			if (selectors != null && request.getStatus() == 200)
+			{
+				//TODO Do we need to set encoding here?
 				byte[] addon = selectors.getBytes();
+
+				if (chunked)
+				{
+					String chunkHeader = Integer.toHexString(addon.length) + "\r\n";
+					byte[] chunk = chunkHeader.getBytes();
+					byte[] newaddon = new byte[addon.length + chunk.length + 2];
+					System.arraycopy(chunk, 0, newaddon, 0, chunk.length);
+					System.arraycopy(addon, 0, newaddon, chunk.length, addon.length);
+					newaddon[newaddon.length - 2] = (byte) "\r".charAt(0);
+					newaddon[newaddon.length - 1] = (byte) "\n".charAt(0);
+					addon = newaddon;
+				}
+				
 				byte[] newcontent = new byte[content.length + addon.length];
 				System.arraycopy(addon, 0, newcontent, 0, addon.length);
 				System.arraycopy(content, 0, newcontent, addon.length, content.length);
 				content = newcontent;
 			}
+
+			String s = new String(content);
+			Log.e(prefix, request.url);
+			for (int i = 0; i < request.responseHeaders.size(); i++)
+			{
+			    Log.i(request.responseHeaders.getKey(i), request.responseHeaders.get(i));
+			}
+			Log.w(prefix, s);
 			request.sendResponse(content, null);
 			return true;
 		}
