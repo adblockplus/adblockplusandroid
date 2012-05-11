@@ -159,23 +159,7 @@ public class ProxyService extends Service
 			config.put("adblock.class", "org.adblockplus.brazil.RequestHandler");
 			config.put("adblock.handler", "proxy");
 			config.put("proxy.class", "sunlabs.brazil.proxy.ProxyHandler");
-			//config.put("proxy.proxylog", "yes");
-            /*
-            This is for future - when we will need to filter content
-            config.put("main.handlers", "... filter");
-            config.put("filter.class", "sunlabs.brazil.filter.FilterHandler");
-            config.put("filter.handler", "proxy");
-            config.put("filter.prefix", "");
-            config.put("filter.filters", "standard");
-            config.put("standard.class", "org.paw.filter.StandardFilter");
-            */
-            
-			/*
-            if(!filters.isEmpty() && !passThrough) {
-                useFilters += " repack";
-                this.config.put("repack.class", "org.paw.filter.RepackFilter");
-            }
-            */
+			config.put("proxy.proxylog", "yes");
 
 			String proxyHost = prefs.getString(getString(R.string.pref_proxyhost), "");
 			String proxyPort = prefs.getString(getString(R.string.pref_proxyport), "");
