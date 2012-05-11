@@ -12,6 +12,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -31,6 +32,7 @@ import android.preference.PreferenceScreen;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 
 public class Preferences extends PreferenceActivity implements OnSharedPreferenceChangeListener
 {
@@ -39,7 +41,10 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+
 		super.onCreate(savedInstanceState);
+
 		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 		setContentView(R.layout.preferences);
 		addPreferencesFromResource(R.xml.preferences);
@@ -261,6 +266,23 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 				Log.e(TAG, "Asset copy error", e);
 			}
 		}
+	}
+	
+	public void onHelp(View view)
+	{
+		final Intent intent = new Intent(Intent.ACTION_MAIN, null);
+		intent.addCategory(Intent.CATEGORY_LAUNCHER);
+		final ComponentName cn = new ComponentName("com.android.settings", "com.android.settings.wifi.WifiSettings");
+		intent.setComponent(cn);
+		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		startActivity(intent);
+
+	}
+
+	public void onAbout(View view)
+	{
+		AboutDialog about = new AboutDialog(this);
+		about.show();
 	}
 
 	@Override
