@@ -576,7 +576,7 @@ Android.load("ElemHide.jsm");
 Android.load("Synchronizer.jsm");
 
 FilterListener.startup();
-//Synchronizer.startup();
+Synchronizer.startup();
 
 Android.load("publicSuffixList.js");
 Android.load("punycode.js");

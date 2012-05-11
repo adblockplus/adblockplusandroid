@@ -53,8 +53,8 @@ long RunNextCallback(v8::Handle<v8::Context> context)
   int64_t delay = (*minEntry)->delay;
   if (delay > 0)
   {
-	// Here we assume that we will be called next time after the specified delay,
-	// but it can happen earlier - should fix this.
+    // Here we assume that we will be called next time after the specified delay,
+    // caller should ensure this
     for (std::list<QueueEntry*>::iterator it = queue.begin(); it != queue.end(); it++)
       (*it)->delay -= delay;
     return delay;
