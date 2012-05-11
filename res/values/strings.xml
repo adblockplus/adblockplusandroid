@@ -11,6 +11,9 @@
     
     <string name="ok">OK</string>
     <string name="error">Error</string>
+    <string name="about">About</string>
+    <string name="help">Help</string>
+    <string name="version">Version</string>
     
     <string name="synchronize_in_progress">downloading&#8230;</string>
     <string name="synchronize_invalid_url">invalid url</string>
