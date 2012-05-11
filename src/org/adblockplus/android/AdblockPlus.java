@@ -14,8 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -43,6 +41,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -54,8 +53,6 @@ public class AdblockPlus extends Application
 	private final static int MSG_TOAST = 1;
 
 	public final static String BROADCAST_SUBSCRIPTION_STATUS = "org.adblockplus.android.subscription.status";
-	
-	private final static long REFRESH_PERIOD = 60 * 60 * 1000;
 	
 	private List<Subscription> subscriptions;
 	private JSThread js;
@@ -621,6 +618,7 @@ public class AdblockPlus extends Application
 					}
 					else if (delay > 0)
 					{
+						long t = SystemClock.uptimeMillis();
 						synchronized (queue)
 						{
 							try
@@ -631,9 +629,9 @@ public class AdblockPlus extends Application
 							{
 							}
 						}
-						delay = 0;
+						delay -= SystemClock.uptimeMillis() - t;
 					}
-					else if (delay == 0)
+					else if (delay <= 0)
 					{
 						delay = jsEngine.runCallbacks();
 					}
