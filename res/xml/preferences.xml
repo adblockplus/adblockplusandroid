@@ -3,14 +3,16 @@
 
     <CheckBoxPreference
         android:key="@string/pref_enabled"
-        android:summary="@string/pref_enabled_summary"
-        android:title="@string/pref_enabled_title" />
+        android:title="@string/pref_enabled_title"
+        android:summaryOn="@string/pref_enabled_summary_on"
+        android:summaryOff="@string/pref_enabled_summary_off" />
     <CheckBoxPreference
         android:defaultValue="@bool/def_startatboot"
         android:dependency="@string/pref_enabled"
         android:key="@string/pref_startatboot"
-        android:summary="@string/pref_startatboot_summary"
-        android:title="@string/pref_startatboot_title" />
+        android:title="@string/pref_startatboot_title"
+        android:summaryOn="@string/pref_startatboot_summary_on"
+        android:summaryOff="@string/pref_startatboot_summary_off" />
 
     <org.adblockplus.android.RefreshableListPreference
         android:key="@string/pref_subscription"
@@ -27,8 +29,9 @@
     <CheckBoxPreference
         android:defaultValue="@bool/def_wifirefresh"
         android:key="@string/pref_wifirefresh"
-        android:summary="@string/pref_wifirefresh_summary"
-        android:title="@string/pref_wifirefresh_title" />
+        android:title="@string/pref_wifirefresh_title"
+        android:summaryOn="@string/pref_wifirefresh_summary_on"
+        android:summaryOff="@string/pref_wifirefresh_summary_off" />
 
     <EditTextPreference
         android:defaultValue="@integer/def_port"
@@ -36,7 +39,6 @@
         android:inputType="number"
         android:key="@string/pref_port"
         android:singleLine="true"
-        android:summary="@string/pref_port_summary"
         android:title="@string/pref_port_title" />
 
     <PreferenceCategory android:title="@string/pref_proxy_title" >
