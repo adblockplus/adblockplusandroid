@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
@@ -25,8 +26,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -61,6 +65,7 @@ public class ProxyService extends Service
 	private static final Class<?>[] mStartForegroundSignature = new Class[] { int.class, Notification.class };
 	private static final Class<?>[] mStopForegroundSignature = new Class[] { boolean.class };
 
+	private ConnectivityManager mCM;
 	private NotificationManager mNM;
 	private Method mSetForeground;
 	private Method mStartForeground;
@@ -77,6 +82,7 @@ public class ProxyService extends Service
 	private int isRoot = -1;
 	
 	private boolean isTransparent = false;
+	private boolean isNativeProxy = false;
 
 	private String shell = null;
 	private String root_shell = null;
@@ -101,6 +107,13 @@ public class ProxyService extends Service
 			port = getResources().getInteger(R.integer.def_port);
 		}
 
+		// Try to set native proxy
+		mCM = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		isNativeProxy = setConnectionProxy();
+		if (isNativeProxy)
+			registerReceiver(connectionReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+
+		//TODO Do not attempt to root if running in native mode
 		if (isRoot())
 		{
 			runRootCommand("chmod 700 " + DEFAULT_IPTABLES + "\n", DEFAULT_TIMEOUT);
@@ -125,9 +138,10 @@ public class ProxyService extends Service
 		// Start engine
 		AdblockPlus.getApplication().startEngine();
 
-		registerReceiver(receiver, new IntentFilter(ProxyService.BROADCAST_PROXY_FAILED));
+		registerReceiver(proxyReceiver, new IntentFilter(ProxyService.BROADCAST_PROXY_FAILED));
 
 		// Start proxy
+		
 		if (proxy == null)
 		{
 			ServerSocket listen = null;
@@ -194,8 +208,8 @@ public class ProxyService extends Service
 		}
 		
 		// Lock service
-		String msg = getString(isTransparent ? R.string.notif_transparent : R.string.notif_proxy);
-		if (! isTransparent)
+		String msg = getString(isTransparent ? R.string.notif_transparent : isNativeProxy ? R.string.notif_native : R.string.notif_proxy);
+		if (! isTransparent && ! isNativeProxy)
 			msg = String.format(msg, port);
 		Notification notification = new Notification();
 		notification.when = 0;
@@ -210,7 +224,7 @@ public class ProxyService extends Service
 	{
 		super.onDestroy();
 
-		unregisterReceiver(receiver);
+		unregisterReceiver(proxyReceiver);
 
 		// Stop IP redirecting
 		if (isTransparent)
@@ -224,6 +238,13 @@ public class ProxyService extends Service
 			}.start();
 		}
 
+		// Clear native proxy
+		if (isNativeProxy)
+		{
+			unregisterReceiver(connectionReceiver);
+			clearConnectionProxy();
+		}
+		
 		// Stop proxy server
 		proxy.close();
 
@@ -315,6 +336,114 @@ public class ProxyService extends Service
 		{
 			// Should not happen
 			Log.w(TAG, "Unable to invoke method", e);
+		}
+	}
+
+	/**
+	 * Tries to set proxy via native call.
+	 * 
+	 * @return true if device supports native proxy setting
+	 */
+	private boolean setConnectionProxy()
+	{
+		Method method = null;
+		try
+		{
+			/*
+			 * android.net.LinkProperties lp = ConnectivityManager.getActiveLinkProperties();
+			 */
+			method = ConnectivityManager.class.getMethod("getActiveLinkProperties");
+		}
+		catch (NoSuchMethodException e)
+		{
+			// This is normal situation for pre-ICS devices
+			return false;
+		}
+		catch (Exception e)
+		{
+			// This should not happen
+			Log.e(TAG, "setHttpProxy failure", e);
+			return false;
+		}
+		try
+		{
+			Object lp = method.invoke(mCM);
+			if (lp == null)
+				return true;
+			/*
+			 * ProxyProperties pp = new ProxyProperties("127.0.0.1", port, "");
+			 */
+			String className = "android.net.ProxyProperties";
+			Class<?> c = Class.forName(className);
+			Class<?>[] parameter = new Class[] {String.class, int.class, String.class};
+			Object args[] = new Object[3];
+			args[0] = "127.0.0.1";
+			args[1] = new Integer(port);
+			args[2] = "";
+			Constructor<?> cons = c.getConstructor(parameter);
+			Object pp = cons.newInstance(args);
+			/*
+			 * lp.setHttpProxy(pp);
+			 */
+			method = lp.getClass().getMethod("setHttpProxy", pp.getClass());
+			method.invoke(lp, pp);
+
+			Intent intent = null;
+			NetworkInfo ni = mCM.getActiveNetworkInfo();
+			switch (ni.getType())
+			{
+				case ConnectivityManager.TYPE_WIFI:
+					intent = new Intent("android.net.wifi.LINK_CONFIGURATION_CHANGED");
+					break;
+				case ConnectivityManager.TYPE_MOBILE:
+					//TODO We leave it here for future, it does not work now
+			        //intent = new Intent("android.intent.action.ANY_DATA_STATE");
+			        break;
+			}
+			if (intent != null)
+			{
+		        if (lp != null)
+		        {
+		        	intent.putExtra("linkProperties", (Parcelable) lp);
+		        }
+				sendBroadcast(intent);
+			}
+			
+			return true;
+		}
+		catch (Exception e)
+		{
+			// This should not happen
+			Log.e(TAG, "setHttpProxy failure", e);
+			return false;
+		}       
+	}
+	
+	private void clearConnectionProxy()
+	{
+		try
+		{
+			/*
+			 * android.net.LinkProperties lp =
+			 * ConnectivityManager.getActiveLinkProperties();
+			 */
+			Method method = ConnectivityManager.class.getMethod("getActiveLinkProperties");
+			Object lp = method.invoke(mCM);
+			/*
+			 * lp.setHttpProxy(null);
+			 */
+			String className = "android.net.ProxyProperties";
+			Class<?> c = Class.forName(className);
+			method = lp.getClass().getMethod("setHttpProxy", c);
+			method.invoke(lp, new Object[] {null});
+
+			Intent intent = new Intent("android.net.wifi.LINK_CONFIGURATION_CHANGED");
+			intent.putExtra("linkProperties", (Parcelable) lp);
+			sendBroadcast(intent);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
 		}
 	}
 
@@ -490,7 +619,7 @@ public class ProxyService extends Service
 		return binder;
 	}
 
-	private BroadcastReceiver receiver = new BroadcastReceiver()
+	private BroadcastReceiver proxyReceiver = new BroadcastReceiver()
 	{
 		@Override
 		public void onReceive(final Context context, Intent intent)
@@ -498,6 +627,25 @@ public class ProxyService extends Service
 			if (intent.getAction().equals(ProxyService.BROADCAST_PROXY_FAILED))
 			{
 				stopSelf();
+			}
+		}
+	};
+	
+	private BroadcastReceiver connectionReceiver = new BroadcastReceiver()
+	{
+		@Override
+		public void onReceive(Context ctx, Intent intent)
+		{
+			Log.i(TAG, "Action: " + intent.getAction());
+			if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION))
+			{
+				NetworkInfo info = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+				String typeName = info.getTypeName();
+				String subtypeName = info.getSubtypeName();
+				boolean available = info.isAvailable();
+				Log.i(TAG, "Network Type: " + typeName + ", subtype: " + subtypeName + ", available: " + available);
+				if (info.getType() == ConnectivityManager.TYPE_WIFI)
+					setConnectionProxy();
 			}
 		}
 	};
