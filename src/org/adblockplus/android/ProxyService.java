@@ -147,6 +147,7 @@ public class ProxyService extends Service
 			ServerSocket listen = null;
 			try
 			{
+				//TODO Add port travel
 				listen = new ServerSocket(port, 1024);
 			}
 			catch (IOException e)
