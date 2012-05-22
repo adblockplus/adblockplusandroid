@@ -7,6 +7,7 @@
     <string name="pref_refresh">refresh</string>
     <string name="pref_wifirefresh">wifirefresh</string>
     <string name="pref_port">port</string>
+    <string name="pref_advanced">advanced</string>
     <string name="pref_proxyhost">proxyhost</string>
     <string name="pref_proxyport">proxyport</string>
     <string name="pref_proxyuser">proxyuser</string>
