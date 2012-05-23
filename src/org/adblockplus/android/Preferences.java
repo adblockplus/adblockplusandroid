@@ -20,6 +20,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
@@ -66,6 +67,12 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		catch (NameNotFoundException e)
 		{
 			copyAssets();
+		}
+		
+		if (Build.VERSION.SDK_INT >= 12) // Honeycomb 3.1
+		{
+			PreferenceScreen advanced = (PreferenceScreen) findPreference(getString(R.string.pref_advanced));			
+			advanced.removePreference(findPreference(getString(R.string.pref_proxy)));
 		}
 	}
 

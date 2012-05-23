@@ -37,7 +37,9 @@
                 android:summaryOn="@string/pref_wifirefresh_summary_on"
                 android:title="@string/pref_wifirefresh_title" />
         </PreferenceCategory>
-        <PreferenceCategory android:title="@string/pref_proxy_title" >
+        <PreferenceCategory
+            android:key="@string/pref_proxy"
+            android:title="@string/pref_proxy_title" >
             <EditTextPreference
                 android:inputType="text"
                 android:key="@string/pref_proxyhost"
