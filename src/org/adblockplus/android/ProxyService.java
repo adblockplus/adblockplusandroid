@@ -138,8 +138,11 @@ public class ProxyService extends Service
 		// Try to set native proxy
 		isNativeProxy = setConnectionProxy();
 		if (isNativeProxy)
+		{
 			registerReceiver(connectionReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-
+			registerReceiver(connectionReceiver, new IntentFilter("android.net.wifi.LINK_CONFIGURATION_CHANGED"));
+		}
+		
 		//TODO Do not attempt to root if running in native mode
 		if (isRoot())
 		{
@@ -168,7 +171,6 @@ public class ProxyService extends Service
 		registerReceiver(proxyReceiver, new IntentFilter(ProxyService.BROADCAST_PROXY_FAILED));
 
 		// Start proxy
-		
 		if (proxy == null)
 		{
 			ServerSocket listen = null;
@@ -201,31 +203,8 @@ public class ProxyService extends Service
 			config.put("adblock.class", "org.adblockplus.brazil.RequestHandler");
 			//config.put("adblock.proxylog", "yes");
 			
-			if (proxyHost != null && proxyPort != null)
-			{
-				config.put("adblock.proxyHost", proxyHost);
-				config.put("adblock.proxyPort", proxyPort);
-				//TODO Not implemented in our proxy but needed to restore settings
-				config.put("adblock.proxyExcl", proxyExcl);
-
-				if (! isTransparent)
-				{
-					config.put("https.proxyHost", proxyHost);
-					config.put("https.proxyPort", proxyPort);
-				}
-
-				if (proxyUser != null  && proxyPass != null)
-				{
-					// Base64 encode user:password
-					String proxyAuth = "Basic " + new String(Base64.encode(proxyUser + ":" + proxyPass));
-					config.put("adblock.auth", proxyAuth);
-					if (! isTransparent)
-					{
-						config.put("https.auth", proxyAuth);
-					}
-				}
-			}
-
+			configureUserProxy(config, proxyHost, proxyPort, proxyExcl, proxyUser, proxyPass);
+			
 			proxy = new ProxyServer();
 			proxy.logLevel = Server.LOG_DIAGNOSTIC;
 			proxy.setup(listen, config.getProperty("handler"), config);
@@ -392,29 +371,7 @@ public class ProxyService extends Service
 			if (pp == null)
 				return null;
 			
-			String[] userProxy = new String[3];
-			
-			String className = "android.net.ProxyProperties";
-			Class<?> c = Class.forName(className);
-			
-		    /*
-		     * String proxyHost = pp.getHost()
-		     */
-			method = c.getMethod("getHost");
-			userProxy[0] = (String) method.invoke(pp);
-
-		    /*
-		     * int proxyPort = pp.getPort();
-		     */
-			method = c.getMethod("getPort");
-			userProxy[1] = String.valueOf((Integer) method.invoke(pp));
-
-			/*
-			 * String proxyEL = getExclusionList()
-			 */
-			method = c.getMethod("getExclusionList");
-			userProxy[2] = (String) method.invoke(pp);
-
+			String[] userProxy = getUserProxy(pp);
 			return userProxy;
 		}
 		catch (Exception e)
@@ -423,6 +380,35 @@ public class ProxyService extends Service
 			Log.e(TAG, "getProxy failure", e);
 			return null;
 		}       
+	}
+	
+	private String[] getUserProxy(Object pp) throws Exception
+	{
+		String[] userProxy = new String[3];
+		
+		String className = "android.net.ProxyProperties";
+		Class<?> c = Class.forName(className);
+		Method method;
+		
+	    /*
+	     * String proxyHost = pp.getHost()
+	     */
+		method = c.getMethod("getHost");
+		userProxy[0] = (String) method.invoke(pp);
+
+	    /*
+	     * int proxyPort = pp.getPort();
+	     */
+		method = c.getMethod("getPort");
+		userProxy[1] = String.valueOf((Integer) method.invoke(pp));
+
+		/*
+		 * String proxyEL = getExclusionList()
+		 */
+		method = c.getMethod("getExclusionList");
+		userProxy[2] = (String) method.invoke(pp);
+
+		return userProxy;
 	}
 	
 	/**
@@ -516,9 +502,9 @@ public class ProxyService extends Service
 			Method method = ConnectivityManager.class.getMethod("getActiveLinkProperties");
 			Object lp = method.invoke(mCM);
 			
-			String proxyHost = (String) proxy.props.get("adblock.proxyHost");
-			String proxyPort = (String) proxy.props.get("adblock.proxyPort");
-			String proxyExcl = (String) proxy.props.get("adblock.proxyExcl");
+			String proxyHost = (String) proxy.props.getProperty("adblock.proxyHost");
+			String proxyPort = (String) proxy.props.getProperty("adblock.proxyPort");
+			String proxyExcl = (String) proxy.props.getProperty("adblock.proxyExcl");
 
 			String className = "android.net.ProxyProperties";
 			Class<?> c = Class.forName(className);
@@ -555,6 +541,34 @@ public class ProxyService extends Service
 		catch (Exception e)
 		{
 			e.printStackTrace();
+		}
+	}
+	
+	private void configureUserProxy(Properties config, String proxyHost, String proxyPort, String proxyExcl, String proxyUser, String proxyPass)
+	{
+		if (proxyHost != null && proxyPort != null)
+		{
+			config.put("adblock.proxyHost", proxyHost);
+			config.put("adblock.proxyPort", proxyPort);
+			//TODO Not implemented in our proxy but needed to restore settings
+			config.put("adblock.proxyExcl", proxyExcl);
+
+			if (! isTransparent)
+			{
+				config.put("https.proxyHost", proxyHost);
+				config.put("https.proxyPort", proxyPort);
+			}
+
+			if (proxyUser != null  && proxyPass != null)
+			{
+				// Base64 encode user:password
+				String proxyAuth = "Basic " + new String(Base64.encode(proxyUser + ":" + proxyPass));
+				config.put("adblock.auth", proxyAuth);
+				if (! isTransparent)
+				{
+					config.put("https.auth", proxyAuth);
+				}
+			}
 		}
 	}
 
@@ -747,8 +761,9 @@ public class ProxyService extends Service
 		@Override
 		public void onReceive(Context ctx, Intent intent)
 		{
-			Log.i(TAG, "Action: " + intent.getAction());
-			if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION))
+			String action = intent.getAction();
+			Log.i(TAG, "Action: " + action);
+			if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action))
 			{
 				NetworkInfo info = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
 				String typeName = info.getTypeName();
@@ -757,6 +772,34 @@ public class ProxyService extends Service
 				Log.i(TAG, "Network Type: " + typeName + ", subtype: " + subtypeName + ", available: " + available);
 				if (info.getType() == ConnectivityManager.TYPE_WIFI)
 					setConnectionProxy();
+			}
+			else if ("android.net.wifi.LINK_CONFIGURATION_CHANGED".equals(action))
+			{
+				Object lp = intent.getParcelableExtra("linkProperties");
+				Method method;
+				try
+				{
+					/*
+					 * lp.getHttpProxy();
+					 */
+					method = lp.getClass().getMethod("getHttpProxy");
+					Object pp = method.invoke(lp);
+					
+					String[] userProxy = getUserProxy(pp);
+					if (userProxy != null && Integer.valueOf(userProxy[1]) != port)
+					{
+						Log.i(TAG, "User has set new proxy: " + userProxy[0] + ":" + userProxy[1] + "(" + userProxy[2] + ")");
+						configureUserProxy(proxy.props, userProxy[0], userProxy[1], userProxy[2], null, null);
+						proxy.restart(proxy.props.getProperty("handler"));
+					}
+				}
+				catch (Exception e)
+				{
+					// This should not happen
+					e.printStackTrace();
+				}
+
+				
 			}
 		}
 	};
