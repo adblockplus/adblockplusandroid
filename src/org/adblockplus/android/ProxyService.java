@@ -10,6 +10,7 @@ import java.io.OutputStreamWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -371,8 +372,7 @@ public class ProxyService extends Service
 			if (pp == null)
 				return null;
 			
-			String[] userProxy = getUserProxy(pp);
-			return userProxy;
+			return getUserProxy(pp);
 		}
 		catch (Exception e)
 		{
@@ -408,7 +408,10 @@ public class ProxyService extends Service
 		method = c.getMethod("getExclusionList");
 		userProxy[2] = (String) method.invoke(pp);
 
-		return userProxy;
+		if (userProxy[0] != null)
+			return userProxy;
+		else
+			return null;
 	}
 	
 	/**
@@ -548,6 +551,14 @@ public class ProxyService extends Service
 	{
 		if (proxyHost != null && proxyPort != null)
 		{
+			// Check for dirty proxy settings - this indicated previous crash:
+			// proxy points to ourselves
+			// proxy port is 0
+			// proxy is 127.0.0.1:8080
+			int p = Integer.valueOf(proxyPort);
+			if (p == 0 || isLocalHost(proxyHost) && (p == port || p == 8080))
+				return;
+			
 			config.put("adblock.proxyHost", proxyHost);
 			config.put("adblock.proxyPort", proxyPort);
 			//TODO Not implemented in our proxy but needed to restore settings
@@ -570,6 +581,36 @@ public class ProxyService extends Service
 				}
 			}
 		}
+	}
+	
+	private static final boolean isLocalHost(String host)
+	{
+		if (host == null)
+			return false;
+
+		try
+		{
+			if (host != null)
+			{
+				if (host.equalsIgnoreCase("localhost"))
+					return true;
+				
+				String className = "android.net.NetworkUtils";
+				Class<?> c = Class.forName(className);
+				/*
+				 * InetAddress address = NetworkUtils.numericToInetAddress(host);
+				 */
+				Method method = c.getMethod("numericToInetAddress", String.class);
+				InetAddress address = (InetAddress) method.invoke(null, host);
+				
+				if (address.isLoopbackAddress())
+					return true;
+			}
+		}
+		catch (Exception e)
+		{
+		}
+		return false;
 	}
 
 	private void testRedirectSupport()
