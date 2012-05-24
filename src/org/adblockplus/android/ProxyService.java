@@ -549,7 +549,7 @@ public class ProxyService extends Service
 	
 	private void configureUserProxy(Properties config, String proxyHost, String proxyPort, String proxyExcl, String proxyUser, String proxyPass)
 	{
-		if (proxyHost != null && proxyPort != null)
+		if (proxyHost != null && ! "".equals(proxyHost) && proxyPort != null && ! "".equals(proxyPort))
 		{
 			// Check for dirty proxy settings - this indicated previous crash:
 			// proxy points to ourselves
@@ -570,7 +570,7 @@ public class ProxyService extends Service
 				config.put("https.proxyPort", proxyPort);
 			}
 
-			if (proxyUser != null  && proxyPass != null)
+			if (proxyUser != null && ! "".equals(proxyUser) && proxyPass != null && ! "".equals(proxyPass))
 			{
 				// Base64 encode user:password
 				String proxyAuth = "Basic " + new String(Base64.encode(proxyUser + ":" + proxyPass));
