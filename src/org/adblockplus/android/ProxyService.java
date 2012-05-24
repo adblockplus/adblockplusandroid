@@ -1,19 +1,18 @@
 package org.adblockplus.android;
 
 import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.ServerSocket;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeoutException;
+
+import com.stericson.RootTools.RootTools;
+import com.stericson.RootTools.RootToolsException;
 
 import sunlabs.brazil.server.Server;
 import sunlabs.brazil.util.Base64;
@@ -39,23 +38,19 @@ import android.widget.Toast;
 
 public class ProxyService extends Service
 {
+	static
+	{
+		RootTools.debugMode = true;
+	}
+	
 	private static final String TAG = "ProxyService";
 
 	public static final String BASE = "/data/data/org.adblockplus.android/";
 
-	public final static String DEFAULT_SHELL = "/system/bin/sh";
-
-	public final static String DEFAULT_ROOT = "/system/bin/su";
-	public final static String ALTERNATIVE_ROOT = "/system/xbin/su";
-
 	public final static String DEFAULT_IPTABLES = "/data/data/org.adblockplus.android/iptables";
 	public final static String ALTERNATIVE_IPTABLES = "/system/bin/iptables";
 
-	public final static String SCRIPT_FILE = "/data/data/org.adblockplus.android/script";
-	public final static String DEFOUT_FILE = "/data/data/org.adblockplus.android/defout";
-
 	public final static int DEFAULT_TIMEOUT = 3000;
-	public final static int EXECUTION_ERROR = -99;
 
 	public final static String BROADCAST_PROXY_FAILED = "org.adblockplus.android.proxy.failure";
 
@@ -79,14 +74,9 @@ public class ProxyService extends Service
 	private ProxyServer proxy = null;
 	private int port;
 
-	private int hasRedirectSupport = -1;
-	private int isRoot = -1;
-	
 	private boolean isTransparent = false;
 	private boolean isNativeProxy = false;
 
-	private String shell = null;
-	private String root_shell = null;
 	private String iptables = null;
 
 	@Override
@@ -145,22 +135,34 @@ public class ProxyService extends Service
 		}
 		
 		//TODO Do not attempt to root if running in native mode
-		if (isRoot())
+		if (RootTools.isAccessGiven())
 		{
-			runRootCommand("chmod 700 " + DEFAULT_IPTABLES + "\n", DEFAULT_TIMEOUT);
-			testRedirectSupport();
-
 			try
 			{
+				RootTools.sendShell("chmod 700 " + DEFAULT_IPTABLES, DEFAULT_TIMEOUT);
+				boolean hasRedirect = testRedirectSupport();
+
 				StringBuffer cmd = new StringBuffer();
 				int uid = getPackageManager().getPackageInfo(getPackageName(), 0).applicationInfo.uid;
 				cmd.append(CMD_IPTABLES_RETURN.replace("{{UID}}", String.valueOf(uid)));
-				cmd.append(hasRedirectSupport > 0 ? CMD_IPTABLES_REDIRECT_ADD_HTTP.replace("{{PORT}}", String.valueOf(port)) : CMD_IPTABLES_DNAT_ADD_HTTP.replace("{{PORT}}", String.valueOf(port)));
+				cmd.append(hasRedirect ? CMD_IPTABLES_REDIRECT_ADD_HTTP.replace("{{PORT}}", String.valueOf(port)) : CMD_IPTABLES_DNAT_ADD_HTTP.replace("{{PORT}}", String.valueOf(port)));
 				String rules = cmd.toString().replace("iptables", getIptables());
-				runRootCommand(rules, DEFAULT_TIMEOUT);
+				RootTools.sendShell(rules, DEFAULT_TIMEOUT);
 				isTransparent = true;
 			}
 			catch (NameNotFoundException e)
+			{
+				e.printStackTrace();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+			catch (RootToolsException e)
+			{
+				e.printStackTrace();
+			}
+			catch (TimeoutException e)
 			{
 				e.printStackTrace();
 			}
@@ -238,7 +240,14 @@ public class ProxyService extends Service
 				@Override
 				public void run()
 				{
-					runRootCommand(getIptables() + " -t nat -F OUTPUT\n", DEFAULT_TIMEOUT);
+					try
+					{
+						RootTools.sendShell(getIptables() + " -t nat -F OUTPUT", DEFAULT_TIMEOUT);
+					}
+					catch (Exception e)
+					{
+						e.printStackTrace();
+					}
 				}
 			}.start();
 		}
@@ -613,117 +622,22 @@ public class ProxyService extends Service
 		return false;
 	}
 
-	private void testRedirectSupport()
+	private boolean testRedirectSupport() throws IOException, RootToolsException, TimeoutException
 	{
-		StringBuilder sb = new StringBuilder();
 		String command = getIptables() + " -t nat -A OUTPUT -p udp --dport 54 -j REDIRECT --to 8154";
+		// Run check command
+		List<String> result = RootTools.sendShell(command, DEFAULT_TIMEOUT);
+		// Clear check command
+		RootTools.sendShell(command.replace("-A", "-D"), DEFAULT_TIMEOUT);
 
-		int exitcode = runScript(command, sb, DEFAULT_TIMEOUT, true);
-
-		String lines = sb.toString();
-
-		hasRedirectSupport = 1;
-
-		// Flush the check command
-		runRootCommand(command.replace("-A", "-D"), DEFAULT_TIMEOUT);
-
-		if (exitcode == EXECUTION_ERROR)
-			return;
-
-		if (lines.contains("No chain/target/match"))
+		boolean res = true;
+		for (String line : result)
 		{
-			hasRedirectSupport = 0;
+			Log.w(TAG, line);
+			if (line.contains("No chain/target/match"))
+				res = false;
 		}
-	}
-
-	public boolean runRootCommand(String command, int timeout)
-	{
-		StringBuilder res = new StringBuilder();
-		runScript(command, res, timeout, true);
-		return true;
-	}
-
-	private synchronized int runScript(String script, StringBuilder res, long timeout, boolean asroot)
-	{
-		Log.d(TAG, script);
-		final File file = new File(SCRIPT_FILE);
-		final ScriptRunner runner = new ScriptRunner(file, script, res, asroot);
-		runner.start();
-		try
-		{
-			if (timeout > 0)
-			{
-				runner.join(timeout);
-			}
-			else
-			{
-				runner.join();
-			}
-			if (runner.isAlive())
-			{
-				// Timed-out
-				runner.destroy();
-				runner.join(1000);
-				return EXECUTION_ERROR;
-			}
-		}
-		catch (InterruptedException ex)
-		{
-			return EXECUTION_ERROR;
-		}
-		return runner.exitcode;
-	}
-
-	public boolean isRoot()
-	{
-		if (isRoot != -1)
-			return isRoot == 1;
-
-		// Switch between binaries
-		if (new File(DEFAULT_ROOT).exists())
-		{
-			root_shell = DEFAULT_ROOT;
-		}
-		else if (new File(ALTERNATIVE_ROOT).exists())
-		{
-			root_shell = ALTERNATIVE_ROOT;
-		}
-		else
-		{
-			root_shell = "su";
-		}
-
-		String lines = null;
-
-		StringBuilder sb = new StringBuilder();
-		String command = "ls /\n" + "exit\n";
-
-		int exitcode = runScript(command, sb, 10 * 1000, true);
-
-		if (exitcode == EXECUTION_ERROR)
-		{
-			return false;
-		}
-
-		lines = sb.toString();
-
-		if (lines.contains("system"))
-		{
-			isRoot = 1;
-		}
-
-		return isRoot == 1 ? true : false;
-	}
-
-	private String getShell()
-	{
-		if (shell == null)
-		{
-			shell = DEFAULT_SHELL;
-			if (!new File(shell).exists())
-				shell = "sh";
-		}
-		return shell;
+		return res;
 	}
 
 	public String getIptables()
@@ -732,31 +646,28 @@ public class ProxyService extends Service
 		{
 			iptables = DEFAULT_IPTABLES;
 
-			if (!isRoot())
+			if (! RootTools.isAccessGiven())
 				return iptables;
-
-			String lines = null;
 
 			boolean compatible = false;
 			boolean version = false;
 
-			StringBuilder sb = new StringBuilder();
 			String command = iptables + " --version\n" + iptables + " -L -t nat -n\n" + "exit\n";
 
-			int exitcode = runScript(command, sb, DEFAULT_TIMEOUT, true);
-
-			if (exitcode == EXECUTION_ERROR)
-				return iptables;
-
-			lines = sb.toString();
-
-			if (lines.contains("OUTPUT"))
+			try
 			{
-				compatible = true;
+				List<String> result = RootTools.sendShell(command, DEFAULT_TIMEOUT);
+				for (String line : result)
+				{
+					if (line.contains("OUTPUT"))
+						compatible = true;
+					if (line.contains("v1.4."))
+						version = true;
+				}
 			}
-			if (lines.contains("v1.4."))
+			catch (Exception e)
 			{
-				version = true;
+				return iptables;
 			}
 
 			if (!compatible || !version)
@@ -868,205 +779,6 @@ public class ProxyService extends Service
 			if (level <= logLevel)
 			{
 				Log.println(7 - level, obj != null ? obj.toString() : TAG, message);
-			}
-		}
-	}
-
-	private final class ScriptRunner extends Thread
-	{
-		private final File file;
-		private final String script;
-		private final StringBuilder res;
-		private final boolean asroot;
-		public int exitcode = -1;
-		// private Process exec;
-		private int mProcId;
-		private FileDescriptor mTermFd;
-
-		private int createSubprocess(int[] processId, String cmd)
-		{
-			ArrayList<String> argList = parse(cmd);
-			String arg0 = argList.get(0);
-			String[] args = argList.toArray(new String[1]);
-
-			mTermFd = Exec.createSubprocess(arg0, args, null, processId);
-			return processId[0];
-		}
-
-		private ArrayList<String> parse(String cmd)
-		{
-			final int PLAIN = 0;
-			final int WHITESPACE = 1;
-			final int INQUOTE = 2;
-			int state = WHITESPACE;
-			ArrayList<String> result = new ArrayList<String>();
-			int cmdLen = cmd.length();
-			StringBuilder builder = new StringBuilder();
-			for (int i = 0; i < cmdLen; i++)
-			{
-				char c = cmd.charAt(i);
-				if (state == PLAIN)
-				{
-					if (Character.isWhitespace(c))
-					{
-						result.add(builder.toString());
-						builder.delete(0, builder.length());
-						state = WHITESPACE;
-					}
-					else if (c == '"')
-					{
-						state = INQUOTE;
-					}
-					else
-					{
-						builder.append(c);
-					}
-				}
-				else if (state == WHITESPACE)
-				{
-					if (Character.isWhitespace(c))
-					{
-						// do nothing
-					}
-					else if (c == '"')
-					{
-						state = INQUOTE;
-					}
-					else
-					{
-						state = PLAIN;
-						builder.append(c);
-					}
-				}
-				else if (state == INQUOTE)
-				{
-					if (c == '\\')
-					{
-						if (i + 1 < cmdLen)
-						{
-							i += 1;
-							builder.append(cmd.charAt(i));
-						}
-					}
-					else if (c == '"')
-					{
-						state = PLAIN;
-					}
-					else
-					{
-						builder.append(c);
-					}
-				}
-			}
-			if (builder.length() > 0)
-			{
-				result.add(builder.toString());
-			}
-			return result;
-		}
-
-		/**
-		 * Creates a new script runner.
-		 * 
-		 * @param file
-		 *            temporary script file
-		 * @param script
-		 *            script to run
-		 * @param res
-		 *            response output
-		 * @param asroot
-		 *            if true, executes the script as root
-		 */
-		public ScriptRunner(File file, String script, StringBuilder res, boolean asroot)
-		{
-			this.file = file;
-			this.script = script;
-			this.res = res;
-			this.asroot = asroot;
-		}
-
-		/**
-		 * Destroy this script runner
-		 */
-		@Override
-		public synchronized void destroy()
-		{
-			try
-			{
-				Exec.hangupProcessGroup(mProcId);
-				Exec.close(mTermFd);
-			}
-			catch (NoClassDefFoundError ignore)
-			{
-				// Nothing
-			}
-		}
-
-		@Override
-		public void run()
-		{
-			try
-			{
-				new File(DEFOUT_FILE).createNewFile();
-				file.createNewFile();
-				final String abspath = file.getAbsolutePath();
-
-				// TODO: Rewrite this line
-				// make sure we have execution permission on the script file
-				// Runtime.getRuntime().exec("chmod 755 " + abspath).waitFor();
-
-				// Write the script to be executed
-				final OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(file));
-				out.write("#!/system/bin/sh\n");
-				out.write(script);
-				if (!script.endsWith("\n"))
-					out.write("\n");
-				out.write("exit\n");
-				out.flush();
-				out.close();
-
-				if (this.asroot)
-				{
-					// Create the "su" request to run the script
-					// exec = Runtime.getRuntime().exec(
-					// root_shell + " -c " + abspath);
-
-					int pid[] = new int[1];
-					mProcId = createSubprocess(pid, root_shell + " -c " + abspath);
-				}
-				else
-				{
-					// Create the "sh" request to run the script
-					// exec = Runtime.getRuntime().exec(getShell() + " " +
-					// abspath);
-
-					int pid[] = new int[1];
-					mProcId = createSubprocess(pid, getShell() + " " + abspath);
-				}
-
-				final InputStream stdout = new FileInputStream(DEFOUT_FILE);
-				final byte buf[] = new byte[8192];
-				int read = 0;
-
-				exitcode = Exec.waitFor(mProcId);
-
-				// Read stdout
-				while (stdout.available() > 0)
-				{
-					read = stdout.read(buf);
-					if (res != null)
-						res.append(new String(buf, 0, read));
-				}
-
-			}
-			catch (Exception ex)
-			{
-				if (res != null)
-					res.append("\n" + ex);
-			}
-			finally
-			{
-				destroy();
 			}
 		}
 	}
