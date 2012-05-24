@@ -18,6 +18,7 @@
     <string name="msg_update_description">New update is available for download. Proceed?</string>
     <string name="msg_update_downloading">Downloading update: %d%%</string>
     <string name="msg_update_ready">Ready to install update</string>
+    <string name="update_url">https://adblockplus.org/devbuilds/adblockplusandroid/updates.xml</string>
     
     <string name="configuring_url">https://adblockplus.org/en/android-config</string>
     
