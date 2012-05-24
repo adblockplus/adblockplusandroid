@@ -9,7 +9,7 @@
 //
 
 (function (_patchFunc2) {
-  const cacheVersion = 2;
+  const cacheVersion = 3;
   var batchMode = false;
   var isDirty = 0;
   var FilterListener = {
