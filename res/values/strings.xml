@@ -44,5 +44,9 @@
     <string name="pref_proxyport_title">Port</string>
     <string name="pref_proxyuser_title">User</string>
     <string name="pref_proxypass_title">Password</string>
-
+    <string name="pref_support_title">Support</string>
+    <string name="pref_crashreport_title">Crash report</string>
+    <string name="pref_crashreport_summary_on">Report will be generated in external storage root folder if application crashes</string>
+    <string name="pref_crashreport_summary_off">Report will not be generated on application crash</string>
+    
 </resources>
