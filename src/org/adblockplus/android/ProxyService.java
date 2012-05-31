@@ -130,8 +130,7 @@ public class ProxyService extends Service
 			registerReceiver(connectionReceiver, new IntentFilter("android.net.wifi.LINK_CONFIGURATION_CHANGED"));
 		}
 		
-		//TODO Do not attempt to root if running in native mode
-		if (RootTools.isAccessGiven())
+		if (! isNativeProxy && RootTools.isAccessGiven())
 		{
 			try
 			{
