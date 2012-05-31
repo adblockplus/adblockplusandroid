@@ -11,7 +11,6 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -19,6 +18,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -272,13 +272,9 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 	
 	public void onHelp(View view)
 	{
-		final Intent intent = new Intent(Intent.ACTION_MAIN, null);
-		intent.addCategory(Intent.CATEGORY_LAUNCHER);
-		final ComponentName cn = new ComponentName("com.android.settings", "com.android.settings.wifi.WifiSettings");
-		intent.setComponent(cn);
-		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		Uri uri = Uri.parse(getString(R.string.configuring_url));
+		final Intent intent = new Intent(Intent.ACTION_VIEW, uri);
 		startActivity(intent);
-
 	}
 
 	public void onAbout(View view)
