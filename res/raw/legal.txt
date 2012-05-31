@@ -1,7 +1,7 @@
-This program is distributed under the terms of the GNU General Public 
-License as published by the Free Software Foundation, either version 3 
-of the License.\n\n
-This application is distributed in the hope that it will be useful, 
-but WITHOUT ANY WARRANTY; without even the implied warranty of 
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
-GNU General Public License for more details.
+<p>This program is subject to the terms of the Mozilla Public License, v. 2.0.
+You can obtain a copy of the MPL at http://mozilla.org/MPL/2.0/.</p>
+<h4>CREDITS</h4>
+1. V8 - https://developers.google.com/v8/terms<br/>
+2. RootTools - http://www.apache.org/licenses/LICENSE-2.0<br/>
+3. Brazil - http://www.oracle.com/technetwork/java/scsl-1-1-149938.txt<br/>
+4. PAW - http://paw-project.sourceforge.net/license.html<br/>
