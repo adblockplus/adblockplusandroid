@@ -10,6 +10,8 @@
     <string name="msg_subscription_offer">We have selected a suitable subscription for you: \'%s\'. You can change it at any time in application settings.</string>
     <string name="msg_badport">Bad port value</string>
     
+    <string name="configuring_url">https://adblockplus.org/en/android-config</string>
+    
     <string name="ok">OK</string>
     <string name="error">Error</string>
     <string name="about">About</string>
