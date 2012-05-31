@@ -2,4 +2,5 @@
 <resources>
     <bool name="def_startatboot">false</bool>
     <bool name="def_wifirefresh">true</bool>
+    <bool name="def_crashreport">true</bool>
 </resources>

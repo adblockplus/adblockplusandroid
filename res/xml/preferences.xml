@@ -61,6 +61,14 @@
                 android:singleLine="true"
                 android:title="@string/pref_proxypass_title" />
         </PreferenceCategory>
+        <PreferenceCategory android:title="@string/pref_support_title" >
+            <CheckBoxPreference
+                android:defaultValue="@bool/def_crashreport"
+                android:key="@string/pref_crashreport"
+                android:summaryOff="@string/pref_crashreport_summary_off"
+                android:summaryOn="@string/pref_crashreport_summary_on"
+                android:title="@string/pref_crashreport_title" />
+        </PreferenceCategory>
     </PreferenceScreen>
 
 </PreferenceScreen>

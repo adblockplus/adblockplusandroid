@@ -39,6 +39,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -57,6 +58,7 @@ public class AdblockPlus extends Application
 	private List<Subscription> subscriptions;
 	private JSThread js;
 	private boolean interactive = false;
+	private boolean generateCrashReport = false;
 
 	private static AdblockPlus myself;
 
@@ -365,11 +367,39 @@ public class AdblockPlus extends Application
 		}
 	}
 	
+	public void updateCrashReportStatus()
+	{
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		boolean report = prefs.getBoolean(getString(R.string.pref_enabled), getResources().getBoolean(R.bool.def_crashreport));
+		if (report != generateCrashReport)
+		{
+			if (report)
+			{
+				File sdcard = Environment.getExternalStorageDirectory();		
+				Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(this, sdcard.getAbsolutePath()));
+			}
+			else
+			{
+				try
+				{
+					CrashHandler handler = (CrashHandler) Thread.getDefaultUncaughtExceptionHandler();
+					Thread.setDefaultUncaughtExceptionHandler(handler.getDefault());
+				}
+				catch (ClassCastException e)
+				{
+					// ignore - already default handler
+				}
+			}
+			generateCrashReport = report;
+		}
+	}
+	
 	@Override
 	public void onCreate()
 	{
 		super.onCreate();
 		myself = this;
+		updateCrashReportStatus();
 	}
 
 	private final Handler messageHandler = new Handler()
