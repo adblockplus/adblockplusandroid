@@ -1,6 +1,5 @@
 package org.adblockplus.android;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -52,15 +51,15 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-		String lastVersion = prefs.getString(getString(R.string.pref_version), "");
+		int lastVersion = prefs.getInt(getString(R.string.pref_version), 0);
 		try
 		{
-			String thisVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
-			if (!lastVersion.equals(thisVersion))
+			int thisVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+			if (lastVersion != thisVersion)
 			{
 				copyAssets();
 				SharedPreferences.Editor editor = prefs.edit();
-				editor.putString(getString(R.string.pref_version), thisVersion);
+				editor.putInt(getString(R.string.pref_version), thisVersion);
 				editor.commit();
 			}
 		}
@@ -250,7 +249,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 			{
 				Log.d(TAG, "Copy: install/" + files[i]);
 				in = assetManager.open("install/" + files[i]);
-				out = new FileOutputStream(ProxyService.BASE + files[i]);
+				out = openFileOutput(files[i], MODE_PRIVATE);
 				byte[] buffer = new byte[1024];
 				int read;
 				while ((read = in.read(buffer)) != -1)

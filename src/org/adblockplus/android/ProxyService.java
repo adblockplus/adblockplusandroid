@@ -40,23 +40,17 @@ public class ProxyService extends Service
 {
 	static
 	{
-		RootTools.debugMode = true;
+		RootTools.debugMode = false;
 	}
 	
 	private static final String TAG = "ProxyService";
-
-	public static final String BASE = "/data/data/org.adblockplus.android/";
-
-	public final static String DEFAULT_IPTABLES = "/data/data/org.adblockplus.android/iptables";
-	public final static String ALTERNATIVE_IPTABLES = "/system/bin/iptables";
 
 	public final static int DEFAULT_TIMEOUT = 3000;
 
 	public final static String BROADCAST_PROXY_FAILED = "org.adblockplus.android.proxy.failure";
 
-	private final static String CMD_IPTABLES_RETURN = "iptables -t nat -m owner --uid-owner {{UID}} -A OUTPUT -p tcp -j RETURN\n";
-	private final static String CMD_IPTABLES_REDIRECT_ADD_HTTP = "iptables -t nat -A OUTPUT -p tcp --dport 80 -j REDIRECT --to {{PORT}}\n";
-	private final static String CMD_IPTABLES_DNAT_ADD_HTTP = "iptables -t nat -A OUTPUT -p tcp --dport 80 -j DNAT --to-destination 127.0.0.1:{{PORT}}\n";
+	private final static String IPTABLES_RETURN = " -t nat -m owner --uid-owner {{UID}} -A OUTPUT -p tcp -j RETURN\n";
+	private final static String IPTABLES_ADD_HTTP = " -t nat -A OUTPUT -p tcp --dport 80 -j REDIRECT --to {{PORT}}\n";
 
 	private static final Class<?>[] mSetForegroundSignature = new Class[] { boolean.class };
 	private static final Class<?>[] mStartForegroundSignature = new Class[] { int.class, Notification.class };
@@ -85,6 +79,8 @@ public class ProxyService extends Service
 		super.onCreate();
 
 		initForegroundCompat();
+
+		this.getFilesDir();
 
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		String p = prefs.getString(getString(R.string.pref_port), null);
@@ -139,16 +135,19 @@ public class ProxyService extends Service
 		{
 			try
 			{
-				RootTools.sendShell("chmod 700 " + DEFAULT_IPTABLES, DEFAULT_TIMEOUT);
-				boolean hasRedirect = testRedirectSupport();
-
-				StringBuffer cmd = new StringBuffer();
-				int uid = getPackageManager().getPackageInfo(getPackageName(), 0).applicationInfo.uid;
-				cmd.append(CMD_IPTABLES_RETURN.replace("{{UID}}", String.valueOf(uid)));
-				cmd.append(hasRedirect ? CMD_IPTABLES_REDIRECT_ADD_HTTP.replace("{{PORT}}", String.valueOf(port)) : CMD_IPTABLES_DNAT_ADD_HTTP.replace("{{PORT}}", String.valueOf(port)));
-				String rules = cmd.toString().replace("iptables", getIptables());
-				RootTools.sendShell(rules, DEFAULT_TIMEOUT);
-				isTransparent = true;
+				iptables = getIptables();
+				if (iptables != null)
+				{
+					StringBuffer cmd = new StringBuffer();
+					int uid = getPackageManager().getPackageInfo(getPackageName(), 0).applicationInfo.uid;
+					cmd.append(iptables);
+					cmd.append(IPTABLES_RETURN.replace("{{UID}}", String.valueOf(uid)));
+					cmd.append(iptables);
+					cmd.append(IPTABLES_ADD_HTTP.replace("{{PORT}}", String.valueOf(port)));
+					String rules = cmd.toString();
+					RootTools.sendShell(rules, DEFAULT_TIMEOUT);
+					isTransparent = true;
+				}
 			}
 			catch (NameNotFoundException e)
 			{
@@ -242,7 +241,7 @@ public class ProxyService extends Service
 				{
 					try
 					{
-						RootTools.sendShell(getIptables() + " -t nat -F OUTPUT", DEFAULT_TIMEOUT);
+						RootTools.sendShell(iptables + " -t nat -F OUTPUT", DEFAULT_TIMEOUT);
 					}
 					catch (Exception e)
 					{
@@ -622,62 +621,38 @@ public class ProxyService extends Service
 		return false;
 	}
 
-	private boolean testRedirectSupport() throws IOException, RootToolsException, TimeoutException
+	public String getIptables() throws IOException, RootToolsException, TimeoutException
 	{
-		String command = getIptables() + " -t nat -A OUTPUT -p udp --dport 54 -j REDIRECT --to 8154";
-		// Run check command
-		List<String> result = RootTools.sendShell(command, DEFAULT_TIMEOUT);
-		// Clear check command
-		RootTools.sendShell(command.replace("-A", "-D"), DEFAULT_TIMEOUT);
+		if (! RootTools.isAccessGiven())
+			return null;
+		
+		File ipt = getFileStreamPath("iptables");
+		
+		if (! ipt.exists())
+			return null;
+		
+		String path = ipt.getAbsolutePath();
+		
+		RootTools.sendShell("chmod 700 " + path, DEFAULT_TIMEOUT);
 
-		boolean res = true;
+		boolean compatible = false;
+		boolean version = false;
+
+		String command = path + " --version\n" + path + " -L -t nat -n\n";
+
+		List<String> result = RootTools.sendShell(command, DEFAULT_TIMEOUT);
 		for (String line : result)
 		{
-			Log.w(TAG, line);
-			if (line.contains("No chain/target/match"))
-				res = false;
+			if (line.contains("OUTPUT"))
+				compatible = true;
+			if (line.contains("v1.4."))
+				version = true;
 		}
-		return res;
-	}
 
-	public String getIptables()
-	{
-		if (iptables == null)
-		{
-			iptables = DEFAULT_IPTABLES;
-
-			if (! RootTools.isAccessGiven())
-				return iptables;
-
-			boolean compatible = false;
-			boolean version = false;
-
-			String command = iptables + " --version\n" + iptables + " -L -t nat -n\n" + "exit\n";
-
-			try
-			{
-				List<String> result = RootTools.sendShell(command, DEFAULT_TIMEOUT);
-				for (String line : result)
-				{
-					if (line.contains("OUTPUT"))
-						compatible = true;
-					if (line.contains("v1.4."))
-						version = true;
-				}
-			}
-			catch (Exception e)
-			{
-				return iptables;
-			}
-
-			if (!compatible || !version)
-			{
-				iptables = ALTERNATIVE_IPTABLES;
-				if (!new File(iptables).exists())
-					iptables = "iptables";
-			}
-		}
-		return iptables;
+		if (!compatible || !version)
+			return null;
+		
+		return path;
 	}
 
 	private final IBinder binder = new LocalBinder();
