@@ -121,16 +121,8 @@ public class ProxyService extends Service
 			proxyUser = prefs.getString(getString(R.string.pref_proxyuser), null);
 			proxyPass = prefs.getString(getString(R.string.pref_proxypass), null);
 		}
-
-		// Try to set native proxy
-		isNativeProxy = setConnectionProxy();
-		if (isNativeProxy)
-		{
-			registerReceiver(connectionReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-			registerReceiver(connectionReceiver, new IntentFilter("android.net.wifi.LINK_CONFIGURATION_CHANGED"));
-		}
 		
-		if (! isNativeProxy && RootTools.isAccessGiven())
+		if (RootTools.isAccessGiven())
 		{
 			try
 			{
@@ -163,6 +155,17 @@ public class ProxyService extends Service
 			catch (TimeoutException e)
 			{
 				e.printStackTrace();
+			}
+		}
+
+		if (! isTransparent)
+		{
+			// Try to set native proxy
+			isNativeProxy = setConnectionProxy();
+			if (isNativeProxy)
+			{
+				registerReceiver(connectionReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+				registerReceiver(connectionReceiver, new IntentFilter("android.net.wifi.LINK_CONFIGURATION_CHANGED"));
 			}
 		}
 
