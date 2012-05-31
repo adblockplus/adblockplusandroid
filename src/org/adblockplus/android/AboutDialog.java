@@ -41,8 +41,9 @@ public class AboutDialog extends Dialog
 
 		TextView tv = (TextView) findViewById(R.id.legal_text);
 		tv.setText(Html.fromHtml(readRawTextFile(R.raw.legal).replace("\\n", "<br/>")));
+		Linkify.addLinks(tv, Linkify.ALL);
 		tv = (TextView) findViewById(R.id.info_text);
-		String info = "<h4>" + mContext.getString(R.string.app_name) + "</h4>" + mContext.getString(R.string.version) + ": " + versionName + "<br/><br/>" + readRawTextFile(R.raw.info);
+		String info = "<h3>" + mContext.getString(R.string.app_name) + "</h3>" + mContext.getString(R.string.version) + ": " + versionName + "<br/><br/>" + readRawTextFile(R.raw.info);
 		tv.setText(Html.fromHtml(info));
 		Linkify.addLinks(tv, Linkify.ALL);
 	}

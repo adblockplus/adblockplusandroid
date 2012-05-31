@@ -1,2 +1,3 @@
-adblockplus.org<br/>
-Credits: adblockplus.org/android/credits.html
+Homepage: adblockplus.org/en/android-about<br/>
+F.A.Q.: adblockplus.org/en/android-config#faq<br/>
+Support forum: adblockplus.org/forum/<br/>
