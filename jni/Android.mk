@@ -45,16 +45,4 @@ LOCAL_LDLIBS 			:= -llog
 
 include $(BUILD_SHARED_LIBRARY)
 
-include $(CLEAR_VARS)
-
-# This is the target being built.
-LOCAL_MODULE:= exec
-
-# All of the source files that we will compile.
-LOCAL_SRC_FILES:= \
-  termExec.cpp
-
-LOCAL_LDLIBS := -ldl -llog
-
-include $(BUILD_SHARED_LIBRARY)
 
