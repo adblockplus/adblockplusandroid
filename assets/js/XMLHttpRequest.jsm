@@ -35,14 +35,12 @@ XMLHttpRequest.prototype =
     {
       if (self.aborted)
         return;
-      Android.print(code + ": " + message);
       if (headers != null)
       {
         for (var i = 0; i < headers.length; i++)
         {
           var headerName = headers[i][0];
           var headerValue = headers[i][1];
-      Android.print(headerName + ": " + headerValue);
           if (headerName)
             self.responseHeaders[headerName] = headerValue;
         }
