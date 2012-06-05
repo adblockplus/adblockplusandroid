@@ -33,13 +33,13 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -375,8 +375,7 @@ public class AdblockPlus extends Application
 		{
 			if (report)
 			{
-				File sdcard = Environment.getExternalStorageDirectory();		
-				Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(this, sdcard.getAbsolutePath()));
+				Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(this));
 			}
 			else
 			{
@@ -399,6 +398,38 @@ public class AdblockPlus extends Application
 	{
 		super.onCreate();
 		myself = this;
+		try
+		{
+			InputStreamReader reportFile = new InputStreamReader(openFileInput(CrashHandler.REPORT_FILE));
+			final char[] buffer = new char[0x1000];
+			StringBuilder out = new StringBuilder();
+			int read;
+			do
+			{
+				read = reportFile.read(buffer, 0, buffer.length);
+				if (read > 0)
+					out.append(buffer, 0, read);
+			}
+			while (read >= 0);
+			String report = out.toString();
+			if (! "".equals(report))
+			{
+				final Intent intent = new Intent(this, CrashReportDialog.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				intent.putExtra("report", report);
+				startActivity(intent);
+			}
+			deleteFile(CrashHandler.REPORT_FILE);
+		}
+		catch (FileNotFoundException e)
+		{
+			// ignore
+		}
+		catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		updateCrashReportStatus();
 	}
 

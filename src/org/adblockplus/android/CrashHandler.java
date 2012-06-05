@@ -1,7 +1,5 @@
 package org.adblockplus.android;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -9,21 +7,19 @@ import java.lang.Thread.UncaughtExceptionHandler;
 
 import android.app.NotificationManager;
 import android.content.Context;
+import android.util.Log;
 
 public class CrashHandler implements UncaughtExceptionHandler
 {
+	public static final String REPORT_FILE = "AdblockPlus_Crash_Report.txt";
 	private UncaughtExceptionHandler defaultUEH;
 	private NotificationManager notificationManager;
-	private String localPath;
+	private Context mContext;
 
-	/*
-	 * if any of the parameters is null, the respective functionality will not
-	 * be used
-	 */
-	public CrashHandler(Context context, String localPath)
+	public CrashHandler(Context context)
 	{
-		this.localPath = localPath;
-		this.defaultUEH = Thread.getDefaultUncaughtExceptionHandler();
+		defaultUEH = Thread.getDefaultUncaughtExceptionHandler();
+		mContext = context;
 		notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 	}
 
@@ -40,12 +36,8 @@ public class CrashHandler implements UncaughtExceptionHandler
 		e.printStackTrace(printWriter);
 		String stacktrace = result.toString();
 		printWriter.close();
-		String filename = "AdblockPlus_Crash_Report.txt";
 
-		if (localPath != null)
-		{
-			writeToFile(stacktrace, filename);
-		}
+		writeToFile(stacktrace, REPORT_FILE);
 		if (notificationManager != null)
 		{
 			try
@@ -64,12 +56,13 @@ public class CrashHandler implements UncaughtExceptionHandler
 
 	private void writeToFile(String stacktrace, String filename)
 	{
+		Log.e("DCR", "Writing crash report");
 		try
 		{
-			BufferedWriter bos = new BufferedWriter(new FileWriter(localPath + "/" + filename));
-			bos.write(stacktrace);
-			bos.flush();
-			bos.close();
+			PrintWriter pw = new PrintWriter(mContext.openFileOutput(filename, Context.MODE_WORLD_READABLE));
+			pw.print(stacktrace);
+			pw.flush();
+			pw.close();
 		}
 		catch (Throwable e)
 		{
