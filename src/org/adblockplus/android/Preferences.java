@@ -218,7 +218,9 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 
 	private void setDependingEnabled(boolean enabled)
 	{
-		findPreference(getString(R.string.pref_proxy)).setEnabled(enabled);
+		Preference p = findPreference(getString(R.string.pref_proxy));
+		if (p != null)
+			p.setEnabled(enabled);
 	}
 	
 	private void setNotEnabled()
