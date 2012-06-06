@@ -1,7 +1,12 @@
+<p>This is an open source project, it's source can be found at
+ <a href="https://hg.adblockplus.org/android/">https://hg.adblockplus.org/android/</a></p>
 <p>This program is subject to the terms of the Mozilla Public License, v. 2.0.
-You can obtain a copy of the MPL at http://mozilla.org/MPL/2.0/.</p>
+ You can obtain a copy of the MPL at <a href="http://mozilla.org/MPL/2.0/">http://mozilla.org/MPL/2.0/</a>.</p>
+<br/>
 <h4>CREDITS</h4>
-1. V8 - https://developers.google.com/v8/terms<br/>
-2. RootTools - http://www.apache.org/licenses/LICENSE-2.0<br/>
-3. Brazil - http://www.oracle.com/technetwork/java/scsl-1-1-149938.txt<br/>
-4. PAW - http://paw-project.sourceforge.net/license.html<br/>
+<p>Adblock Plus contains code from the following projects:</p>
+1. <a href="http://code.google.com/p/v8/">V8</a> (<a href="https://developers.google.com/v8/terms">licence</a>)<br/>
+2. <a href="http://code.google.com/p/roottools/">RootTools</a> (<a href="http://www.apache.org/licenses/LICENSE-2.0">licence</a>)<br/>
+3. <a href="http://freecode.com/projects/brazil">Brazil</a> (<a href="http://java.sun.com/spl.html">licence</a>)<br/>
+4. <a href="http://paw-project.sourceforge.net/">PAW</a> (<a href="http://paw-project.sourceforge.net/license.html">licence</a>)<br/>
+</p>
