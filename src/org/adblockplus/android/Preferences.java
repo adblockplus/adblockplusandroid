@@ -12,6 +12,8 @@ import android.app.ActivityManager.RunningServiceInfo;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -37,6 +39,9 @@ import android.view.Window;
 public class Preferences extends PreferenceActivity implements OnSharedPreferenceChangeListener
 {
 	private final static String TAG = "Preferences";
+
+	private AboutDialog aboutDialog;
+	private boolean showAbout = false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -163,6 +168,9 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		setDependingEnabled(!enabled);
 
 		prefs.registerOnSharedPreferenceChangeListener(this);
+		
+		if (showAbout)
+			onAbout(findViewById(R.id.btn_about));
 	}
 
 	@Override
@@ -183,6 +191,9 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		AdblockPlus.getApplication().stopInteractive();
 		if (!enabled)
 			AdblockPlus.getApplication().stopEngine(true);
+		
+		if (aboutDialog != null)
+			aboutDialog.dismiss();
 	}
 
 	private void setPrefSummary(Preference pref)
@@ -279,8 +290,18 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 
 	public void onAbout(View view)
 	{
-		AboutDialog about = new AboutDialog(this);
-		about.show();
+		aboutDialog = new AboutDialog(this);
+		aboutDialog.setOnDismissListener(new OnDismissListener() {
+
+			@Override
+			public void onDismiss(DialogInterface dialog)
+			{
+				showAbout = false;
+				aboutDialog = null;
+			}
+		});
+		showAbout = true;
+		aboutDialog.show();
 	}
 
 	@Override
@@ -315,6 +336,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 
 		Preference pref = findPreference(key);
 		setPrefSummary(pref);
+		throw new IllegalArgumentException("Test");
 	}
 
 	private void initSummaries(PreferenceGroup preference)
@@ -386,4 +408,18 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 			}
 		}
 	};
+
+	@Override
+	protected void onRestoreInstanceState(Bundle state)
+	{
+		super.onRestoreInstanceState(state);
+		showAbout = state.getBoolean("showAbout");
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState)
+	{
+		outState.putBoolean("showAbout", showAbout);
+		super.onSaveInstanceState(outState);
+	}
 }
