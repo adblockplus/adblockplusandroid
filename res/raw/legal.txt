@@ -1,9 +1,11 @@
 <p>This is an open source project, it's source can be found at
  <a href="https://hg.adblockplus.org/android/">https://hg.adblockplus.org/android/</a></p>
+<br/>
+<h4>License</h4>
 <p>This program is subject to the terms of the Mozilla Public License, v. 2.0.
  You can obtain a copy of the MPL at <a href="http://mozilla.org/MPL/2.0/">http://mozilla.org/MPL/2.0/</a>.</p>
 <br/>
-<h4>CREDITS</h4>
+<h4>Credits</h4>
 <p>Adblock Plus contains code from the following projects:</p>
 1. <a href="http://code.google.com/p/v8/">V8</a> (<a href="https://developers.google.com/v8/terms">licence</a>)<br/>
 2. <a href="http://code.google.com/p/roottools/">RootTools</a> (<a href="http://www.apache.org/licenses/LICENSE-2.0">licence</a>)<br/>
