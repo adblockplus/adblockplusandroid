@@ -338,7 +338,6 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 
 		Preference pref = findPreference(key);
 		setPrefSummary(pref);
-		throw new IllegalArgumentException("Test");
 	}
 
 	private void initSummaries(PreferenceGroup preference)
