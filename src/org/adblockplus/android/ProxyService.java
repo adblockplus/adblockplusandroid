@@ -80,8 +80,6 @@ public class ProxyService extends Service
 
 		initForegroundCompat();
 
-		this.getFilesDir();
-
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		String p = prefs.getString(getString(R.string.pref_port), null);
 		try
