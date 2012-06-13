@@ -10,10 +10,12 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -23,13 +25,16 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.adblockplus.android.updater.AlarmReceiver;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
+import android.app.AlarmManager;
 import android.app.Application;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -76,6 +81,14 @@ public class AdblockPlus extends Application
 	        networkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 	    }
 	    return networkInfo == null ? false : networkInfo.isConnected();
+	}
+
+	public boolean checkWriteExternalPermission()
+	{
+
+	    String permission = "android.permission.WRITE_EXTERNAL_STORAGE";
+	    int res = checkCallingOrSelfPermission(permission);
+	    return res == PackageManager.PERMISSION_GRANTED;            
 	}
 
 	public List<Subscription> getSubscriptions()
@@ -353,7 +366,6 @@ public class AdblockPlus extends Application
 	{
 		if ((implicitly || ! interactive) && js != null)
 		{
-			Log.e(TAG, "stopEngine " + implicitly + " " + interactive);
 			js.stopEngine();
 			try
 			{
@@ -398,6 +410,8 @@ public class AdblockPlus extends Application
 	{
 		super.onCreate();
 		myself = this;
+		
+		// Check for crash report
 		try
 		{
 			InputStreamReader reportFile = new InputStreamReader(openFileInput(CrashHandler.REPORT_FILE));
@@ -430,7 +444,27 @@ public class AdblockPlus extends Application
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 		updateCrashReportStatus();
+		
+		// Check for updates
+		if (! getResources().getBoolean(R.bool.def_release) && checkWriteExternalPermission())
+		{
+			// Start update checks at 10:00 GMT
+			Calendar updateTime = Calendar.getInstance();
+			updateTime.setTimeZone(TimeZone.getTimeZone("GMT"));
+			updateTime.set(Calendar.HOUR_OF_DAY, 10);
+			updateTime.set(Calendar.MINUTE, 0);
+			// Spread out the “mass downloading” for 6 hours
+			updateTime.add(Calendar.MINUTE, (int) Math.random() * 60 * 6);
+			
+			Intent updater = new Intent(this, AlarmReceiver.class);
+			PendingIntent recurringUpdate = PendingIntent.getBroadcast(this, 0, updater, PendingIntent.FLAG_CANCEL_CURRENT);
+			// Set non-waking alarm
+			AlarmManager alarms = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+			Log.e(TAG, "setAlarm");
+			alarms.setRepeating(AlarmManager.RTC, updateTime.getTimeInMillis(), AlarmManager.INTERVAL_DAY, recurringUpdate);
+		}
 	}
 
 	private final Handler messageHandler = new Handler()
