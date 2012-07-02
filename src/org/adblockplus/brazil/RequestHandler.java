@@ -216,7 +216,17 @@ public class RequestHandler implements Handler
 			// If no filters are applicable just pass through the response
 			if (selectors == null || target.getResponseCode() != 200)
 			{
-				request.sendResponse(target.getInputStream(), target.getContentLength(), null, target.getResponseCode());
+				int contentLength = target.getContentLength();
+				if (contentLength == 0)
+				{
+					// we do not use request.sendResponse to avoid arbitrary
+					// 200 -> 204 response code conversion
+					request.sendHeaders(-1, null, -1);
+			    }
+				else
+				{
+					request.sendResponse(target.getInputStream(), contentLength, null, target.getResponseCode());
+				}
 			}
 			// Insert filters otherwise
 			else
@@ -301,6 +311,7 @@ public class RequestHandler implements Handler
 				msg += ": " + e.getMessage();
 			}
 			request.sendError(500, msg);
+			Log.e(prefix, msg, e);
 		}
 		finally
 		{
