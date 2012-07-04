@@ -1,7 +1,9 @@
 package org.adblockplus.brazil;
 
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedInputStream;
 import java.io.EOFException;
+import java.io.FilterInputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
@@ -9,10 +11,14 @@ import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.Properties;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.InflaterInputStream;
 
+import org.adblockplus.ChunkedOutputStream;
 import org.adblockplus.android.AdblockPlus;
-import org.paw.util.Pack;
+import org.literateprograms.BoyerMoore;
 
 import sunlabs.brazil.server.Handler;
 import sunlabs.brazil.server.Request;
@@ -231,49 +237,103 @@ public class RequestHandler implements Handler
 			// Insert filters otherwise
 			else
 			{
-				Log.e(prefix, request.url);
-
-				// Buffer response content
-				HttpInputStream in = target.getInputStream();
+				HttpInputStream his = target.getInputStream();
 				int size = target.getContentLength();
 				if (size < 0)
-					size = 32; // default ByteArrayOutputStream size
-				ByteArrayOutputStream buffer = new ByteArrayOutputStream(size);
-				in.copyTo(buffer);
+				{
+					size = Integer.MAX_VALUE;
+				}
 
-				byte[] content = buffer.toByteArray();
-
-				// Decode content if needed
+				FilterInputStream in = null;
+				FilterOutputStream out = null;
+				
+				// Detect if content needs decoding
 				String encodingHeader = request.responseHeaders.get("Content-Encoding");
 				if (encodingHeader != null)
 				{
 					encodingHeader = encodingHeader.toLowerCase();
 					if (encodingHeader.equals("gzip") || encodingHeader.equals("x-gzip"))
 					{
-						content = Pack.unzipData(content);
+						in = new GZIPInputStream(his);
+						request.responseHeaders.remove("Content-Length");
 						request.responseHeaders.remove("Content-Encoding");
+						out = new ChunkedOutputStream(request.out);
+						request.responseHeaders.add("Transfer-Encoding", "chunked");
 					}
 					else if (encodingHeader.equals("compress") || encodingHeader.equals("x-compress"))
 					{
-						content = Pack.deCompressData(content);
+						in = new InflaterInputStream(his);
+						request.responseHeaders.remove("Content-Length");
 						request.responseHeaders.remove("Content-Encoding");
+						out = new ChunkedOutputStream(request.out);
+						request.responseHeaders.add("Transfer-Encoding", "chunked");
 					}
 					else
 					{
+						// Unsupported encoding, proxy content as-is
+						in = new BufferedInputStream(his);
+						out = request.out;
 						selectors = null;
 					}
 				}
 
-				// Insert selectors at the beginning of content
-				// TODO Do we need to set encoding here?
-				byte[] addon = selectors.getBytes();
-				byte[] newcontent = new byte[content.length + addon.length];
-				System.arraycopy(addon, 0, newcontent, 0, addon.length);
-				System.arraycopy(content, 0, newcontent, addon.length, content.length);
-				content = newcontent;
+				request.sendHeaders(-1, null, -1);
+				
+				byte[] buf = new byte[Math.min(4096, size)];
 
-				// Send content to client
-				request.sendResponse(content, null);
+				Log.e(prefix, request.url);
+
+				boolean sent = selectors == null;
+				// TODO Do we need to set encoding here?
+				BoyerMoore matcher = new BoyerMoore("<html".getBytes());
+				
+				while (size > 0)
+				{
+					out.flush();
+					
+					count = in.read(buf, 0, Math.min(buf.length, size));
+					if (count < 0)
+					{
+						break;
+					}
+					size -= count;
+					try
+					{
+						// Search for <html> tag
+						if (! sent && count > 0)
+						{
+							List<Integer> matches = matcher.match(buf, 0, count);
+							if (! matches.isEmpty())
+							{
+								// TODO Do we need to set encoding here?
+								byte[] addon = selectors.getBytes();
+								// Add selectors right before match
+								int m = matches.get(0);
+								out.write(buf, 0, m);
+								out.write(addon);
+								out.write(buf, m, count - m);
+								sent = true;
+								continue;
+							}
+						}
+						out.write(buf, 0, count);
+					}
+					catch (IOException e)
+					{
+						break;
+					}
+				}
+				// The correct way would be to close ChunkedOutputStream
+				// but we can not do it because underlying output stream is
+				// used later in caller code. So we use this ugly hack:
+				try
+				{
+					((ChunkedOutputStream)out).writeFinalChunk();
+				}
+				catch (ClassCastException e)
+				{
+					// ignore
+				}
 			}
 		}
 		catch (InterruptedIOException e)
