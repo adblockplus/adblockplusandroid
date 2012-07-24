@@ -570,7 +570,8 @@ public class ProxyService extends Service
 			config.put("adblock.proxyHost", proxyHost);
 			config.put("adblock.proxyPort", proxyPort);
 			//TODO Not implemented in our proxy but needed to restore settings
-			config.put("adblock.proxyExcl", proxyExcl);
+			if (proxyExcl != null)
+				config.put("adblock.proxyExcl", proxyExcl);
 
 			if (! isTransparent)
 			{
