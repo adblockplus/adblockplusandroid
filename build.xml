@@ -39,27 +39,25 @@
          application and should be checked into Version Control Systems. -->
     <loadproperties srcFile="project.properties" />
 
-    <!-- quick check on sdk.dir -->
     <fail
-            message="sdk.dir is missing. Make sure to generate local.properties using 'android update project' or to inject it through an env var"
-            unless="sdk.dir"
+        message="sdk.dir is missing. Make sure to generate specify it in local.properties or to inject it through an env var"
+        unless="sdk.dir"
+    />
+    <fail
+        message="ndk.dir is missing. Make sure to generate specify it in local.properties or to inject it through an env var"
+        unless="ndk.dir"
     />
 
-
-<!-- extension targets. Uncomment the ones where you want to do custom work
-     in between standard targets -->
-<!--
-    <target name="-pre-build">
-    </target>
-    <target name="-pre-compile">
+    <target name="jni" description="Compiles and builds NDK libraries.">
+        <exec executable="${ndk.dir}/ndk-build" failonerror="true" />
     </target>
 
-    /* This is typically used for code obfuscation.
-       Compiled code location: ${out.classes.absolute.dir}
-       If this is not done in place, override ${out.dex.input.absolute.dir} */
-    <target name="-post-compile">
+    <target name="-pre-build" depends="jni">
     </target>
--->
+
+    <target name="-pre-clean">
+        <delete dir="${native.libs.absolute.dir}/armeabi" verbose="${verbose}" />
+    </target>
 
     <!-- Import the actual build file.
 
@@ -79,7 +77,7 @@
          In all cases you must update the value of version-tag below to read 'custom' instead of an integer,
          in order to avoid having your file be overridden by tools such as "android update project"
     -->
-    <!-- version-tag: 1 -->
+    <!-- version-tag: custom -->
     <import file="${sdk.dir}/tools/ant/build.xml" />
 
 </project>
