@@ -17,31 +17,30 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
-import android.preference.EditTextPreference;
 import android.preference.ListPreference;
-import android.preference.Preference;
-import android.preference.PreferenceActivity;
-import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 
-public class Preferences extends PreferenceActivity implements OnSharedPreferenceChangeListener
+public class Preferences extends SummarizedPreferences
 {
 	private final static String TAG = "Preferences";
 
 	private AboutDialog aboutDialog;
 	private boolean showAbout = false;
+	private String subscriptionSummary;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -75,7 +74,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		
 		if (Build.VERSION.SDK_INT >= 12) // Honeycomb 3.1
 		{
-			PreferenceScreen advanced = (PreferenceScreen) findPreference(getString(R.string.pref_advanced));			
+			PreferenceScreen advanced = (PreferenceScreen) findPreference(getString(R.string.pref_advanced));
 			advanced.removePreference(findPreference(getString(R.string.pref_proxy)));
 		}
 	}
@@ -89,7 +88,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 	}
 
 	@Override
-	protected void onResume()
+	public void onResume()
 	{
 		super.onResume();
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -137,10 +136,10 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 			}
 		});
 
-		int refresh = Integer.valueOf(prefs.getString(getString(R.string.pref_refresh), "0"));
-		findPreference(getString(R.string.pref_wifirefresh)).setEnabled(refresh > 0);
-
-		initSummaries(getPreferenceScreen());
+		if (subscriptionSummary != null)
+			subscriptionList.setSummary(subscriptionSummary);
+		else
+			setPrefSummary(subscriptionList);
 
 		registerReceiver(receiver, new IntentFilter(AdblockPlus.BROADCAST_SUBSCRIPTION_STATUS));
 		registerReceiver(receiver, new IntentFilter(ProxyService.BROADCAST_PROXY_FAILED));
@@ -166,18 +165,14 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 			enabled = false;
 		}
 
-		prefs.registerOnSharedPreferenceChangeListener(this);
-		
 		if (showAbout)
 			onAbout(findViewById(R.id.btn_about));
 	}
 
 	@Override
-	protected void onPause()
+	public void onPause()
 	{
 		super.onPause();
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		prefs.unregisterOnSharedPreferenceChangeListener(this);
 		unregisterReceiver(receiver);
 	}
 
@@ -195,23 +190,25 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 			aboutDialog.dismiss();
 	}
 
-	private void setPrefSummary(Preference pref)
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		if (pref instanceof ListPreference)
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.menu_preferences, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		switch (item.getItemId())
 		{
-			CharSequence summary = ((ListPreference) pref).getEntry();
-			if (summary != null)
-			{
-				pref.setSummary(summary);
-			}
-		}
-		if (pref instanceof EditTextPreference)
-		{
-			CharSequence summary = ((EditTextPreference) pref).getText();
-			if (summary != null)
-			{
-				pref.setSummary(summary);
-			}
+			case R.id.menu_advanced:
+				Class<?> activity = Preferences.InnerPreferences.class;
+				startActivity(new Intent(Preferences.this, activity).putExtra("KEY", "preferences_advanced"));
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
 		}
 	}
 
@@ -326,27 +323,8 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 			AdblockPlus application = AdblockPlus.getApplication();
 			application.updateCrashReportStatus();			
 		}
-
-		Preference pref = findPreference(key);
-		setPrefSummary(pref);
+		super.onSharedPreferenceChanged(sharedPreferences, key);
 	}
-
-	private void initSummaries(PreferenceGroup preference)
-    {
-    	for (int i=preference.getPreferenceCount()-1; i>=0; i--)
-    	{
-    		Preference pref = preference.getPreference(i);
-
-    		if (pref instanceof PreferenceGroup || pref instanceof PreferenceScreen)
-            {
-    			initSummaries((PreferenceGroup) pref);
-            }
-    		else
-    		{
-               	setPrefSummary(pref);
-    		}
-    	}
-    }
 
 	private BroadcastReceiver receiver = new BroadcastReceiver() {
 		@Override
@@ -393,7 +371,8 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 								}
 								builder.append(")");
 							}
-							subscriptionList.setSummary(builder.toString());
+							subscriptionSummary = builder.toString();
+							subscriptionList.setSummary(subscriptionSummary);
 						}
 					}
 				});
@@ -401,16 +380,57 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		}
 	};
 
+	public static class InnerPreferences extends SummarizedPreferences
+	{
+		@Override
+		public void onCreate(Bundle savedInstanceState)
+		{
+			super.onCreate(savedInstanceState);
+
+			String key = getIntent().getExtras().getString("KEY");
+			int res = getResources().getIdentifier(key, "xml", getPackageName());
+
+			addPreferencesFromResource(res);
+		}
+		
+		@Override
+		public void onResume()
+		{
+			super.onResume();
+			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+			int refresh = Integer.valueOf(prefs.getString(getString(R.string.pref_refresh), "0"));
+			findPreference(getString(R.string.pref_wifirefresh)).setEnabled(refresh > 0);
+		}
+
+		@Override
+		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
+		{
+			if (getString(R.string.pref_refresh).equals(key))
+			{
+				int refresh = Integer.valueOf(sharedPreferences.getString(getString(R.string.pref_refresh), "0"));
+				findPreference(getString(R.string.pref_wifirefresh)).setEnabled(refresh > 0);
+			}
+			if (getString(R.string.pref_crashreport).equals(key))
+			{
+				AdblockPlus application = AdblockPlus.getApplication();
+				application.updateCrashReportStatus();
+			}
+			super.onSharedPreferenceChanged(sharedPreferences, key);
+		}
+	}
+
 	@Override
 	protected void onRestoreInstanceState(Bundle state)
 	{
 		super.onRestoreInstanceState(state);
 		showAbout = state.getBoolean("showAbout");
+		subscriptionSummary = state.getString("subscriptionSummary");
 	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState)
 	{
+		outState.putString("subscriptionSummary", subscriptionSummary);
 		outState.putBoolean("showAbout", showAbout);
 		super.onSaveInstanceState(outState);
 	}
