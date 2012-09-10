@@ -57,6 +57,7 @@
 
     <target name="-pre-clean">
         <delete dir="${native.libs.absolute.dir}/armeabi" verbose="${verbose}" />
+        <delete dir="obj/" verbose="${verbose}" />
     </target>
 
     <!-- Import the actual build file.
