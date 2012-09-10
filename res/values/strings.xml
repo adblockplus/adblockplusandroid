@@ -41,8 +41,8 @@
     <string name="pref_enabled_summary_on">Adblock filtering is enabled</string>
     <string name="pref_enabled_summary_off">Adblock filtering is disabled</string>
     <string name="pref_startatboot_title">Start at boot</string>
-    <string name="pref_startatboot_summary_on">Service will start automatically at boot time</string>
-    <string name="pref_startatboot_summary_off">Service requires implicit start after boot</string>
+    <string name="pref_startatboot_summary_on">Adblock Plus will start in background automatically if it is enabled</string>
+    <string name="pref_startatboot_summary_off">Adblock Plus needs to be started manually after boot</string>
     <string name="pref_subscription_title">Filter subscription</string>
     <string name="pref_refresh_title">Subscription refresh</string>
     <string name="pref_wifirefresh_title">Refresh over WiFi only</string>

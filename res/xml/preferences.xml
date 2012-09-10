@@ -6,13 +6,6 @@
         android:summaryOff="@string/pref_enabled_summary_off"
         android:summaryOn="@string/pref_enabled_summary_on"
         android:title="@string/pref_enabled_title" />
-    <CheckBoxPreference
-        android:defaultValue="@bool/def_startatboot"
-        android:dependency="@string/pref_enabled"
-        android:key="@string/pref_startatboot"
-        android:summaryOff="@string/pref_startatboot_summary_off"
-        android:summaryOn="@string/pref_startatboot_summary_on"
-        android:title="@string/pref_startatboot_title" />
 
     <org.adblockplus.android.RefreshableListPreference
         android:key="@string/pref_subscription"
@@ -21,6 +14,13 @@
     <PreferenceScreen
         android:key="@string/pref_advanced"
         android:title="@string/pref_advanced_title" >
+        <CheckBoxPreference
+            android:defaultValue="@bool/def_startatboot"
+            android:key="@string/pref_startatboot"
+            android:summaryOff="@string/pref_startatboot_summary_off"
+            android:summaryOn="@string/pref_startatboot_summary_on"
+            android:title="@string/pref_startatboot_title" />
+
         <PreferenceCategory android:title="@string/pref_subscription_title" >
             <ListPreference
                 android:defaultValue="@integer/def_refresh"
