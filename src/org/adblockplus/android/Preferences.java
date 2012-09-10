@@ -165,7 +165,6 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 			setNotEnabled();
 			enabled = false;
 		}
-		setDependingEnabled(!enabled);
 
 		prefs.registerOnSharedPreferenceChangeListener(this);
 		
@@ -216,13 +215,6 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		}
 	}
 
-	private void setDependingEnabled(boolean enabled)
-	{
-		Preference p = findPreference(getString(R.string.pref_proxy));
-		if (p != null)
-			p.setEnabled(enabled);
-	}
-	
 	private void setNotEnabled()
 	{
 		SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
@@ -312,7 +304,6 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		if (getString(R.string.pref_enabled).equals(key))
 		{
 			boolean enabled = sharedPreferences.getBoolean(key, false);
-			setDependingEnabled(!enabled);
 			if (enabled && !isServiceRunning())
 				startService(new Intent(this, ProxyService.class));
 			else if (!enabled && isServiceRunning())
