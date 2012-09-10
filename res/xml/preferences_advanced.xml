@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/pref_advanced_title" >
+
+    <CheckBoxPreference
+        android:defaultValue="@bool/def_startatboot"
+        android:key="@string/pref_startatboot"
+        android:summaryOff="@string/pref_startatboot_summary_off"
+        android:summaryOn="@string/pref_startatboot_summary_on"
+        android:title="@string/pref_startatboot_title" />
+
+    <PreferenceCategory android:title="@string/pref_subscription_title" >
+        <ListPreference
+            android:defaultValue="@integer/def_refresh"
+            android:dialogTitle="@string/pref_refresh_title"
+            android:entries="@array/refresh_names"
+            android:entryValues="@array/refresh_values"
+            android:key="@string/pref_refresh"
+            android:title="@string/pref_refresh_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="@bool/def_wifirefresh"
+            android:key="@string/pref_wifirefresh"
+            android:summaryOff="@string/pref_wifirefresh_summary_off"
+            android:summaryOn="@string/pref_wifirefresh_summary_on"
+            android:title="@string/pref_wifirefresh_title" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="@string/pref_proxy"
+        android:title="@string/pref_proxy_title" >
+        <EditTextPreference
+            android:inputType="text"
+            android:key="@string/pref_proxyhost"
+            android:singleLine="true"
+            android:title="@string/pref_proxyhost_title" />
+        <EditTextPreference
+            android:inputType="number"
+            android:key="@string/pref_proxyport"
+            android:singleLine="true"
+            android:title="@string/pref_proxyport_title" />
+        <EditTextPreference
+            android:inputType="text"
+            android:key="@string/pref_proxyuser"
+            android:singleLine="true"
+            android:title="@string/pref_proxyuser_title" />
+        <EditTextPreference
+            android:inputType="textPassword"
+            android:key="@string/pref_proxypass"
+            android:singleLine="true"
+            android:title="@string/pref_proxypass_title" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_support_title" >
+        <CheckBoxPreference
+            android:defaultValue="@bool/def_crashreport"
+            android:key="@string/pref_crashreport"
+            android:summaryOff="@string/pref_crashreport_summary_off"
+            android:summaryOn="@string/pref_crashreport_summary_on"
+            android:title="@string/pref_crashreport_title" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
