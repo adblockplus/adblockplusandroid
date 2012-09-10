@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -36,13 +37,13 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
-public class ProxyService extends Service
+public class ProxyService extends Service implements OnSharedPreferenceChangeListener
 {
 	static
 	{
 		RootTools.debugMode = false;
 	}
-	
+
 	private static final String TAG = "ProxyService";
 
 	public final static int DEFAULT_TIMEOUT = 3000;
@@ -52,9 +53,9 @@ public class ProxyService extends Service
 	private final static String IPTABLES_RETURN = " -t nat -m owner --uid-owner {{UID}} -A OUTPUT -p tcp -j RETURN\n";
 	private final static String IPTABLES_ADD_HTTP = " -t nat -A OUTPUT -p tcp --dport 80 -j REDIRECT --to {{PORT}}\n";
 
-	private static final Class<?>[] mSetForegroundSignature = new Class[] { boolean.class };
-	private static final Class<?>[] mStartForegroundSignature = new Class[] { int.class, Notification.class };
-	private static final Class<?>[] mStopForegroundSignature = new Class[] { boolean.class };
+	private static final Class<?>[] mSetForegroundSignature = new Class[] {boolean.class};
+	private static final Class<?>[] mStartForegroundSignature = new Class[] {int.class, Notification.class};
+	private static final Class<?>[] mStopForegroundSignature = new Class[] {boolean.class};
 
 	private ConnectivityManager mCM;
 	private NotificationManager mNM;
@@ -84,7 +85,7 @@ public class ProxyService extends Service
 		String p = prefs.getString(getString(R.string.pref_port), null);
 		try
 		{
-			port = p != null ? Integer.valueOf(p): getResources().getInteger(R.integer.def_port);
+			port = p != null ? Integer.valueOf(p) : getResources().getInteger(R.integer.def_port);
 		}
 		catch (NumberFormatException e)
 		{
@@ -100,17 +101,17 @@ public class ProxyService extends Service
 		String proxyExcl = null;
 		String proxyUser = null;
 		String proxyPass = null;
-		
+
 		if (Build.VERSION.SDK_INT >= 12) // Honeycomb 3.1
 		{
 			proxyHost = System.getProperty("http.proxyHost");
 			proxyPort = System.getProperty("http.proxyPort");
 			proxyExcl = System.getProperty("http.nonProxyHosts");
 
-			Log.e(TAG, "PRX: " + proxyHost+":"+proxyPort+"("+proxyExcl+")");			
+			Log.e(TAG, "PRX: " + proxyHost + ":" + proxyPort + "(" + proxyExcl + ")");
 			String[] px = getUserProxy();
 			if (px != null)
-				Log.e(TAG, "PRX: " + px[0]+":"+px[1]+"("+px[2]+")");			
+				Log.e(TAG, "PRX: " + px[0] + ":" + px[1] + "(" + px[2] + ")");
 		}
 		else
 		{
@@ -119,7 +120,7 @@ public class ProxyService extends Service
 			proxyUser = prefs.getString(getString(R.string.pref_proxyuser), null);
 			proxyPass = prefs.getString(getString(R.string.pref_proxypass), null);
 		}
-		
+
 		if (RootTools.isAccessGiven())
 		{
 			try
@@ -156,7 +157,7 @@ public class ProxyService extends Service
 			}
 		}
 
-		if (! isTransparent)
+		if (!isTransparent)
 		{
 			// Try to set native proxy
 			isNativeProxy = setConnectionProxy();
@@ -178,7 +179,7 @@ public class ProxyService extends Service
 			ServerSocket listen = null;
 			try
 			{
-				//TODO Add port travel
+				// TODO Add port travel
 				listen = new ServerSocket(port, 1024);
 			}
 			catch (IOException e)
@@ -203,19 +204,21 @@ public class ProxyService extends Service
 				config.put("https.class", "org.paw.handler.SSLConnectionHandler");
 			}
 			config.put("adblock.class", "org.adblockplus.brazil.RequestHandler");
-			//config.put("adblock.proxylog", "yes");
-			
+			// config.put("adblock.proxylog", "yes");
+
 			configureUserProxy(config, proxyHost, proxyPort, proxyExcl, proxyUser, proxyPass);
-			
+
 			proxy = new ProxyServer();
 			proxy.logLevel = Server.LOG_DIAGNOSTIC;
 			proxy.setup(listen, config.getProperty("handler"), config);
 			proxy.start();
 		}
-		
+
+		prefs.registerOnSharedPreferenceChangeListener(this);
+
 		// Lock service
 		String msg = getString(isTransparent ? R.string.notif_transparent : isNativeProxy ? R.string.notif_native : R.string.notif_proxy);
-		if (! isTransparent && ! isNativeProxy)
+		if (!isTransparent && !isNativeProxy)
 			msg = String.format(msg, port);
 		Notification notification = new Notification();
 		notification.when = 0;
@@ -257,13 +260,13 @@ public class ProxyService extends Service
 			unregisterReceiver(connectionReceiver);
 			clearConnectionProxy();
 		}
-		
+
 		// Stop proxy server
 		proxy.close();
 
 		// Stop engine if not in interactive mode
 		AdblockPlus.getApplication().stopEngine(false);
-		
+
 		// Release service lock
 		stopForegroundCompat(R.string.app_name);
 	}
@@ -373,13 +376,13 @@ public class ProxyService extends Service
 			Log.e(TAG, "getProxy failure", e);
 			return null;
 		}
-		
+
 		try
 		{
 			Object pp = method.invoke(mCM);
 			if (pp == null)
 				return null;
-			
+
 			return getUserProxy(pp);
 		}
 		catch (Exception e)
@@ -387,26 +390,26 @@ public class ProxyService extends Service
 			// This should not happen
 			Log.e(TAG, "getProxy failure", e);
 			return null;
-		}       
+		}
 	}
-	
+
 	private String[] getUserProxy(Object pp) throws Exception
 	{
 		String[] userProxy = new String[3];
-		
+
 		String className = "android.net.ProxyProperties";
 		Class<?> c = Class.forName(className);
 		Method method;
-		
-	    /*
-	     * String proxyHost = pp.getHost()
-	     */
+
+		/*
+		 * String proxyHost = pp.getHost()
+		 */
 		method = c.getMethod("getHost");
 		userProxy[0] = (String) method.invoke(pp);
 
-	    /*
-	     * int proxyPort = pp.getPort();
-	     */
+		/*
+		 * int proxyPort = pp.getPort();
+		 */
 		method = c.getMethod("getPort");
 		userProxy[1] = String.valueOf((Integer) method.invoke(pp));
 
@@ -421,7 +424,7 @@ public class ProxyService extends Service
 		else
 			return null;
 	}
-	
+
 	/**
 	 * Tries to set proxy via native call.
 	 * 
@@ -479,19 +482,19 @@ public class ProxyService extends Service
 					intent = new Intent("android.net.wifi.LINK_CONFIGURATION_CHANGED");
 					break;
 				case ConnectivityManager.TYPE_MOBILE:
-					//TODO We leave it here for future, it does not work now
-			        //intent = new Intent("android.intent.action.ANY_DATA_STATE");
-			        break;
+					// TODO We leave it here for future, it does not work now
+					// intent = new Intent("android.intent.action.ANY_DATA_STATE");
+					break;
 			}
 			if (intent != null)
 			{
-		        if (lp != null)
-		        {
-		        	intent.putExtra("linkProperties", (Parcelable) lp);
-		        }
+				if (lp != null)
+				{
+					intent.putExtra("linkProperties", (Parcelable) lp);
+				}
 				sendBroadcast(intent);
 			}
-			
+
 			return true;
 		}
 		catch (Exception e)
@@ -499,20 +502,19 @@ public class ProxyService extends Service
 			// This should not happen
 			Log.e(TAG, "setHttpProxy failure", e);
 			return false;
-		}       
+		}
 	}
-	
+
 	private void clearConnectionProxy()
 	{
 		try
 		{
 			/*
-			 * android.net.LinkProperties lp =
-			 * ConnectivityManager.getActiveLinkProperties();
+			 * android.net.LinkProperties lp = ConnectivityManager.getActiveLinkProperties();
 			 */
 			Method method = ConnectivityManager.class.getMethod("getActiveLinkProperties");
 			Object lp = method.invoke(mCM);
-			
+
 			String proxyHost = (String) proxy.props.getProperty("adblock.proxyHost");
 			String proxyPort = (String) proxy.props.getProperty("adblock.proxyPort");
 			String proxyExcl = (String) proxy.props.getProperty("adblock.proxyExcl");
@@ -554,44 +556,91 @@ public class ProxyService extends Service
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void configureUserProxy(Properties config, String proxyHost, String proxyPort, String proxyExcl, String proxyUser, String proxyPass)
 	{
-		if (proxyHost != null && ! "".equals(proxyHost) && proxyPort != null && ! "".equals(proxyPort))
+		// Handlers check for null value
+		if ("".equals(proxyHost))
+			proxyHost = null;
+		if (proxyHost != null)
 		{
-			// Check for dirty proxy settings - this indicated previous crash:
-			// proxy points to ourselves
-			// proxy port is 0
-			// proxy is 127.0.0.1:8080
-			int p = Integer.valueOf(proxyPort);
-			if (p == 0 || isLocalHost(proxyHost) && (p == port || p == 8080))
-				return;
-			
 			config.put("adblock.proxyHost", proxyHost);
-			config.put("adblock.proxyPort", proxyPort);
-			//TODO Not implemented in our proxy but needed to restore settings
-			if (proxyExcl != null)
-				config.put("adblock.proxyExcl", proxyExcl);
-
-			if (! isTransparent)
-			{
+			if (!isTransparent)
 				config.put("https.proxyHost", proxyHost);
-				config.put("https.proxyPort", proxyPort);
-			}
+		}
+		else
+		{
+			config.remove("adblock.proxyHost");
+			if (!isTransparent)
+				config.remove("https.proxyHost");
+		}
+		
+		// Check for dirty proxy settings - this indicated previous crash:
+		// proxy points to ourselves
+		// proxy port is 0
+		// proxy is 127.0.0.1:8080
+		int p = 0;
+		if (proxyPort == null)
+			proxyPort = "";
+		try
+		{
+			p = Integer.valueOf(proxyPort);
+		}
+		catch (NumberFormatException e)
+		{
+			// ignore
+		}
+		if (p == 0 || isLocalHost(proxyHost) && (p == port || p == 8080))
+			return;
 
-			if (proxyUser != null && ! "".equals(proxyUser) && proxyPass != null && ! "".equals(proxyPass))
+		config.put("adblock.proxyPort", proxyPort);
+		
+		// TODO Not implemented in our proxy but needed to restore settings
+		if (proxyExcl != null)
+			config.put("adblock.proxyExcl", proxyExcl);
+		else
+			config.remove("adblock.proxyExcl");
+			
+
+		if (!isTransparent)
+			config.put("https.proxyPort", proxyPort);
+
+		if (proxyUser != null && !"".equals(proxyUser) && proxyPass != null && !"".equals(proxyPass))
+		{
+			// Base64 encode user:password
+			String proxyAuth = "Basic " + new String(Base64.encode(proxyUser + ":" + proxyPass));
+			config.put("adblock.auth", proxyAuth);
+			if (!isTransparent)
+				config.put("https.auth", proxyAuth);
+		}
+		else
+		{
+			config.remove("adblock.auth");
+			if (!isTransparent)
+				config.remove("https.auth");			
+		}
+	}
+
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
+	{
+		if (Build.VERSION.SDK_INT < 12) // Honeycomb 3.1
+		{
+			if (key.equals(getString(R.string.pref_proxyhost)) || key.equals(getString(R.string.pref_proxyport)) || key.equals(getString(R.string.pref_proxyuser)) || key.equals(getString(R.string.pref_proxypass)))
 			{
-				// Base64 encode user:password
-				String proxyAuth = "Basic " + new String(Base64.encode(proxyUser + ":" + proxyPass));
-				config.put("adblock.auth", proxyAuth);
-				if (! isTransparent)
+				String proxyHost = sharedPreferences.getString(getString(R.string.pref_proxyhost), null);
+				String proxyPort = sharedPreferences.getString(getString(R.string.pref_proxyport), null);
+				String proxyUser = sharedPreferences.getString(getString(R.string.pref_proxyuser), null);
+				String proxyPass = sharedPreferences.getString(getString(R.string.pref_proxypass), null);
+				if (proxy != null)
 				{
-					config.put("https.auth", proxyAuth);
+					configureUserProxy(proxy.props, proxyHost, proxyPort, null, proxyUser, proxyPass);
+					proxy.restart(proxy.props.getProperty("handler"));
 				}
 			}
 		}
 	}
-	
+
 	private static final boolean isLocalHost(String host)
 	{
 		if (host == null)
@@ -603,7 +652,7 @@ public class ProxyService extends Service
 			{
 				if (host.equalsIgnoreCase("localhost"))
 					return true;
-				
+
 				String className = "android.net.NetworkUtils";
 				Class<?> c = Class.forName(className);
 				/*
@@ -611,7 +660,7 @@ public class ProxyService extends Service
 				 */
 				Method method = c.getMethod("numericToInetAddress", String.class);
 				InetAddress address = (InetAddress) method.invoke(null, host);
-				
+
 				if (address.isLoopbackAddress())
 					return true;
 			}
@@ -624,16 +673,16 @@ public class ProxyService extends Service
 
 	public String getIptables() throws IOException, RootToolsException, TimeoutException
 	{
-		if (! RootTools.isAccessGiven())
+		if (!RootTools.isAccessGiven())
 			return null;
-		
+
 		File ipt = getFileStreamPath("iptables");
-		
-		if (! ipt.exists())
+
+		if (!ipt.exists())
 			return null;
-		
+
 		String path = ipt.getAbsolutePath();
-		
+
 		RootTools.sendShell("chmod 700 " + path, DEFAULT_TIMEOUT);
 
 		boolean compatible = false;
@@ -652,7 +701,7 @@ public class ProxyService extends Service
 
 		if (!compatible || !version)
 			return null;
-		
+
 		return path;
 	}
 
@@ -672,8 +721,7 @@ public class ProxyService extends Service
 		return binder;
 	}
 
-	private BroadcastReceiver proxyReceiver = new BroadcastReceiver()
-	{
+	private BroadcastReceiver proxyReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, Intent intent)
 		{
@@ -683,9 +731,8 @@ public class ProxyService extends Service
 			}
 		}
 	};
-	
-	private BroadcastReceiver connectionReceiver = new BroadcastReceiver()
-	{
+
+	private BroadcastReceiver connectionReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context ctx, Intent intent)
 		{
@@ -712,13 +759,16 @@ public class ProxyService extends Service
 					 */
 					method = lp.getClass().getMethod("getHttpProxy");
 					Object pp = method.invoke(lp);
-					
+
 					String[] userProxy = getUserProxy(pp);
 					if (userProxy != null && Integer.valueOf(userProxy[1]) != port)
 					{
 						Log.i(TAG, "User has set new proxy: " + userProxy[0] + ":" + userProxy[1] + "(" + userProxy[2] + ")");
-						configureUserProxy(proxy.props, userProxy[0], userProxy[1], userProxy[2], null, null);
-						proxy.restart(proxy.props.getProperty("handler"));
+						if (proxy != null)
+						{
+							configureUserProxy(proxy.props, userProxy[0], userProxy[1], userProxy[2], null, null);
+							proxy.restart(proxy.props.getProperty("handler"));
+						}
 					}
 				}
 				catch (Exception e)
@@ -727,14 +777,13 @@ public class ProxyService extends Service
 					e.printStackTrace();
 				}
 
-				
 			}
 		}
 	};
-	
+
 	private final class ProxyServer extends Server
 	{
-	    @Override
+		@Override
 		public void close()
 		{
 			try
@@ -749,7 +798,7 @@ public class ProxyService extends Service
 			log(LOG_WARNING, null, "server stopped");
 		}
 
-	    @Override
+		@Override
 		public void log(int level, Object obj, String message)
 		{
 			if (level <= logLevel)
