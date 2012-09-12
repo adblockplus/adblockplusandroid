@@ -31,6 +31,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
@@ -46,8 +47,12 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 
 	private static final String TAG = "ProxyService";
 
-	public final static int DEFAULT_TIMEOUT = 3000;
-
+	private final static int DEFAULT_TIMEOUT = 3000;
+	private final static int NO_TRAFFIC_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+	
+	private final static int ONGOING_NOTIFICATION_ID = R.string.app_name;
+	private final static int NOTRAFFIC_NOTIFICATION_ID = R.string.app_name + 3;
+			
 	public final static String BROADCAST_PROXY_FAILED = "org.adblockplus.android.proxy.failure";
 
 	private final static String IPTABLES_RETURN = " -t nat -m owner --uid-owner {{UID}} -A OUTPUT -p tcp -j RETURN\n";
@@ -65,11 +70,21 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 	private Object[] mSetForegroundArgs = new Object[1];
 	private Object[] mStartForegroundArgs = new Object[2];
 	private Object[] mStopForegroundArgs = new Object[1];
+	private Notification ongoingNotification;
+	private PendingIntent contentIntent;
+
+	private Handler notrafficHandler;
 
 	private ProxyServer proxy = null;
 	private int port;
 
+	/**
+	 * Indicates that service is working with root privileges
+	 */
 	private boolean isTransparent = false;
+	/**
+	 * Indicates that service has autoconfigured Android proxy settings (version 4.0+)
+	 */
 	private boolean isNativeProxy = false;
 
 	private String iptables = null;
@@ -172,6 +187,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 		AdblockPlus.getApplication().startEngine();
 
 		registerReceiver(proxyReceiver, new IntentFilter(ProxyService.BROADCAST_PROXY_FAILED));
+		registerReceiver(matchesReceiver, new IntentFilter(AdblockPlus.BROADCAST_FILTER_MATCHES));
 
 		// Start proxy
 		if (proxy == null)
@@ -217,15 +233,18 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 		prefs.registerOnSharedPreferenceChangeListener(this);
 
 		// Lock service
-		String msg = getString(isTransparent ? R.string.notif_transparent : isNativeProxy ? R.string.notif_native : R.string.notif_proxy);
+		String msg = getString(isTransparent ? R.string.notif_all : isNativeProxy ? R.string.notif_wifi : R.string.notif_waiting);
 		if (!isTransparent && !isNativeProxy)
-			msg = String.format(msg, port);
-		Notification notification = new Notification();
-		notification.when = 0;
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, Preferences.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK), 0);
-		notification.icon = R.drawable.ic_stat_blocking;
-		notification.setLatestEventInfo(getApplicationContext(), getText(R.string.app_name), msg, contentIntent);
-		startForegroundCompat(R.string.app_name, notification);
+		{
+			notrafficHandler = new Handler();
+			notrafficHandler.postDelayed(noTraffic, NO_TRAFFIC_TIMEOUT);
+		}
+		ongoingNotification = new Notification();
+		ongoingNotification.when = 0;
+		contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, Preferences.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK), 0);
+		ongoingNotification.icon = R.drawable.ic_stat_blocking;
+		ongoingNotification.setLatestEventInfo(getApplicationContext(), getText(R.string.app_name), msg, contentIntent);
+		startForegroundCompat(ONGOING_NOTIFICATION_ID, ongoingNotification);
 	}
 
 	@Override
@@ -233,6 +252,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 	{
 		super.onDestroy();
 
+		unregisterReceiver(matchesReceiver);
 		unregisterReceiver(proxyReceiver);
 
 		// Stop IP redirecting
@@ -720,6 +740,40 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 	{
 		return binder;
 	}
+
+	private Runnable noTraffic = new Runnable(){
+	    public void run()
+	    {
+	    	// Show warning notification
+			Notification notification = new Notification();
+			notification.icon = R.drawable.ic_stat_warning;
+			notification.when = System.currentTimeMillis();
+			notification.flags |= Notification.FLAG_AUTO_CANCEL;
+			notification.defaults |= Notification.DEFAULT_SOUND;
+			Intent intent = new Intent(ProxyService.this, ConfigurationActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			intent.putExtra("port", port);
+			PendingIntent contentIntent = PendingIntent.getActivity(ProxyService.this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+			notification.setLatestEventInfo(ProxyService.this, getText(R.string.app_name), getString(R.string.notif_notraffic), contentIntent);
+			mNM.notify(NOTRAFFIC_NOTIFICATION_ID, notification);
+	    }
+	};
+
+	private BroadcastReceiver matchesReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(final Context context, Intent intent)
+		{
+			if (intent.getAction().equals(AdblockPlus.BROADCAST_FILTER_MATCHES))
+			{
+				if (notrafficHandler != null)
+				{
+					notrafficHandler.removeCallbacks(noTraffic);
+					ongoingNotification.setLatestEventInfo(ProxyService.this, getText(R.string.app_name), getText(R.string.notif_some), contentIntent);
+					mNM.notify(ONGOING_NOTIFICATION_ID, ongoingNotification);					
+				}
+				notrafficHandler = null;
+			}
+		}
+	};
 
 	private BroadcastReceiver proxyReceiver = new BroadcastReceiver() {
 		@Override

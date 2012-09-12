@@ -59,6 +59,7 @@ public class AdblockPlus extends Application
 	private final static int MSG_TOAST = 1;
 
 	public final static String BROADCAST_SUBSCRIPTION_STATUS = "org.adblockplus.android.subscription.status";
+	public final static String BROADCAST_FILTER_MATCHES = "org.adblockplus.android.filter.matches";
 	
 	private List<Subscription> subscriptions;
 	private JSThread js;
@@ -302,8 +303,10 @@ public class AdblockPlus extends Application
 	public boolean matches(String url, String query, String reqHost, String refHost, String accept) throws Exception
 	{
 		Callable<Boolean> callable = new MatchesCallable(url, query, reqHost, refHost, accept);
-		Future<Boolean> future = js.submit(callable);		
-		return future.get().booleanValue();
+		Future<Boolean> future = js.submit(callable);
+		boolean matches = future.get().booleanValue();
+		sendBroadcast(new Intent(BROADCAST_FILTER_MATCHES).putExtra("url", url).putExtra("matches", matches));
+		return matches;
 	}
 	
 	public void startInteractive()
