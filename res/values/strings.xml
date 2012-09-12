@@ -4,15 +4,18 @@
     <string name="app_name">Adblock Plus</string>
     <string name="crash_name">Crash occured</string>
 
-    <string name="notif_transparent">Filtering is done transparently</string>
-    <string name="notif_native">Filtering is done seamlessly</string>
-    <string name="notif_proxy">Filtering is done via proxy on port %d</string>
-
+    <string name="notif_wifi">Ads are blocked on WiFi connection</string>
+    <string name="notif_some">Ads are blocked on configured connections</string>
+    <string name="notif_all">Ads are blocked on all connections</string>
+    <string name="notif_waiting">Waiting for traffic</string>
+    <string name="notif_notraffic">You probably need to adjust configuration</string>
+    
     <string name="crash_dialog_text">It seems that application encounted a problem and was forcefully stopped on previous launch. You can help us fix this if you send us error report by clicking \'OK\'.</string>
 	<string name="crash_dialog_comment_prompt">You might add your comments about the problem below:</string>
 	<string name="crash_dialog_chooser_title">Share report via</string>
 
     <string name="msg_subscription_offer">We have selected a suitable subscription for you: \'%s\'. You can change it at any time in application settings.</string>
+	<string name="msg_configuration">It seems that no traffic is passing through application. Please make sure that proxy server \'localhost\' and proxy port \'%d\' are configured in your phone network settings.</string>
     <string name="msg_badport">Bad port value</string>
     <string name="msg_update_available">New update available</string>
     <string name="msg_update_description">New update is available for download. Proceed?</string>
@@ -20,6 +23,7 @@
     <string name="msg_update_ready">Ready to install update</string>
     
     <string name="configuring_url">https://adblockplus.org/en/android-config</string>
+    <string name="configuring_proxy_url">https://adblockplus.org/en/android-config#proxy</string>
     
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
@@ -28,6 +32,7 @@
     <string name="help">Help</string>
     <string name="version">Version</string>
     <string name="build">build#</string>
+    <string name="gotit">Got it</string>
     
     <string name="synchronize_in_progress">downloading&#8230;</string>
     <string name="synchronize_invalid_url">invalid url</string>
