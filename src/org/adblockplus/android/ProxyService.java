@@ -252,6 +252,8 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 	{
 		super.onDestroy();
 
+		stopNoTrafficCheck(false);
+
 		unregisterReceiver(matchesReceiver);
 		unregisterReceiver(proxyReceiver);
 
@@ -725,6 +727,20 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 		return path;
 	}
 
+	private void stopNoTrafficCheck(boolean changeStatus)
+	{
+		if (notrafficHandler != null)
+		{
+			notrafficHandler.removeCallbacks(noTraffic);
+			if (changeStatus)
+			{
+				ongoingNotification.setLatestEventInfo(ProxyService.this, getText(R.string.app_name), getText(R.string.notif_some), contentIntent);
+				mNM.notify(ONGOING_NOTIFICATION_ID, ongoingNotification);
+			}
+		}
+		notrafficHandler = null;
+	}
+
 	private final IBinder binder = new LocalBinder();
 
 	public final class LocalBinder extends Binder
@@ -763,15 +779,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 		public void onReceive(final Context context, Intent intent)
 		{
 			if (intent.getAction().equals(AdblockPlus.BROADCAST_FILTER_MATCHES))
-			{
-				if (notrafficHandler != null)
-				{
-					notrafficHandler.removeCallbacks(noTraffic);
-					ongoingNotification.setLatestEventInfo(ProxyService.this, getText(R.string.app_name), getText(R.string.notif_some), contentIntent);
-					mNM.notify(ONGOING_NOTIFICATION_ID, ongoingNotification);					
-				}
-				notrafficHandler = null;
-			}
+				stopNoTrafficCheck(true);
 		}
 	};
 
