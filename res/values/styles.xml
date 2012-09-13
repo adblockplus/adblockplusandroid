@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="MessageText">
+        <item name="android:background">#ff888888</item>
+        <item name="android:padding">3dip</item>
+    </style>
+
+</resources>

@@ -14,7 +14,8 @@
 	<string name="crash_dialog_chooser_title">Share report via</string>
 
     <string name="msg_subscription_offer">We have selected a suitable subscription for you: \'%s\'. You can change it at any time in application settings.</string>
-	<string name="msg_configuration">It seems that no traffic is passing through application. Please make sure that proxy server \'localhost\' and proxy port \'%d\' are configured in your phone network settings.</string>
+	<string name="msg_notraffic">It seems that no traffic is passing through application.</string>
+	<string name="msg_configuration">Please make sure that proxy server \'localhost\' and proxy port \'%d\' are configured in your phone network settings.</string>
     <string name="msg_badport">Bad port value</string>
     <string name="msg_update_available">New update available</string>
     <string name="msg_update_description">New update is available for download. Proceed?</string>

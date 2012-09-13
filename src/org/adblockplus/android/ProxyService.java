@@ -52,7 +52,8 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 	
 	private final static int ONGOING_NOTIFICATION_ID = R.string.app_name;
 	private final static int NOTRAFFIC_NOTIFICATION_ID = R.string.app_name + 3;
-			
+	
+	public final static String BROADCAST_STATE_CHANGED = "org.adblockplus.android.service.state";
 	public final static String BROADCAST_PROXY_FAILED = "org.adblockplus.android.proxy.failure";
 
 	private final static String IPTABLES_RETURN = " -t nat -m owner --uid-owner {{UID}} -A OUTPUT -p tcp -j RETURN\n";
@@ -245,6 +246,8 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 		ongoingNotification.icon = R.drawable.ic_stat_blocking;
 		ongoingNotification.setLatestEventInfo(getApplicationContext(), getText(R.string.app_name), msg, contentIntent);
 		startForegroundCompat(ONGOING_NOTIFICATION_ID, ongoingNotification);
+		
+		sendBroadcast(new Intent(BROADCAST_STATE_CHANGED).putExtra("enabled", true).putExtra("port", port).putExtra("manual", !isTransparent && !isNativeProxy));
 	}
 
 	@Override
@@ -282,6 +285,8 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 			unregisterReceiver(connectionReceiver);
 			clearConnectionProxy();
 		}
+
+		sendBroadcast(new Intent(BROADCAST_STATE_CHANGED).putExtra("enabled", false));
 
 		// Stop proxy server
 		proxy.close();
