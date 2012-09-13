@@ -50,7 +50,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 	private final static int DEFAULT_TIMEOUT = 3000;
 	private final static int NO_TRAFFIC_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 	
-	private final static int ONGOING_NOTIFICATION_ID = R.string.app_name;
+	final static int ONGOING_NOTIFICATION_ID = R.string.app_name;
 	private final static int NOTRAFFIC_NOTIFICATION_ID = R.string.app_name + 3;
 	
 	public final static String BROADCAST_STATE_CHANGED = "org.adblockplus.android.service.state";

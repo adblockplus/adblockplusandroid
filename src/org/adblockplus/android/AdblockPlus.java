@@ -395,10 +395,13 @@ public class AdblockPlus extends Application
 		}
 	}
 	
+	/**
+	 * Sets or removes crash handler according to user setting
+	 */
 	public void updateCrashReportStatus()
 	{
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		boolean report = prefs.getBoolean(getString(R.string.pref_enabled), getResources().getBoolean(R.bool.def_crashreport));
+		boolean report = prefs.getBoolean(getString(R.string.pref_crashreport), getResources().getBoolean(R.bool.def_crashreport));
 		if (report != generateCrashReport)
 		{
 			if (report)
@@ -461,25 +464,29 @@ public class AdblockPlus extends Application
 			e.printStackTrace();
 		}
 		
-		updateCrashReportStatus();
-		
-		// Check for updates
-		if (! getResources().getBoolean(R.bool.def_release) && checkWriteExternalPermission())
+		if (! getResources().getBoolean(R.bool.def_release))
 		{
-			// Start update checks at 10:00 GMT
-			Calendar updateTime = Calendar.getInstance();
-			updateTime.setTimeZone(TimeZone.getTimeZone("GMT"));
-			updateTime.set(Calendar.HOUR_OF_DAY, 10);
-			updateTime.set(Calendar.MINUTE, 0);
-			// Spread out the “mass downloading” for 6 hours
-			updateTime.add(Calendar.MINUTE, (int) Math.random() * 60 * 6);
-			
-			Intent updater = new Intent(this, AlarmReceiver.class);
-			PendingIntent recurringUpdate = PendingIntent.getBroadcast(this, 0, updater, PendingIntent.FLAG_CANCEL_CURRENT);
-			// Set non-waking alarm
-			AlarmManager alarms = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-			Log.e(TAG, "setAlarm");
-			alarms.setRepeating(AlarmManager.RTC, updateTime.getTimeInMillis(), AlarmManager.INTERVAL_DAY, recurringUpdate);
+			// Set crash handler
+			updateCrashReportStatus();
+		
+			// Check for updates
+			if (checkWriteExternalPermission())
+			{
+				// Start update checks at 10:00 GMT
+				Calendar updateTime = Calendar.getInstance();
+				updateTime.setTimeZone(TimeZone.getTimeZone("GMT"));
+				updateTime.set(Calendar.HOUR_OF_DAY, 10);
+				updateTime.set(Calendar.MINUTE, 0);
+				// Spread out the “mass downloading” for 6 hours
+				updateTime.add(Calendar.MINUTE, (int) Math.random() * 60 * 6);
+				
+				Intent updater = new Intent(this, AlarmReceiver.class);
+				PendingIntent recurringUpdate = PendingIntent.getBroadcast(this, 0, updater, PendingIntent.FLAG_CANCEL_CURRENT);
+				// Set non-waking alarm
+				AlarmManager alarms = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+				Log.e(TAG, "setAlarm");
+				alarms.setRepeating(AlarmManager.RTC, updateTime.getTimeInMillis(), AlarmManager.INTERVAL_DAY, recurringUpdate);
+			}
 		}
 	}
 
