@@ -734,7 +734,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 			notrafficHandler.removeCallbacks(noTraffic);
 			if (changeStatus)
 			{
-				ongoingNotification.setLatestEventInfo(ProxyService.this, getText(R.string.app_name), getText(R.string.notif_some), contentIntent);
+				ongoingNotification.setLatestEventInfo(ProxyService.this, getText(R.string.app_name), getText(R.string.notif_wifi), contentIntent);
 				mNM.notify(ONGOING_NOTIFICATION_ID, ongoingNotification);
 			}
 		}
