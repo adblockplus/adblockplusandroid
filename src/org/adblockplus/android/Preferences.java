@@ -71,12 +71,6 @@ public class Preferences extends SummarizedPreferences
 		{
 			copyAssets();
 		}
-		
-		if (Build.VERSION.SDK_INT >= 12) // Honeycomb 3.1
-		{
-			PreferenceScreen advanced = (PreferenceScreen) findPreference(getString(R.string.pref_advanced));
-			advanced.removePreference(findPreference(getString(R.string.pref_proxy)));
-		}
 	}
 
 	@Override
@@ -391,8 +385,14 @@ public class Preferences extends SummarizedPreferences
 			int res = getResources().getIdentifier(key, "xml", getPackageName());
 
 			addPreferencesFromResource(res);
+
+			if (Build.VERSION.SDK_INT >= 12) // Honeycomb 3.1
+			{
+				PreferenceScreen screen = this.getPreferenceScreen();
+				screen.removePreference(findPreference(getString(R.string.pref_proxy)));
+			}
 		}
-		
+
 		@Override
 		public void onResume()
 		{
