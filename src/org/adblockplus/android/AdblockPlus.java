@@ -136,6 +136,11 @@ public class AdblockPlus extends Application
 		return null;
 	}
 	
+	/**
+	 * Adds provided subscription and removes previous subscriptions if any.
+	 * 
+	 * @param subscription Subscription to add
+	 */
 	public void setSubscription(Subscription subscription)
 	{
 		/*
@@ -171,6 +176,9 @@ public class AdblockPlus extends Application
 		}
 	}
 
+	/**
+	 * Forces subscriptions refresh.
+	 */
 	public void refreshSubscription()
 	{
 		js.execute(new Runnable(){
@@ -221,6 +229,11 @@ public class AdblockPlus extends Application
 		return selectedItem;
 	}
 	
+	/**
+	 * Verifies that subscriptions are loaded and returns flag of subscription presence.
+	 * 
+	 * @return True if at least one subscription is present and downloaded
+	 */
 	public boolean verifySubscriptions()
 	{
 		Future<Boolean> future = js.submit(new Callable<Boolean>(){

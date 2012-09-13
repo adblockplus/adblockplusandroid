@@ -462,7 +462,7 @@ function refreshSubscriptions()
 }
 
 /**
- * Verifies that subscriptions are loaded and returns flag od subscription presence.
+ * Verifies that subscriptions are loaded and returns flag of subscription presence.
  */
 function verifySubscriptions()
 {
