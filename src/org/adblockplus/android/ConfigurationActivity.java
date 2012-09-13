@@ -15,8 +15,9 @@ public class ConfigurationActivity extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.configuration);
 		int port = getIntent().getIntExtra("port", 0);
-		String msg = getString(R.string.msg_configuration, port);
-		((TextView) findViewById(R.id.message_text)).setText(msg);
+		String msg1 = getString(R.string.msg_notraffic);
+		String msg2 = getString(R.string.msg_configuration, port);
+		((TextView) findViewById(R.id.message_text)).setText(msg1 + " " + msg2);
 	}
 
 	public void onOk(View view)

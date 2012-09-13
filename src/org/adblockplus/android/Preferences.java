@@ -33,6 +33,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.TextView;
 
 public class Preferences extends SummarizedPreferences
 {
@@ -40,6 +41,7 @@ public class Preferences extends SummarizedPreferences
 
 	private AboutDialog aboutDialog;
 	private boolean showAbout = false;
+	private String configurationMsg;
 	private String subscriptionSummary;
 
 	@Override
@@ -139,6 +141,8 @@ public class Preferences extends SummarizedPreferences
 			setPrefSummary(subscriptionList);
 
 		registerReceiver(receiver, new IntentFilter(AdblockPlus.BROADCAST_SUBSCRIPTION_STATUS));
+		registerReceiver(receiver, new IntentFilter(AdblockPlus.BROADCAST_FILTER_MATCHES));
+		registerReceiver(receiver, new IntentFilter(ProxyService.BROADCAST_STATE_CHANGED));
 		registerReceiver(receiver, new IntentFilter(ProxyService.BROADCAST_PROXY_FAILED));
 
 		final String url = current;
@@ -167,6 +171,9 @@ public class Preferences extends SummarizedPreferences
 			setEnabled(true);
 		}
 
+		if (configurationMsg != null)
+			showConfigurationMsg(configurationMsg);
+		
 		if (showAbout)
 			onAbout(findViewById(R.id.btn_about));
 	}
@@ -328,12 +335,48 @@ public class Preferences extends SummarizedPreferences
 		super.onSharedPreferenceChanged(sharedPreferences, key);
 	}
 
+	private void showConfigurationMsg(String message)
+	{
+		TextView msg = (TextView) findViewById(R.id.txt_configuration);
+		msg.setText(message);
+		msg.setVisibility(View.VISIBLE);
+		configurationMsg = message;
+	}
+
+	private void hideConfigurationMsg()
+	{
+		if (configurationMsg == null)
+			return;
+		TextView msg = (TextView) findViewById(R.id.txt_configuration);
+		msg.setVisibility(View.GONE);
+		configurationMsg = null;
+	}
+
 	private BroadcastReceiver receiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, Intent intent)
 		{
 			String action = intent.getAction();
 			Bundle extra = intent.getExtras();
+			if (action.equals(ProxyService.BROADCAST_STATE_CHANGED))
+			{
+				if (extra.getBoolean("enabled"))
+				{
+					if (extra.getBoolean("manual"))
+					{
+						showConfigurationMsg(getString(R.string.msg_configuration, extra.getInt("port")));
+					}
+				}
+				else
+				{
+					setEnabled(false);
+					hideConfigurationMsg();
+				}
+			}
+			if (action.equals(AdblockPlus.BROADCAST_FILTER_MATCHES))
+			{
+				hideConfigurationMsg();
+			}
 			if (action.equals(ProxyService.BROADCAST_PROXY_FAILED))
 			{
 				String msg = extra.getString("msg");
@@ -396,7 +439,7 @@ public class Preferences extends SummarizedPreferences
 
 			if (Build.VERSION.SDK_INT >= 12) // Honeycomb 3.1
 			{
-				PreferenceScreen screen = this.getPreferenceScreen();
+				PreferenceScreen screen = getPreferenceScreen();
 				screen.removePreference(findPreference(getString(R.string.pref_proxy)));
 			}
 		}
@@ -432,6 +475,7 @@ public class Preferences extends SummarizedPreferences
 	{
 		super.onRestoreInstanceState(state);
 		showAbout = state.getBoolean("showAbout");
+		configurationMsg = state.getString("configurationMsg");
 		subscriptionSummary = state.getString("subscriptionSummary");
 	}
 
@@ -439,6 +483,7 @@ public class Preferences extends SummarizedPreferences
 	protected void onSaveInstanceState(Bundle outState)
 	{
 		outState.putString("subscriptionSummary", subscriptionSummary);
+		outState.putString("configurationMsg", configurationMsg);
 		outState.putBoolean("showAbout", showAbout);
 		super.onSaveInstanceState(outState);
 	}
