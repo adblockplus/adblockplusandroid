@@ -104,8 +104,11 @@ public class Preferences extends SummarizedPreferences
 		subscriptionList.setEntries(entries);
 		subscriptionList.setEntryValues(entryValues);
 
+		boolean firstRun = false;
+
 		if (current == null)
 		{
+			firstRun = true;
 			Subscription offer = application.offerSubscription();
 			current = offer.url;
 			if (offer != null)
@@ -155,8 +158,13 @@ public class Preferences extends SummarizedPreferences
 		boolean enabled = prefs.getBoolean(getString(R.string.pref_enabled), false);
 		if (enabled && !isServiceRunning())
 		{
-			setNotEnabled();
+			setEnabled(false);
 			enabled = false;
+		}
+		else if (! enabled && firstRun)
+		{
+			startService(new Intent(this, ProxyService.class));
+			setEnabled(true);
 		}
 
 		if (showAbout)
@@ -206,12 +214,12 @@ public class Preferences extends SummarizedPreferences
 		}
 	}
 
-	private void setNotEnabled()
+	private void setEnabled(boolean enabled)
 	{
 		SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
-		editor.putBoolean(getString(R.string.pref_enabled), false);
+		editor.putBoolean(getString(R.string.pref_enabled), enabled);
 		editor.commit();
-		((CheckBoxPreference) findPreference(getString(R.string.pref_enabled))).setChecked(false);
+		((CheckBoxPreference) findPreference(getString(R.string.pref_enabled))).setChecked(enabled);
 	}
 
 	private boolean isServiceRunning()
@@ -330,7 +338,7 @@ public class Preferences extends SummarizedPreferences
 			{
 				String msg = extra.getString("msg");
 				new AlertDialog.Builder(Preferences.this).setTitle(R.string.error).setMessage(msg).setIcon(android.R.drawable.ic_dialog_alert).setPositiveButton(R.string.ok, null).create().show();
-				setNotEnabled();
+				setEnabled(false);
 			}
 			if (action.equals(AdblockPlus.BROADCAST_SUBSCRIPTION_STATUS))
 			{
