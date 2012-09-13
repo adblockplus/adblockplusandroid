@@ -7,6 +7,9 @@ import java.lang.Thread.UncaughtExceptionHandler;
 
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Build;
 import android.util.Log;
 
 public class CrashHandler implements UncaughtExceptionHandler
@@ -42,7 +45,7 @@ public class CrashHandler implements UncaughtExceptionHandler
 		{
 			try
 			{
-				notificationManager.cancel(R.string.app_name);
+				notificationManager.cancel(ProxyService.ONGOING_NOTIFICATION_ID);
 			}
 			catch (Throwable ex)
 			{
@@ -57,9 +60,20 @@ public class CrashHandler implements UncaughtExceptionHandler
 	private void writeToFile(String stacktrace, String filename)
 	{
 		Log.e("DCR", "Writing crash report");
+		int versionCode = -1;
+		try
+		{
+			PackageInfo pi = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
+			versionCode = pi.versionCode;
+		}
+		catch (NameNotFoundException ex)
+		{
+		}
 		try
 		{
 			PrintWriter pw = new PrintWriter(mContext.openFileOutput(filename, Context.MODE_WORLD_READABLE));
+			pw.println(Build.VERSION.SDK_INT);
+			pw.println(versionCode);
 			pw.print(stacktrace);
 			pw.flush();
 			pw.close();

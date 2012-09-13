@@ -437,10 +437,14 @@ public class Preferences extends SummarizedPreferences
 
 			addPreferencesFromResource(res);
 
+			PreferenceScreen screen = getPreferenceScreen();
 			if (Build.VERSION.SDK_INT >= 12) // Honeycomb 3.1
 			{
-				PreferenceScreen screen = getPreferenceScreen();
 				screen.removePreference(findPreference(getString(R.string.pref_proxy)));
+			}
+			if (getResources().getBoolean(R.bool.def_release))
+			{
+				screen.removePreference(findPreference(getString(R.string.pref_support)));
 			}
 		}
 

@@ -15,6 +15,7 @@
     <string name="pref_proxyport">proxyport</string>
     <string name="pref_proxyuser">proxyuser</string>
     <string name="pref_proxypass">proxypass</string>
+    <string name="pref_support">support</string>
     <string name="pref_crashreport">crashreport</string>
     <string name="pref_version">versioncode</string>
 
