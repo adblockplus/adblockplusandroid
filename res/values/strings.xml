@@ -12,7 +12,8 @@
     <string name="crash_dialog_text">It seems that application encounted a problem and was forcefully stopped on previous launch. You can help us fix this if you send us error report by clicking \'OK\'.</string>
 	<string name="crash_dialog_comment_prompt">You might add your comments about the problem below:</string>
 	<string name="crash_dialog_chooser_title">Share report via</string>
-
+	
+	<string name="msg_crash_submission_failure">Failed to submit crash report, will try again later.</string>	
     <string name="msg_subscription_offer">We have selected a suitable subscription for you: \'%s\'. You can change it at any time in application settings.</string>
 	<string name="msg_notraffic">It seems that no traffic is passing through application.</string>
 	<string name="msg_configuration">Please make sure that proxy server \'localhost\' and proxy port \'%d\' are configured in your phone network settings.</string>

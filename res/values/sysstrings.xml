@@ -2,6 +2,7 @@
 <resources>
 
     <string name="update_url">https://adblockplus.org/devbuilds/adblockplusandroid/updates.xml</string>
+    <string name="crash_report_url">https://crashes.adblockplus.org/submitCrash?version=1</string>
     
     <string name="pref_enabled">enabled</string>
     <string name="pref_startatboot">startatboot</string>

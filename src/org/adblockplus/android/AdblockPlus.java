@@ -452,7 +452,6 @@ public class AdblockPlus extends Application
 				intent.putExtra("report", report);
 				startActivity(intent);
 			}
-			deleteFile(CrashHandler.REPORT_FILE);
 		}
 		catch (FileNotFoundException e)
 		{
