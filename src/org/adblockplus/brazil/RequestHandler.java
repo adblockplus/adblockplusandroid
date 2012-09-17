@@ -259,6 +259,7 @@ public class RequestHandler implements Handler
 						request.responseHeaders.remove("Content-Encoding");
 						out = new ChunkedOutputStream(request.out);
 						request.responseHeaders.add("Transfer-Encoding", "chunked");
+						size = Integer.MAX_VALUE;
 					}
 					else if (encodingHeader.equals("compress") || encodingHeader.equals("x-compress"))
 					{
@@ -267,6 +268,7 @@ public class RequestHandler implements Handler
 						request.responseHeaders.remove("Content-Encoding");
 						out = new ChunkedOutputStream(request.out);
 						request.responseHeaders.add("Transfer-Encoding", "chunked");
+						size = Integer.MAX_VALUE;
 					}
 					else
 					{
