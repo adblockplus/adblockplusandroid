@@ -19,9 +19,11 @@
 	<string name="msg_configuration">Please make sure that proxy server \'localhost\' and proxy port \'%d\' are configured in your phone network settings.</string>
     <string name="msg_badport">Bad port value</string>
     <string name="msg_update_available">New update available</string>
+    <string name="msg_update_missing">You are running the latest version</string>
     <string name="msg_update_description">New update is available for download. Proceed?</string>
     <string name="msg_update_downloading">Downloading update: %d%%</string>
     <string name="msg_update_ready">Ready to install update</string>
+    <string name="msg_update_fail">Failed to check for updates, please try again later</string>
     
     <string name="configuring_url">https://adblockplus.org/en/android-config</string>
     <string name="configuring_proxy_url">https://adblockplus.org/en/android-config#proxy</string>
@@ -64,6 +66,7 @@
     <string name="pref_crashreport_title">Crash report</string>
     <string name="pref_crashreport_summary_on">Application will generate report if crashed and will ask to send it on next start</string>
     <string name="pref_crashreport_summary_off">Report will not be generated on application crash</string>
+    <string name="pref_checkupdate_title">Check for update</string>
     <string name="menu_advanced">Advanced settings</string>
     
 </resources>
