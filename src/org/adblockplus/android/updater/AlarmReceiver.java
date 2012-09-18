@@ -34,11 +34,15 @@ public class AlarmReceiver extends BroadcastReceiver
 {
 
 	private static final String TAG = "AlarmReceiver";
+	private static final int NOTIFICATION_ID = R.string.app_name + 1;
 
 	@Override
 	public void onReceive(final Context context, final Intent intent)
 	{
 		Log.i(TAG, "Recurring alarm; requesting updater service");
+
+		final boolean notify = intent.getBooleanExtra("notifynoupdate", false);
+		
 		// Check network availability
 		boolean connected = false;
 		ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -48,6 +52,16 @@ public class AlarmReceiver extends BroadcastReceiver
 			networkInfo = connectivityManager.getActiveNetworkInfo();
 			connected = networkInfo == null ? false : networkInfo.isConnected();
 		}
+		
+		// Prepare notification
+		final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		final Notification notification = new Notification();
+		notification.icon = R.drawable.ic_stat_warning;
+		notification.when = System.currentTimeMillis();
+		notification.flags |= Notification.FLAG_AUTO_CANCEL | Notification.FLAG_ONLY_ALERT_ONCE;
+		if (notify)
+			notification.flags |= Notification.DEFAULT_SOUND;
+		final PendingIntent emptyIntent = PendingIntent.getActivity(context, 0, new Intent(), 0);
 
 		// Get update info
 		if (connected)
@@ -56,6 +70,7 @@ public class AlarmReceiver extends BroadcastReceiver
 				@Override
 				public void run()
 				{
+					boolean success = false;
 					try
 					{
 						// Read updates manifest
@@ -100,19 +115,21 @@ public class AlarmReceiver extends BroadcastReceiver
 						// Run updater service if newer update found
 						if (thisBuild < newBuild)
 						{
-							NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-							Notification notification = new Notification();
 							notification.icon = R.drawable.ic_stat_download;
-							notification.when = System.currentTimeMillis();
-							notification.flags |= Notification.FLAG_AUTO_CANCEL;
 							Intent intent = new Intent(context, UpdaterActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 							intent.setAction("download");
 							intent.putExtra("url", newUrl);
 							intent.putExtra("build", newBuild);
-							PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-							notification.setLatestEventInfo(context, context.getText(R.string.app_name), context.getString(R.string.msg_update_available), contentIntent);
-							notificationManager.notify(R.string.app_name + 1, notification);
+							PendingIntent updateIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+							notification.setLatestEventInfo(context, context.getText(R.string.app_name), context.getString(R.string.msg_update_available), updateIntent);
+							notificationManager.notify(NOTIFICATION_ID, notification);
 						}
+						else if (notify)
+						{
+							notification.setLatestEventInfo(context, context.getText(R.string.app_name), context.getString(R.string.msg_update_missing), emptyIntent);
+							notificationManager.notify(NOTIFICATION_ID, notification);
+						}
+						success = true;
 					}
 					catch (IOException e)
 					{
@@ -130,9 +147,22 @@ public class AlarmReceiver extends BroadcastReceiver
 					{
 						Log.e(TAG, "Error", e);
 					}
+					finally
+					{
+						if (notify && ! success)
+						{
+							notification.setLatestEventInfo(context, context.getText(R.string.app_name), context.getString(R.string.msg_update_fail), emptyIntent);
+							notificationManager.notify(NOTIFICATION_ID, notification);
+						}
+					}
 				}
 			});
 			thread.start();
+		}
+		else if (notify)
+		{
+			notification.setLatestEventInfo(context, context.getText(R.string.app_name), context.getString(R.string.msg_update_fail), emptyIntent);
+			notificationManager.notify(NOTIFICATION_ID, notification);
 		}
 	}
 }

@@ -7,6 +7,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.adblockplus.android.updater.AlarmReceiver;
+
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.app.AlertDialog;
@@ -24,6 +26,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
+import android.preference.Preference;
+import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.text.format.DateFormat;
@@ -213,7 +217,7 @@ public class Preferences extends SummarizedPreferences
 		switch (item.getItemId())
 		{
 			case R.id.menu_advanced:
-				Class<?> activity = Preferences.InnerPreferences.class;
+				Class<?> activity = Preferences.AdvancedPreferences.class;
 				startActivity(new Intent(Preferences.this, activity).putExtra("KEY", "preferences_advanced"));
 				return true;
 			default:
@@ -425,7 +429,7 @@ public class Preferences extends SummarizedPreferences
 		}
 	};
 
-	public static class InnerPreferences extends SummarizedPreferences
+	public static class AdvancedPreferences extends SummarizedPreferences
 	{
 		@Override
 		public void onCreate(Bundle savedInstanceState)
@@ -446,6 +450,16 @@ public class Preferences extends SummarizedPreferences
 			{
 				screen.removePreference(findPreference(getString(R.string.pref_support)));
 			}
+
+			Preference prefUpdate = findPreference(getString(R.string.pref_checkupdate));
+			prefUpdate.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+				public boolean onPreferenceClick(Preference preference)
+				{
+					Intent updater = new Intent(AdvancedPreferences.this, AlarmReceiver.class).putExtra("notifynoupdate", true);
+					sendBroadcast(updater);
+					return true;
+				}
+			});
 		}
 
 		@Override
