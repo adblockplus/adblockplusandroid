@@ -100,9 +100,11 @@ public class UpdaterService extends Service
 				File updateFile = new File(updateDir, "AdblockPlus-update.apk");
 				if (updateFile.exists())
 				{
-//					if (updateFile.length() == fileLength)
-//						return updateFile.getAbsolutePath();
-//					else
+					Log.e(TAG, "L: " + updateFile.length());
+					// TODO Should use md5 checksums, not lengths
+					if (updateFile.length() == fileLength)
+						return updateFile.getAbsolutePath();
+					else
 						updateFile.delete();
 				}
 
