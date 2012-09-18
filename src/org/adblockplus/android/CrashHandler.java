@@ -1,8 +1,6 @@
 package org.adblockplus.android;
 
 import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.lang.Thread.UncaughtExceptionHandler;
 
 import android.app.NotificationManager;
@@ -34,13 +32,7 @@ public class CrashHandler implements UncaughtExceptionHandler
 	@Override
 	public void uncaughtException(Thread t, Throwable e)
 	{
-		final Writer result = new StringWriter();
-		final PrintWriter printWriter = new PrintWriter(result);
-		e.printStackTrace(printWriter);
-		String stacktrace = result.toString();
-		printWriter.close();
-
-		writeToFile(stacktrace, REPORT_FILE);
+		writeToFile(e, REPORT_FILE);
 		if (notificationManager != null)
 		{
 			try
@@ -57,7 +49,7 @@ public class CrashHandler implements UncaughtExceptionHandler
 		defaultUEH.uncaughtException(t, e);
 	}
 
-	private void writeToFile(String stacktrace, String filename)
+	private void writeToFile(Throwable error, String filename)
 	{
 		Log.e("DCR", "Writing crash report");
 		int versionCode = -1;
@@ -74,7 +66,14 @@ public class CrashHandler implements UncaughtExceptionHandler
 			PrintWriter pw = new PrintWriter(mContext.openFileOutput(filename, Context.MODE_WORLD_READABLE));
 			pw.println(Build.VERSION.SDK_INT);
 			pw.println(versionCode);
-			pw.print(stacktrace);
+			
+			printThrowable(error, pw);
+			Throwable cause = error.getCause();
+			if (cause != null)
+			{
+				pw.println("cause");
+				printThrowable(cause, pw);
+			}
 			pw.flush();
 			pw.close();
 		}
@@ -84,4 +83,23 @@ public class CrashHandler implements UncaughtExceptionHandler
 		}
 	}
 
+	private void printThrowable(Throwable error, PrintWriter pw)
+	{
+		pw.println(error.getClass().getName());
+		pw.println(error.getMessage());
+		StackTraceElement[] trace = error.getStackTrace();
+		for (StackTraceElement element : trace)
+		{
+			pw.print(element.getClassName());
+			pw.print("|");
+			pw.print(element.getMethodName());
+			pw.print("|");
+			pw.print(element.isNativeMethod());
+			pw.print("|");
+			pw.print(element.getFileName());
+			pw.print("|");
+			pw.print(element.getLineNumber());
+			pw.println();
+		}
+	}
 }

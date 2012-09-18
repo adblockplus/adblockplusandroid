@@ -2,6 +2,7 @@ package org.adblockplus.android;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.regex.Pattern;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -15,6 +16,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Xml;
 import android.view.View;
@@ -62,37 +64,69 @@ public final class CrashReportDialog extends Activity
 			xmlSerializer.startDocument("UTF-8", true);
 			xmlSerializer.startTag("", "crashreport");
 			xmlSerializer.attribute("", "version", "1");
-			xmlSerializer.startTag("", "api");
-			xmlSerializer.text(String.valueOf(api));
-			xmlSerializer.endTag("", "api");
-			xmlSerializer.startTag("", "build");
-			xmlSerializer.text(String.valueOf(build));
-			xmlSerializer.endTag("", "build");
+			xmlSerializer.attribute("", "api", String.valueOf(api));
+			xmlSerializer.attribute("", "build", String.valueOf(build));
+			xmlSerializer.startTag("", "error");
+			xmlSerializer.attribute("", "type", reportLines[2]);
+			xmlSerializer.startTag("", "message");
+			xmlSerializer.text(reportLines[3]);
+			xmlSerializer.endTag("", "message");
 			xmlSerializer.startTag("", "stacktrace");
-			for (int i = 2; i < reportLines.length; i++)
+			Pattern p = Pattern.compile("\\|");
+			boolean hasCause = false;
+			int i = 4;
+			while (i < reportLines.length)
 			{
-				xmlSerializer.text(reportLines[i]);
-				xmlSerializer.text("\r\n");
+				if ("cause".equals(reportLines[i]))
+				{
+					xmlSerializer.endTag("", "stacktrace");
+					xmlSerializer.startTag("", "cause");
+					hasCause = true;
+					i++;
+					xmlSerializer.attribute("", "type", reportLines[i]);
+					i++;
+					xmlSerializer.startTag("", "message");
+					xmlSerializer.text(reportLines[i]);
+					i++;
+					xmlSerializer.endTag("", "message");
+					xmlSerializer.startTag("", "stacktrace");
+					continue;
+				}
+				Log.e(TAG, "Line: " + reportLines[i]);
+				String[] element = TextUtils.split(reportLines[i], p);
+				xmlSerializer.startTag("", "frame");
+				xmlSerializer.attribute("", "class", element[0]);
+				xmlSerializer.attribute("", "method", element[1]);
+				xmlSerializer.attribute("", "isnative", element[2]);
+				xmlSerializer.attribute("", "file", element[3]);
+				xmlSerializer.attribute("", "line", element[4]);
+				xmlSerializer.endTag("", "frame");
+				i++;
 			}
 			xmlSerializer.endTag("", "stacktrace");
+			if (hasCause)
+				xmlSerializer.endTag("", "cause");
+			xmlSerializer.endTag("", "error");
 			xmlSerializer.startTag("", "comment");
 			xmlSerializer.text(comment);
 			xmlSerializer.endTag("", "comment");
 			xmlSerializer.endTag("", "crashreport");
 			xmlSerializer.endDocument();
-			String xml = writer.toString();
 
+			String xml = writer.toString();
 			HttpClient httpclient = new DefaultHttpClient();
 			HttpPost httppost = new HttpPost(getString(R.string.crash_report_url));
 			httppost.setHeader("Content-Type", "text/xml; charset=UTF-8");
-			httppost.addHeader("X_ADBLOCK_PLUS", "yes");
+			httppost.addHeader("X-Adblock-Plus", "yes");
 			httppost.setEntity(new StringEntity(xml));
 			HttpResponse httpresponse = httpclient.execute(httppost);
 			StatusLine statusLine = httpresponse.getStatusLine();
+			Log.e(TAG, statusLine.getStatusCode() + " " + statusLine.getReasonPhrase());
+			Log.e(TAG, EntityUtils.toString(httpresponse.getEntity()));
 			if (statusLine.getStatusCode() != 200)
 				throw new ClientProtocolException();
 			String response = EntityUtils.toString(httpresponse.getEntity());
-			if (! "saved".equals(response))
+			if (!"saved".equals(response))
 				throw new ClientProtocolException();
 			deleteFile(CrashHandler.REPORT_FILE);
 		}
@@ -108,8 +142,9 @@ public final class CrashReportDialog extends Activity
 		}
 		catch (Exception e)
 		{
+			Log.e(TAG, "Failed to create report", e);
 			// Assuming corrupted report file, just silently deleting it
-			deleteFile(CrashHandler.REPORT_FILE);			
+			deleteFile(CrashHandler.REPORT_FILE);
 		}
 		finish();
 	}
