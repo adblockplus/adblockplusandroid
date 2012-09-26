@@ -19,6 +19,7 @@
     <string name="pref_support">support</string>
     <string name="pref_crashreport">crashreport</string>
     <string name="pref_checkupdate">checkupdate</string>
+    <string name="pref_configuration">configuration</string>
     <string name="pref_version">versioncode</string>
 
 </resources>

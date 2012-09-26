@@ -76,8 +76,8 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 
 	private Handler notrafficHandler;
 
-	private ProxyServer proxy = null;
-	private int port;
+	protected ProxyServer proxy = null;
+	protected int port;
 
 	/**
 	 * Indicates that service is working with root privileges
@@ -382,7 +382,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 		}
 	}
 
-	private String[] getUserProxy()
+	public String[] getUserProxy()
 	{
 		Method method = null;
 		try
@@ -441,7 +441,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 		userProxy[1] = String.valueOf((Integer) method.invoke(pp));
 
 		/*
-		 * String proxyEL = getExclusionList()
+		 * String proxyEL = pp.getExclusionList()
 		 */
 		method = c.getMethod("getExclusionList");
 		userProxy[2] = (String) method.invoke(pp);
@@ -848,7 +848,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 		}
 	};
 
-	private final class ProxyServer extends Server
+	final class ProxyServer extends Server
 	{
 		@Override
 		public void close()
