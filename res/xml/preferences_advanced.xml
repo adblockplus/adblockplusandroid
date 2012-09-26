@@ -58,9 +58,13 @@
             android:summaryOff="@string/pref_crashreport_summary_off"
             android:summaryOn="@string/pref_crashreport_summary_on"
             android:title="@string/pref_crashreport_title" />
+
         <Preference
             android:key="@string/pref_checkupdate"
             android:title="@string/pref_checkupdate_title" />
+        <Preference
+            android:key="@string/pref_configuration"
+            android:title="@string/pref_configuration_title" />
     </PreferenceCategory>
 
 </PreferenceScreen>
