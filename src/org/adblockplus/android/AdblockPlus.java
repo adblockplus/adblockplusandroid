@@ -424,6 +424,38 @@ public class AdblockPlus extends Application
 		}
 	}
 	
+	/**
+	 * Sets Alarm to call updater after specified number of minutes in a day if minutes are set to 0.
+	 * @param minutes number of minutes to wait
+	 */
+	public void scheduleUpdater(int minutes)
+	{
+		Calendar updateTime = Calendar.getInstance();
+		
+		if (minutes == 0)
+		{
+			// Start update checks at 10:00 GMT...
+			updateTime.setTimeZone(TimeZone.getTimeZone("GMT"));		
+			updateTime.set(Calendar.HOUR_OF_DAY, 10);
+			updateTime.set(Calendar.MINUTE, 0);
+			// ...next day
+			updateTime.add(Calendar.HOUR_OF_DAY, 24);
+			// Spread out the “mass downloading” for 6 hours
+			updateTime.add(Calendar.MINUTE, (int) Math.random() * 60 * 6);
+		}
+		else
+		{
+			updateTime.add(Calendar.MINUTE, minutes);
+		}
+		
+		Intent updater = new Intent(this, AlarmReceiver.class);
+		PendingIntent recurringUpdate = PendingIntent.getBroadcast(this, 0, updater, PendingIntent.FLAG_CANCEL_CURRENT);
+		// Set non-waking alarm
+		AlarmManager alarms = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+		Log.e(TAG, "Set updater alarm");
+		alarms.set(AlarmManager.RTC, updateTime.getTimeInMillis(), recurringUpdate);
+	}
+	
 	@Override
 	public void onCreate()
 	{
@@ -466,26 +498,9 @@ public class AdblockPlus extends Application
 		if (! getResources().getBoolean(R.bool.def_release))
 		{
 			// Set crash handler
-			updateCrashReportStatus();
-		
-			// Check for updates
-			if (checkWriteExternalPermission())
-			{
-				// Start update checks at 10:00 GMT
-				Calendar updateTime = Calendar.getInstance();
-				updateTime.setTimeZone(TimeZone.getTimeZone("GMT"));
-				updateTime.set(Calendar.HOUR_OF_DAY, 10);
-				updateTime.set(Calendar.MINUTE, 0);
-				// Spread out the “mass downloading” for 6 hours
-				updateTime.add(Calendar.MINUTE, (int) Math.random() * 60 * 6);
-				
-				Intent updater = new Intent(this, AlarmReceiver.class);
-				PendingIntent recurringUpdate = PendingIntent.getBroadcast(this, 0, updater, PendingIntent.FLAG_CANCEL_CURRENT);
-				// Set non-waking alarm
-				AlarmManager alarms = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-				Log.e(TAG, "setAlarm");
-				alarms.setRepeating(AlarmManager.RTC, updateTime.getTimeInMillis(), AlarmManager.INTERVAL_DAY, recurringUpdate);
-			}
+			updateCrashReportStatus();		
+			// Initiate update check
+			scheduleUpdater(0);
 		}
 	}
 
