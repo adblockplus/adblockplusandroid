@@ -218,7 +218,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 			else
 			{
 				config.put("main.handlers", "https adblock");
-				config.put("https.class", "org.paw.handler.SSLConnectionHandler");
+				config.put("https.class", "org.adblockplus.brazil.SSLConnectionHandler");
 			}
 			config.put("adblock.class", "org.adblockplus.brazil.RequestHandler");
 			// config.put("adblock.proxylog", "yes");
