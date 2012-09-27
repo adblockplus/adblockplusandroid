@@ -7,6 +7,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.adblockplus.android.AdblockPlus;
 import org.adblockplus.android.R;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -41,6 +42,8 @@ public class AlarmReceiver extends BroadcastReceiver
 	{
 		Log.i(TAG, "Recurring alarm; requesting updater service");
 
+		final AdblockPlus application = AdblockPlus.getApplication();
+		
 		final boolean notify = intent.getBooleanExtra("notifynoupdate", false);
 		
 		// Check network availability
@@ -64,7 +67,7 @@ public class AlarmReceiver extends BroadcastReceiver
 		final PendingIntent emptyIntent = PendingIntent.getActivity(context, 0, new Intent(), 0);
 
 		// Get update info
-		if (connected)
+		if (application.checkWriteExternalPermission() && connected)
 		{
 			Thread thread = new Thread(new Runnable() {
 				@Override
@@ -130,6 +133,8 @@ public class AlarmReceiver extends BroadcastReceiver
 							notificationManager.notify(NOTIFICATION_ID, notification);
 						}
 						success = true;
+						// Schedule next check
+						application.scheduleUpdater(0);
 					}
 					catch (IOException e)
 					{
@@ -149,20 +154,30 @@ public class AlarmReceiver extends BroadcastReceiver
 					}
 					finally
 					{
-						if (notify && ! success)
+						if (! success)
 						{
-							notification.setLatestEventInfo(context, context.getText(R.string.app_name), context.getString(R.string.msg_update_fail), emptyIntent);
-							notificationManager.notify(NOTIFICATION_ID, notification);
+							if (notify)
+							{
+								notification.setLatestEventInfo(context, context.getText(R.string.app_name), context.getString(R.string.msg_update_fail), emptyIntent);
+								notificationManager.notify(NOTIFICATION_ID, notification);
+							}
+							// Schedule retry in 1 hour
+							application.scheduleUpdater(60);
 						}
 					}
 				}
 			});
 			thread.start();
 		}
-		else if (notify)
+		else
 		{
-			notification.setLatestEventInfo(context, context.getText(R.string.app_name), context.getString(R.string.msg_update_fail), emptyIntent);
-			notificationManager.notify(NOTIFICATION_ID, notification);
+			if (notify)
+			{
+				notification.setLatestEventInfo(context, context.getText(R.string.app_name), context.getString(R.string.msg_update_fail), emptyIntent);
+				notificationManager.notify(NOTIFICATION_ID, notification);
+			}
+			// Schedule retry in 30 minutes
+			application.scheduleUpdater(30);
 		}
 	}
 }
