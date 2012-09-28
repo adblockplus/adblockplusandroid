@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Adblock Plus</string>
+    <string name="crash_name">Произошёл сбой</string>
+    <string name="notif_wifi">Реклама блокируется при подключении по WiFi</string>
+    <string name="notif_all">Реклама блокируется при любом подключении</string>
+    <string name="notif_waiting">Ожидание трафика</string>
+    <string name="notif_notraffic">Возможно требуется внести изменения в конфигурицию</string>
+    <string name="crash_dialog_text">Похоже, приложение столкнулось с проблемой и было принудительно остановлено во время предыдущего запуска. Вы можете помочь нам решить эту проблему, если отправите отчёт об ошибке, нажав \'OK\'.</string>
+    <string name="crash_dialog_comment_prompt">Вы можете добавить комментарий по данной проблеме:</string>
+    <string name="msg_crash_submission_failure">Не удалось отправить отчёт об ошибке, позже попытка будет повторена.</string>
+    <string name="msg_subscription_offer">Мы выбрали для вас подходящую подписку: \'%s\'. Вы можете изменить её в любое время в настройках приложения.</string>
+    <string name="msg_notraffic">Похоже, нет трафика, проходящего через приложение.</string>
+    <string name="msg_configuration">Убедитесь, что сервер прокси \'localhost\' и порт прокси \'%d\' указаны в сетевых настройках вашего телефона.</string>
+    <string name="msg_badport">Неправильное значение порта</string>
+    <string name="msg_clipboard">Текст скопирован в буфер обмена</string>
+    <string name="msg_update_available">Доступно новое обновление</string>
+    <string name="msg_update_missing">Вы пользуетесь последней доступной версией</string>
+    <string name="msg_update_description">Доступно новое обновление для скачивания. Продолжить?</string>
+    <string name="msg_update_downloading">Загрузка обновления: %d%%</string>
+    <string name="msg_update_ready">Обновление готово к установке</string>
+    <string name="msg_update_fail">Ошибка проверки наличия обновления, пожалуйста, попробуйте позже</string>
+    <string name="configuring_url">https://adblockplus.org/en/android-config</string>
+    <string name="configuring_proxy_url">https://adblockplus.org/en/android-config#proxy</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Отмена</string>
+    <string name="error">Ошибка</string>
+    <string name="about">О приложении</string>
+    <string name="help">Помощь</string>
+    <string name="version">Версия</string>
+    <string name="build">сборка#</string>
+    <string name="gotit">Понятно</string>
+    <string name="synchronize_in_progress">загрузка…</string>
+    <string name="synchronize_invalid_url">неправильный url</string>
+    <string name="synchronize_connection_error">ошибка соединения</string>
+    <string name="synchronize_invalid_data">неправильные данные</string>
+    <string name="synchronize_checksum_mismatch">несовпадение контрольных сумм</string>
+    <string name="synchronize_last_at">последнее обновление</string>
+    <string name="synchronize_never">не загружена</string>
+    <string name="pref_enabled_title">Включить фильтрацию</string>
+    <string name="pref_enabled_summary_on">Фильтрация Adblock включена</string>
+    <string name="pref_enabled_summary_off">Фильтрация Adblock выключена</string>
+    <string name="pref_startatboot_title">Запускать при загрузке</string>
+    <string name="pref_startatboot_summary_on">Adblock Plus будет запущен автоматически в фоновом режиме, если он включён</string>
+    <string name="pref_startatboot_summary_off">Потребуется запустить Adblock Plus вручную после загрузки</string>
+    <string name="pref_subscription_title">Подписка</string>
+    <string name="pref_refresh_title">Обновление подписки</string>
+    <string name="pref_wifirefresh_title">Обновление только через WiFi</string>
+    <string name="pref_wifirefresh_summary_on">Автоматическия обновления будут осуществляться только при наличии подключения по WiFi</string>
+    <string name="pref_wifirefresh_summary_off">Автоматическия обновления будут осуществляться при наличии любого подключения</string>
+    <string name="pref_advanced_title">Расширенные настройки</string>
+    <string name="pref_proxy_title">Прокси</string>
+    <string name="pref_proxyhost_title">Хост</string>
+    <string name="pref_proxyport_title">Порт</string>
+    <string name="pref_proxyuser_title">Пользователь</string>
+    <string name="pref_proxypass_title">Пароль</string>
+    <string name="pref_support_title">Поддержка</string>
+    <string name="pref_crashreport_title">Отчёт о сбое</string>
+    <string name="pref_crashreport_summary_on">Приложение создаст отчёт при возникновении ошибки выполнения и попросит отправить его при последующем запуске</string>
+    <string name="pref_crashreport_summary_off">Отчёт об ошибке не будет создаваться при сбое приложения</string>
+    <string name="pref_checkupdate_title">Проверить обновление</string>
+    <string name="pref_configuration_title">Показать настройки</string>
+    <string name="menu_advanced">Расширенные настройки</string>
+
+</resources>
