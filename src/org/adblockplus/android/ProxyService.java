@@ -172,7 +172,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 				e.printStackTrace();
 			}
 		}
-
+		
 		if (!isTransparent)
 		{
 			// Try to set native proxy
@@ -585,52 +585,52 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 	}
 
 	private void configureUserProxy(Properties config, String proxyHost, String proxyPort, String proxyExcl, String proxyUser, String proxyPass)
-	{
-		// Handlers check for null value
-		if ("".equals(proxyHost))
-			proxyHost = null;
-		if (proxyHost != null)
+	{		
+		// Clean previous settings
+		config.remove("adblock.proxyHost");
+		config.remove("adblock.proxyPort");
+		config.remove("adblock.auth");
+		config.remove("adblock.proxyExcl");
+		if (!isTransparent)
 		{
-			config.put("adblock.proxyHost", proxyHost);
-			if (!isTransparent)
-				config.put("https.proxyHost", proxyHost);
-		}
-		else
-		{
-			config.remove("adblock.proxyHost");
-			if (!isTransparent)
-				config.remove("https.proxyHost");
+			config.remove("https.proxyHost");
+			config.remove("https.proxyPort");
+			config.remove("https.auth");			
 		}
 		
+		// Check if there are any settings
+		if (proxyHost == null || "".equals(proxyHost))
+			return;
+
 		// Check for dirty proxy settings - this indicated previous crash:
 		// proxy points to ourselves
-		// proxy port is 0
+		// proxy port is null, 0 or not a number
 		// proxy is 127.0.0.1:8080
 		int p = 0;
 		if (proxyPort == null)
-			proxyPort = "";
+			return;
 		try
 		{
 			p = Integer.valueOf(proxyPort);
 		}
 		catch (NumberFormatException e)
 		{
-			// ignore
+			return;
 		}
 		if (p == 0 || isLocalHost(proxyHost) && (p == port || p == 8080))
 			return;
 
+		config.put("adblock.proxyHost", proxyHost);
 		config.put("adblock.proxyPort", proxyPort);
+		if (!isTransparent)
+		{
+			config.put("https.proxyHost", proxyHost);
+			config.put("https.proxyPort", proxyPort);
+		}
 		
 		// TODO Not implemented in our proxy but needed to restore settings
 		if (proxyExcl != null)
 			config.put("adblock.proxyExcl", proxyExcl);
-		else
-			config.remove("adblock.proxyExcl");
-			
-
-		if (!isTransparent)
-			config.put("https.proxyPort", proxyPort);
 
 		if (proxyUser != null && !"".equals(proxyUser) && proxyPass != null && !"".equals(proxyPass))
 		{
@@ -639,12 +639,6 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 			config.put("adblock.auth", proxyAuth);
 			if (!isTransparent)
 				config.put("https.auth", proxyAuth);
-		}
-		else
-		{
-			config.remove("adblock.auth");
-			if (!isTransparent)
-				config.remove("https.auth");			
 		}
 	}
 
