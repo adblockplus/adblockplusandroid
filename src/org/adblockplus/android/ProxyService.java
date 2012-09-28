@@ -137,6 +137,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 			proxyPass = prefs.getString(getString(R.string.pref_proxypass), null);
 		}
 
+		// Check for root privileges and try to install transparent proxy
 		if (RootTools.isAccessGiven())
 		{
 			try
@@ -248,6 +249,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 		startForegroundCompat(ONGOING_NOTIFICATION_ID, ongoingNotification);
 		
 		sendBroadcast(new Intent(BROADCAST_STATE_CHANGED).putExtra("enabled", true).putExtra("port", port).putExtra("manual", !isTransparent && !isNativeProxy));
+		Log.i(TAG, "Service started");
 	}
 
 	@Override
@@ -296,6 +298,8 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 
 		// Release service lock
 		stopForegroundCompat(R.string.app_name);
+		
+		Log.i(TAG, "Service stopped");
 	}
 
 	void initForegroundCompat()
@@ -660,6 +664,16 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 				}
 			}
 		}
+	}
+
+	public boolean isTransparent()
+	{
+		return isTransparent;
+	}
+
+	public boolean isNativeProxy()
+	{
+		return isNativeProxy;
 	}
 
 	private static final boolean isLocalHost(String host)
