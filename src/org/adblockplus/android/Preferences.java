@@ -3,41 +3,27 @@ package org.adblockplus.android;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.adblockplus.android.updater.AlarmReceiver;
-
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
-import android.preference.Preference;
-import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
-import android.text.ClipboardManager;
-import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Menu;
@@ -46,7 +32,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class Preferences extends SummarizedPreferences
 {
@@ -57,8 +42,6 @@ public class Preferences extends SummarizedPreferences
 	private String configurationMsg;
 	private String subscriptionSummary;
 
-	private static ProxyService proxyService = null;
-
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -67,11 +50,13 @@ public class Preferences extends SummarizedPreferences
 		super.onCreate(savedInstanceState);
 
 		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+		PreferenceManager.setDefaultValues(this, R.xml.preferences_advanced, false);
 		setContentView(R.layout.preferences);
 		addPreferencesFromResource(R.xml.preferences);
 
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
+		// Check if we need to update assets
 		int lastVersion = prefs.getInt(getString(R.string.pref_version), 0);
 		try
 		{
@@ -106,6 +91,7 @@ public class Preferences extends SummarizedPreferences
 
 		final AdblockPlus application = AdblockPlus.getApplication();
 
+		// Construct subscription list
 		RefreshableListPreference subscriptionList = (RefreshableListPreference) findPreference(getString(R.string.pref_subscription));
 		List<Subscription> subscriptions = application.getSubscriptions();
 		String[] entries = new String[subscriptions.size()];
@@ -123,6 +109,7 @@ public class Preferences extends SummarizedPreferences
 
 		boolean firstRun = false;
 
+		// If there is no current subscription autoselect one
 		if (current == null)
 		{
 			firstRun = true;
@@ -142,6 +129,7 @@ public class Preferences extends SummarizedPreferences
 			}
 		}
 
+		// Enable manual subscription refresh
 		subscriptionList.setOnRefreshClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v)
@@ -150,6 +138,7 @@ public class Preferences extends SummarizedPreferences
 			}
 		});
 
+		// Set subscription status message
 		if (subscriptionSummary != null)
 			subscriptionList.setSummary(subscriptionSummary);
 		else
@@ -162,6 +151,7 @@ public class Preferences extends SummarizedPreferences
 
 		final String url = current;
 
+		// Initialize subscription verification
 		(new Thread() {
 			@Override
 			public void run()
@@ -174,18 +164,21 @@ public class Preferences extends SummarizedPreferences
 			}
 		}).start();
 
+		// Check if service is running and update UI accordingly
 		boolean enabled = prefs.getBoolean(getString(R.string.pref_enabled), false);
 		if (enabled && !isServiceRunning())
 		{
 			setEnabled(false);
 			enabled = false;
 		}
+		// Run service if this is first run
 		else if (!enabled && firstRun)
 		{
 			startService(new Intent(this, ProxyService.class));
 			setEnabled(true);
 		}
-
+		
+		// Process screen rotation
 		if (configurationMsg != null)
 			showConfigurationMsg(configurationMsg);
 
@@ -228,8 +221,7 @@ public class Preferences extends SummarizedPreferences
 		switch (item.getItemId())
 		{
 			case R.id.menu_advanced:
-				Class<?> activity = Preferences.AdvancedPreferences.class;
-				startActivity(new Intent(Preferences.this, activity).putExtra("KEY", "preferences_advanced"));
+				startActivity(new Intent(this, AdvancedPreferences.class));
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
@@ -244,29 +236,21 @@ public class Preferences extends SummarizedPreferences
 		((CheckBoxPreference) findPreference(getString(R.string.pref_enabled))).setChecked(enabled);
 	}
 
+	/**
+	 * Checks if ProxyService is running.
+	 * 
+	 * @return true if service is running
+	 */
 	private boolean isServiceRunning()
 	{
 		ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+		// Actually it returns not only running services, so extra check is required
 		for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
 		{
-			if ("org.adblockplus.android.ProxyService".equals(service.service.getClassName()))
+			if ("org.adblockplus.android.ProxyService".equals(service.service.getClassName()) && service.pid > 0)
 				return true;
 		}
 		return false;
-	}
-
-	private void connect()
-	{
-		bindService(new Intent(this, ProxyService.class), proxyServiceConnection, 0);
-	}
-
-	private void disconnect()
-	{
-		if (proxyService != null)
-		{
-			unbindService(proxyServiceConnection);
-			proxyService = null;
-		}
 	}
 
 	private void copyAssets()
@@ -340,15 +324,9 @@ public class Preferences extends SummarizedPreferences
 		{
 			boolean enabled = sharedPreferences.getBoolean(key, false);
 			if (enabled && !isServiceRunning())
-			{
 				startService(new Intent(this, ProxyService.class));
-				connect();
-			}
 			else if (!enabled && isServiceRunning())
-			{
-				disconnect();
 				stopService(new Intent(this, ProxyService.class));
-			}
 		}
 		if (getString(R.string.pref_subscription).equals(key))
 		{
@@ -387,20 +365,6 @@ public class Preferences extends SummarizedPreferences
 		configurationMsg = null;
 	}
 
-	private ServiceConnection proxyServiceConnection = new ServiceConnection() {
-		public void onServiceConnected(ComponentName className, IBinder service)
-		{
-			proxyService = ((ProxyService.LocalBinder) service).getService();
-			Log.d(TAG, "Proxy service connected");
-		}
-
-		public void onServiceDisconnected(ComponentName className)
-		{
-			proxyService = null;
-			Log.d(TAG, "Proxy service disconnected");
-		}
-	};
-
 	private BroadcastReceiver receiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, Intent intent)
@@ -411,6 +375,7 @@ public class Preferences extends SummarizedPreferences
 			{
 				if (extra.getBoolean("enabled"))
 				{
+					// If service is enabled in manual mode, show configuration message
 					if (extra.getBoolean("manual"))
 					{
 						showConfigurationMsg(getString(R.string.msg_configuration, extra.getInt("port")));
@@ -424,6 +389,7 @@ public class Preferences extends SummarizedPreferences
 			}
 			if (action.equals(AdblockPlus.BROADCAST_FILTER_MATCHES))
 			{
+				// Hide configuration message if traffic is detected
 				hideConfigurationMsg();
 			}
 			if (action.equals(ProxyService.BROADCAST_PROXY_FAILED))
@@ -473,145 +439,6 @@ public class Preferences extends SummarizedPreferences
 			}
 		}
 	};
-
-	public static class AdvancedPreferences extends SummarizedPreferences
-	{
-		private static final int CONFIGURATION_DIALOG = 1;
-
-		@Override
-		public void onCreate(Bundle savedInstanceState)
-		{
-			super.onCreate(savedInstanceState);
-
-			String key = getIntent().getExtras().getString("KEY");
-			int res = getResources().getIdentifier(key, "xml", getPackageName());
-
-			addPreferencesFromResource(res);
-
-			PreferenceScreen screen = getPreferenceScreen();
-			if (Build.VERSION.SDK_INT >= 12) // Honeycomb 3.1
-			{
-				screen.removePreference(findPreference(getString(R.string.pref_proxy)));
-			}
-			if (getResources().getBoolean(R.bool.def_release))
-			{
-				screen.removePreference(findPreference(getString(R.string.pref_support)));
-			}
-
-			Preference prefUpdate = findPreference(getString(R.string.pref_checkupdate));
-			prefUpdate.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-				public boolean onPreferenceClick(Preference preference)
-				{
-					Intent updater = new Intent(AdvancedPreferences.this, AlarmReceiver.class).putExtra("notifynoupdate", true);
-					sendBroadcast(updater);
-					return true;
-				}
-			});
-
-			Preference prefConfiguration = findPreference(getString(R.string.pref_configuration));
-			prefConfiguration.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-				public boolean onPreferenceClick(Preference preference)
-				{
-					showDialog(CONFIGURATION_DIALOG);
-					return true;
-				}
-			});
-		}
-
-		@Override
-		public void onResume()
-		{
-			super.onResume();
-			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-			int refresh = Integer.valueOf(prefs.getString(getString(R.string.pref_refresh), "0"));
-			findPreference(getString(R.string.pref_wifirefresh)).setEnabled(refresh > 0);
-		}
-
-		@Override
-		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
-		{
-			if (getString(R.string.pref_refresh).equals(key))
-			{
-				int refresh = Integer.valueOf(sharedPreferences.getString(getString(R.string.pref_refresh), "0"));
-				findPreference(getString(R.string.pref_wifirefresh)).setEnabled(refresh > 0);
-			}
-			if (getString(R.string.pref_crashreport).equals(key))
-			{
-				AdblockPlus application = AdblockPlus.getApplication();
-				application.updateCrashReportStatus();
-			}
-			super.onSharedPreferenceChanged(sharedPreferences, key);
-		}
-
-		@Override
-		protected Dialog onCreateDialog(int id)
-		{
-			Dialog dialog = null;
-			switch (id)
-			{
-				case CONFIGURATION_DIALOG:
-					List<String> items = new ArrayList<String>();
-					int versionCode = -1;
-					try
-					{
-						PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(), 0);
-						versionCode = pi.versionCode;
-					}
-					catch (NameNotFoundException e)
-					{
-						// ignore - this shouldn't happen
-					}
-					items.add(String.format("API: %d Build: %d", Build.VERSION.SDK_INT, versionCode));
-					if (proxyService != null)
-					{
-						items.add(String.format("Local port: %d", proxyService.port));
-						if (Build.VERSION.SDK_INT >= 12) // Honeycomb 3.1
-						{
-							String[] px = proxyService.getUserProxy();
-							if (px != null)
-							{
-								items.add("System settings:");
-								items.add(String.format("Host: [%s] Port: [%s] Excl: [%s]", px[0], px[1], px[2]));
-							}
-						}
-						items.add("Proxy settings:");
-						items.add(String.format("Host: [%s] Port: [%s] Excl: [%s]", proxyService.proxy.props.getProperty("adblock.proxyHost"), proxyService.proxy.props.getProperty("adblock.proxyPort"), proxyService.proxy.props.getProperty("adblock.proxyExcl")));
-						if (proxyService.proxy.props.getProperty("adblock.auth") != null)
-							items.add("Auth: yes");
-					}
-
-					TextView messageText = new TextView(this);
-					messageText.setPadding(12, 6, 12, 6);
-					messageText.setText(TextUtils.join("\n", items));
-					messageText.setOnClickListener(new View.OnClickListener() {
-
-						@Override
-						public void onClick(View v)
-						{
-							ClipboardManager manager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-							TextView showTextParam = (TextView) v;
-							manager.setText(showTextParam.getText());
-							Toast.makeText(v.getContext(), R.string.msg_clipboard, Toast.LENGTH_SHORT).show();
-						}
-					});
-
-					AlertDialog.Builder builder = new AlertDialog.Builder(this);
-					builder.setView(messageText)
-						   .setTitle(R.string.configuration_name)
-						   .setIcon(android.R.drawable.ic_dialog_info)
-						   .setCancelable(false)
-						   .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id)
-						{
-							dialog.cancel();
-						}
-					});
-					dialog = builder.create();
-					break;
-			}
-			return dialog;
-		}
-	}
 
 	@Override
 	protected void onRestoreInstanceState(Bundle state)
