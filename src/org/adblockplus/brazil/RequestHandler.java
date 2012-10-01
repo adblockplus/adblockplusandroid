@@ -255,20 +255,10 @@ public class RequestHandler implements Handler
 					if (encodingHeader.equals("gzip") || encodingHeader.equals("x-gzip"))
 					{
 						in = new GZIPInputStream(his);
-						request.responseHeaders.remove("Content-Length");
-						request.responseHeaders.remove("Content-Encoding");
-						out = new ChunkedOutputStream(request.out);
-						request.responseHeaders.add("Transfer-Encoding", "chunked");
-						size = Integer.MAX_VALUE;
 					}
 					else if (encodingHeader.equals("compress") || encodingHeader.equals("x-compress"))
 					{
 						in = new InflaterInputStream(his);
-						request.responseHeaders.remove("Content-Length");
-						request.responseHeaders.remove("Content-Encoding");
-						out = new ChunkedOutputStream(request.out);
-						request.responseHeaders.add("Transfer-Encoding", "chunked");
-						size = Integer.MAX_VALUE;
 					}
 					else
 					{
@@ -277,6 +267,19 @@ public class RequestHandler implements Handler
 						out = request.out;
 						selectors = null;
 					}
+				}
+				else
+				{
+                    in = new BufferedInputStream(his);
+				}
+				// Use chunked encoding to inject filters in page
+				if (out == null)
+				{
+                    request.responseHeaders.remove("Content-Length");
+                    request.responseHeaders.remove("Content-Encoding");
+                    out = new ChunkedOutputStream(request.out);
+                    request.responseHeaders.add("Transfer-Encoding", "chunked");
+                    size = Integer.MAX_VALUE;
 				}
 
 				request.sendHeaders(-1, null, -1);
@@ -309,7 +312,7 @@ public class RequestHandler implements Handler
 							{
 								// TODO Do we need to set encoding here?
 								byte[] addon = selectors.getBytes();
-								// Add selectors right before match
+								// Add filters right before match
 								int m = matches.get(0);
 								out.write(buf, 0, m);
 								out.write(addon);
