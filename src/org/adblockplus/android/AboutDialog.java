@@ -17,65 +17,65 @@ import android.widget.TextView;
 
 public class AboutDialog extends Dialog
 {
-	private static Context mContext = null;
+  private static Context mContext = null;
 
-	public AboutDialog(Context context)
-	{
-		super(context);
-		mContext = context;
-	}
+  public AboutDialog(Context context)
+  {
+    super(context);
+    mContext = context;
+  }
 
-	@Override
-	public void onCreate(Bundle savedInstanceState)
-	{
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		setContentView(R.layout.about);
-		String versionName = "--";
-		int versionCode = -1;
-		try
-		{
-			PackageInfo pi = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
-			versionName = pi.versionName;
-			versionCode = pi.versionCode;
-		}
-		catch (NameNotFoundException ex)
-		{
-		}
+  @Override
+  public void onCreate(Bundle savedInstanceState)
+  {
+    requestWindowFeature(Window.FEATURE_NO_TITLE);
+    setContentView(R.layout.about);
+    String versionName = "--";
+    int versionCode = -1;
+    try
+    {
+      PackageInfo pi = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
+      versionName = pi.versionName;
+      versionCode = pi.versionCode;
+    }
+    catch (NameNotFoundException ex)
+    {
+    }
 
-		StringBuilder info = new StringBuilder();
-		info.append("<h3>");
-		info.append(mContext.getString(R.string.app_name));
-		info.append("</h3>");
-		info.append("<p>");
-		info.append(mContext.getString(R.string.version));
-		info.append(": ");
-		info.append(versionName);
-		info.append(" ");
-		info.append(mContext.getString(R.string.build));
-		info.append(" ");
-		info.append(versionCode);
-		info.append("</p>");
-		appendRawTextFile(info, R.raw.info);
-		appendRawTextFile(info, R.raw.legal);
-		
-		TextView tv = (TextView) findViewById(R.id.about_text);
-		tv.setText(Html.fromHtml(info.toString()));
-		tv.setMovementMethod(LinkMovementMethod.getInstance());
-	}
+    StringBuilder info = new StringBuilder();
+    info.append("<h3>");
+    info.append(mContext.getString(R.string.app_name));
+    info.append("</h3>");
+    info.append("<p>");
+    info.append(mContext.getString(R.string.version));
+    info.append(": ");
+    info.append(versionName);
+    info.append(" ");
+    info.append(mContext.getString(R.string.build));
+    info.append(" ");
+    info.append(versionCode);
+    info.append("</p>");
+    appendRawTextFile(info, R.raw.info);
+    appendRawTextFile(info, R.raw.legal);
 
-	public static void appendRawTextFile(StringBuilder text, int id)
-	{
-		InputStream inputStream = mContext.getResources().openRawResource(id);
-		InputStreamReader in = new InputStreamReader(inputStream);
-		BufferedReader buf = new BufferedReader(in);
-		String line;
-		try
-		{
-			while ((line = buf.readLine()) != null)
-				text.append(line);
-		}
-		catch (IOException e)
-		{
-		}
-	}
+    TextView tv = (TextView) findViewById(R.id.about_text);
+    tv.setText(Html.fromHtml(info.toString()));
+    tv.setMovementMethod(LinkMovementMethod.getInstance());
+  }
+
+  public static void appendRawTextFile(StringBuilder text, int id)
+  {
+    InputStream inputStream = mContext.getResources().openRawResource(id);
+    InputStreamReader in = new InputStreamReader(inputStream);
+    BufferedReader buf = new BufferedReader(in);
+    String line;
+    try
+    {
+      while ((line = buf.readLine()) != null)
+        text.append(line);
+    }
+    catch (IOException e)
+    {
+    }
+  }
 }
