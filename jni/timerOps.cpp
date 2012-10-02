@@ -72,5 +72,5 @@ long RunNextCallback(v8::Handle<v8::Context> context)
 
 void ClearQueue()
 {
-	queue.clear();
+  queue.clear();
 }

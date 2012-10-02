@@ -5,34 +5,34 @@
 
 v8::Handle<v8::Value> loadImpl(const v8::Arguments& args)
 {
-	v8::HandleScope handle_scope;
-	if (args.Length() < 1)
-		return v8::ThrowException(v8::String::New("File name expected"));
+  v8::HandleScope handle_scope;
+  if (args.Length() < 1)
+    return v8::ThrowException(v8::String::New("File name expected"));
 
-	v8::String::Utf8Value str(args[0]);
-	if (!*str)
-		return v8::ThrowException(v8::String::New("File name isn't a string"));
+  v8::String::Utf8Value str(args[0]);
+  if (!*str)
+    return v8::ThrowException(v8::String::New("File name isn't a string"));
 
-	jstring jstr = jniEnv->NewStringUTF(*str);
+  jstring jstr = jniEnv->NewStringUTF(*str);
 
-	jstring result;
-	jclass cls = jniEnv->GetObjectClass(jniCallback);
-	jmethodID mid = jniEnv->GetMethodID(cls, "readJSFile", "(Ljava/lang/String;)Ljava/lang/String;");
-	if (mid)
-		result = (jstring) jniEnv->CallObjectMethod(jniCallback, mid, jstr);
-	jniEnv->DeleteLocalRef(jstr);
+  jstring result;
+  jclass cls = jniEnv->GetObjectClass(jniCallback);
+  jmethodID mid = jniEnv->GetMethodID(cls, "readJSFile", "(Ljava/lang/String;)Ljava/lang/String;");
+  if (mid)
+    result = (jstring) jniEnv->CallObjectMethod(jniCallback, mid, jstr);
+  jniEnv->DeleteLocalRef(jstr);
 
-	/*
-	const char* src = jniEnv->GetStringUTFChars(result, 0);
-	v8::Handle<v8::String> source = v8::String::New(src, jniEnv->GetStringLength(result));
-	jniEnv->ReleaseStringUTFChars(result, src);
-	*/
-	v8::Handle<v8::String> source = v8::Handle<v8::String>::Cast(wrapJavaObject(jniEnv, result));
-	v8::Handle<v8::Script> script = v8::Script::Compile(source, args[0]);
-	if (!script.IsEmpty())
-		script->Run();
+  /*
+  const char* src = jniEnv->GetStringUTFChars(result, 0);
+  v8::Handle<v8::String> source = v8::String::New(src, jniEnv->GetStringLength(result));
+  jniEnv->ReleaseStringUTFChars(result, src);
+  */
+  v8::Handle<v8::String> source = v8::Handle<v8::String>::Cast(wrapJavaObject(jniEnv, result));
+  v8::Handle<v8::Script> script = v8::Script::Compile(source, args[0]);
+  if (!script.IsEmpty())
+    script->Run();
 
-	return v8::Undefined();
+  return v8::Undefined();
 }
 
 v8::Handle<v8::Value> setStatusImpl(const v8::Arguments& args)
@@ -65,33 +65,33 @@ v8::Handle<v8::Value> setStatusImpl(const v8::Arguments& args)
 
 v8::Handle<v8::Value> canAutoupdateImpl(const v8::Arguments& args)
 {
-	v8::HandleScope handle_scope;
+  v8::HandleScope handle_scope;
 
-	jboolean result;
-	jclass cls = jniEnv->GetObjectClass(jniCallback);
-	jmethodID mid = jniEnv->GetMethodID(cls, "canAutoupdate", "()Z");
-	if (mid)
-		result = jniEnv->CallBooleanMethod(jniCallback, mid);
-	return wrapJavaObject(jniEnv, NewBoolean(jniEnv, result));
+  jboolean result;
+  jclass cls = jniEnv->GetObjectClass(jniCallback);
+  jmethodID mid = jniEnv->GetMethodID(cls, "canAutoupdate", "()Z");
+  if (mid)
+    result = jniEnv->CallBooleanMethod(jniCallback, mid);
+  return wrapJavaObject(jniEnv, NewBoolean(jniEnv, result));
 }
 
 v8::Handle<v8::Value> showToastImpl(const v8::Arguments& args)
 {
-	v8::HandleScope handle_scope;
-	if (args.Length() < 1)
-		return v8::ThrowException(v8::String::New("String expected"));
+  v8::HandleScope handle_scope;
+  if (args.Length() < 1)
+    return v8::ThrowException(v8::String::New("String expected"));
 
-	v8::String::Utf8Value str(args[0]);
-	if (!*str)
-    	return v8::ThrowException(v8::String::New("Parameter cannot be converted to string"));
-	__android_log_print(ANDROID_LOG_INFO, "ST", *str);
-	jstring jstr = jniEnv->NewStringUTF(*str);
+  v8::String::Utf8Value str(args[0]);
+  if (!*str)
+      return v8::ThrowException(v8::String::New("Parameter cannot be converted to string"));
+  __android_log_print(ANDROID_LOG_INFO, "ST", *str);
+  jstring jstr = jniEnv->NewStringUTF(*str);
 
-	static jclass cls = jniEnv->GetObjectClass(jniCallback);
-	static jmethodID mid = jniEnv->GetMethodID(cls, "showToast", "(Ljava/lang/String;)V");
-	if (mid)
-    	jniEnv->CallVoidMethod(jniCallback, mid, jstr);
-	jniEnv->DeleteLocalRef(jstr);
+  static jclass cls = jniEnv->GetObjectClass(jniCallback);
+  static jmethodID mid = jniEnv->GetMethodID(cls, "showToast", "(Ljava/lang/String;)V");
+  if (mid)
+      jniEnv->CallVoidMethod(jniCallback, mid, jstr);
+  jniEnv->DeleteLocalRef(jstr);
 
     return v8::Undefined();
 }
@@ -106,7 +106,7 @@ v8::Handle<v8::Value> printImpl(const v8::Arguments& args)
     if (first)
       first = false;
     else
-    	msg += " ";
+      msg += " ";
     v8::String::Utf8Value str(args[i]);
     if (!*str)
       return v8::ThrowException(v8::String::New("Parameter cannot be converted to string"));

@@ -94,7 +94,7 @@ var Components =
                 break;
               s += line.value;
             }
-          	return JSON.parse(s);
+            return JSON.parse(s);
           },
           encodeToStream: function(stream, encoding, something, obj)
           {
@@ -501,7 +501,7 @@ function updateSubscriptionStatus(subscription)
   }
   else
     status = "synchronize_never";
-    
+
   Android.setStatus(status, time);
 }
 
@@ -530,7 +530,7 @@ function matchesAny(url, query, reqHost, refHost, accept)
 {
   var contentType = null;
   var thirdParty = false;
-  
+
   if (accept != "")
   {
     if (accept.indexOf("text/css") != -1)
@@ -553,14 +553,14 @@ function matchesAny(url, query, reqHost, refHost, accept)
   }
   if (contentType == null)
     contentType = "OTHER";
-  
+
   if (refHost != "")
   {
     thirdParty = isThirdParty(reqHost, refHost);
   }
-  
+
   if (query != "")
-  	url = url + "?" + query;
+    url = url + "?" + query;
 
   return defaultMatcher.matchesAny(url, contentType, null, thirdParty) != null;
 }
