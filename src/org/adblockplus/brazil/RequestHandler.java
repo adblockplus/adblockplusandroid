@@ -201,6 +201,7 @@ public class RequestHandler implements Handler
 			}
 			HttpRequest.removePointToPointHeaders(target.responseHeaders, true);
 
+			request.setStatus(target.getResponseCode());
 			target.responseHeaders.copyTo(request.responseHeaders);
 			try
 			{
@@ -231,7 +232,7 @@ public class RequestHandler implements Handler
 			    }
 				else
 				{
-					request.sendResponse(target.getInputStream(), contentLength, null, target.getResponseCode());
+					request.sendResponse(target.getInputStream(), contentLength, null, -1);
 				}
 			}
 			// Insert filters otherwise
