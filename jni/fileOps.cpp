@@ -11,12 +11,12 @@ v8::Handle<v8::Value> fileExistsImpl(const v8::Arguments& args)
 
   if (args.Length() < 1)
   {
-	return v8::ThrowException(v8::String::New("File name expected"));
+    return v8::ThrowException(v8::String::New("File name expected"));
   }
   v8::String::AsciiValue fileName(args[0]);
   if (!*fileName)
   {
-	return v8::ThrowException(v8::String::New("File name isn't a string"));
+    return v8::ThrowException(v8::String::New("File name isn't a string"));
   }
   __android_log_print(ANDROID_LOG_INFO, "JS", "fileExists(%s)", *fileName);
 
@@ -32,12 +32,12 @@ v8::Handle<v8::Value> fileLastModifiedImpl(const v8::Arguments& args)
 
   if (args.Length() < 1)
   {
-	return v8::ThrowException(v8::String::New("File name expected"));
+    return v8::ThrowException(v8::String::New("File name expected"));
   }
   v8::String::AsciiValue fileName(args[0]);
   if (!*fileName)
   {
-	return v8::ThrowException(v8::String::New("File name isn't a string"));
+    return v8::ThrowException(v8::String::New("File name isn't a string"));
   }
   __android_log_print(ANDROID_LOG_INFO, "JS", "fileLastModified(%s)", *fileName);
 
@@ -53,12 +53,12 @@ v8::Handle<v8::Value> fileRemoveImpl(const v8::Arguments& args)
 
   if (args.Length() < 1)
   {
-	return v8::ThrowException(v8::String::New("File name expected"));
+    return v8::ThrowException(v8::String::New("File name expected"));
   }
   v8::String::AsciiValue fileName(args[0]);
   if (!*fileName)
   {
-	return v8::ThrowException(v8::String::New("File name isn't a string"));
+    return v8::ThrowException(v8::String::New("File name isn't a string"));
   }
   __android_log_print(ANDROID_LOG_INFO, "JS", "fileRemove(%s)", *fileName);
 
@@ -76,18 +76,18 @@ v8::Handle<v8::Value> fileRenameImpl(const v8::Arguments& args)
 
   if (args.Length() < 2)
   {
-	return v8::ThrowException(v8::String::New("File names expected"));
+    return v8::ThrowException(v8::String::New("File names expected"));
   }
   v8::String::AsciiValue fileName(args[0]);
   if (!*fileName)
   {
-	return v8::ThrowException(v8::String::New("File name isn't a string"));
+    return v8::ThrowException(v8::String::New("File name isn't a string"));
   }
 
   v8::String::AsciiValue newPath(args[1]);
   if (!*newPath)
   {
-	return v8::ThrowException(v8::String::New("File name isn't a string"));
+    return v8::ThrowException(v8::String::New("File name isn't a string"));
   }
   __android_log_print(ANDROID_LOG_INFO, "JS", "fileRename(%s, %s)", *fileName, *newPath);
 
@@ -105,12 +105,12 @@ v8::Handle<v8::Value> fileReadImpl(const v8::Arguments& args)
 
   if (args.Length() < 1)
   {
-	return v8::ThrowException(v8::String::New("File name expected"));
+    return v8::ThrowException(v8::String::New("File name expected"));
   }
   v8::String::AsciiValue fileName(args[0]);
   if (!*fileName)
   {
-	return v8::ThrowException(v8::String::New("File name isn't a string"));
+    return v8::ThrowException(v8::String::New("File name isn't a string"));
   }
   __android_log_print(ANDROID_LOG_INFO, "JS", "fileRead(%s)", *fileName);
 
@@ -150,12 +150,12 @@ v8::Handle<v8::Value> fileWriteImpl(const v8::Arguments& args)
 
   if (args.Length() < 1)
   {
-	return v8::ThrowException(v8::String::New("File name expected"));
+    return v8::ThrowException(v8::String::New("File name expected"));
   }
   v8::String::AsciiValue fileName(args[0]);
   if (!*fileName)
   {
-	return v8::ThrowException(v8::String::New("File name isn't a string"));
+    return v8::ThrowException(v8::String::New("File name isn't a string"));
   }
   __android_log_print(ANDROID_LOG_INFO, "JS", "fileWrite(%s)", *fileName);
 

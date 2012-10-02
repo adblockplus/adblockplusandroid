@@ -5,30 +5,30 @@
 
 jobject NewBoolean(JNIEnv *pEnv, jboolean value)
 {
-	static jclass cls = pEnv->FindClass("java/lang/Boolean");
-	static jmethodID cid = pEnv->GetMethodID(cls, "<init>", "(Z)V");
-	return pEnv->NewObject(cls, cid, value);
+  static jclass cls = pEnv->FindClass("java/lang/Boolean");
+  static jmethodID cid = pEnv->GetMethodID(cls, "<init>", "(Z)V");
+  return pEnv->NewObject(cls, cid, value);
 }
 
 jobject NewInt(JNIEnv *pEnv, jint value)
 {
-	static jclass cls = pEnv->FindClass("java/lang/Integer");
-	static jmethodID cid = pEnv->GetMethodID(cls, "<init>", "(I)V");
-	return pEnv->NewObject(cls, cid, value);
+  static jclass cls = pEnv->FindClass("java/lang/Integer");
+  static jmethodID cid = pEnv->GetMethodID(cls, "<init>", "(I)V");
+  return pEnv->NewObject(cls, cid, value);
 }
 
 jobject NewLong(JNIEnv *pEnv, jlong value)
 {
-	static jclass cls = pEnv->FindClass("java/lang/Long");
-	static jmethodID cid = pEnv->GetMethodID(cls, "<init>", "(J)V");
-	return pEnv->NewObject(cls, cid, value);
+  static jclass cls = pEnv->FindClass("java/lang/Long");
+  static jmethodID cid = pEnv->GetMethodID(cls, "<init>", "(J)V");
+  return pEnv->NewObject(cls, cid, value);
 }
 
 jobject NewDouble(JNIEnv *pEnv, jdouble value)
 {
-	static jclass cls = pEnv->FindClass("java/lang/Double");
-	static jmethodID cid = pEnv->GetMethodID(cls, "<init>", "(D)V");
-	return pEnv->NewObject(cls, cid, value);
+  static jclass cls = pEnv->FindClass("java/lang/Double");
+  static jmethodID cid = pEnv->GetMethodID(cls, "<init>", "(D)V");
+  return pEnv->NewObject(cls, cid, value);
 }
 
 jstring NewString(JNIEnv *pEnv, v8::Handle<v8::String> str)
@@ -38,10 +38,10 @@ jstring NewString(JNIEnv *pEnv, v8::Handle<v8::String> str)
 
 jobject NewDate(JNIEnv *pEnv, v8::Handle<v8::Date> date)
 {
-	static jclass cls = pEnv->FindClass("java/lang/Double");
-	static jmethodID cid = pEnv->GetMethodID(cls, "<init>", "(J)V");
-	jlong value = floor(date->NumberValue());
-	return pEnv->NewObject(cls, cid, value);
+  static jclass cls = pEnv->FindClass("java/lang/Double");
+  static jmethodID cid = pEnv->GetMethodID(cls, "<init>", "(J)V");
+  jlong value = floor(date->NumberValue());
+  return pEnv->NewObject(cls, cid, value);
 }
 
 jobject wrapJSObject(JNIEnv *pEnv, v8::Handle<v8::Value> value)
@@ -64,79 +64,79 @@ jobject wrapJSObject(JNIEnv *pEnv, v8::Handle<v8::Value> value)
 
 v8::Handle<v8::Value> wrapJavaObject(JNIEnv *pEnv, jobject value)
 {
-	v8::HandleScope handle_scope;
-	v8::TryCatch try_catch;
+  v8::HandleScope handle_scope;
+  v8::TryCatch try_catch;
 
-	if (value == NULL)
-		return handle_scope.Close(v8::Null());
+  if (value == NULL)
+    return handle_scope.Close(v8::Null());
 
-	v8::Handle<v8::Value> result;
+  v8::Handle<v8::Value> result;
 
-	jclass cls = pEnv->GetObjectClass(value);
+  jclass cls = pEnv->GetObjectClass(value);
 
-	if (pEnv->IsAssignableFrom(cls, pEnv->FindClass("java/lang/String")) == JNI_TRUE)
-	{
-		jstring str = (jstring) value;
-		const char *p = pEnv->GetStringUTFChars(str, NULL);
+  if (pEnv->IsAssignableFrom(cls, pEnv->FindClass("java/lang/String")) == JNI_TRUE)
+  {
+    jstring str = (jstring) value;
+    const char *p = pEnv->GetStringUTFChars(str, NULL);
 
-		result = v8::String::New(p, pEnv->GetStringUTFLength(str));
+    result = v8::String::New(p, pEnv->GetStringUTFLength(str));
 
-		pEnv->ReleaseStringUTFChars(str, p);
-	}
-	else if (pEnv->IsAssignableFrom(cls, pEnv->FindClass("java/lang/Long")) == JNI_TRUE
-			|| pEnv->IsAssignableFrom(cls, pEnv->FindClass("java/lang/Integer")) == JNI_TRUE
-			|| pEnv->IsAssignableFrom(cls, pEnv->FindClass("java/lang/Short")) == JNI_TRUE
-			|| pEnv->IsAssignableFrom(cls, pEnv->FindClass("java/lang/Byte")) == JNI_TRUE)
-	{
-		static jmethodID mid = pEnv->GetMethodID(pEnv->FindClass("java/lang/Number"), "intValue", "()I");
+    pEnv->ReleaseStringUTFChars(str, p);
+  }
+  else if (pEnv->IsAssignableFrom(cls, pEnv->FindClass("java/lang/Long")) == JNI_TRUE
+      || pEnv->IsAssignableFrom(cls, pEnv->FindClass("java/lang/Integer")) == JNI_TRUE
+      || pEnv->IsAssignableFrom(cls, pEnv->FindClass("java/lang/Short")) == JNI_TRUE
+      || pEnv->IsAssignableFrom(cls, pEnv->FindClass("java/lang/Byte")) == JNI_TRUE)
+  {
+    static jmethodID mid = pEnv->GetMethodID(pEnv->FindClass("java/lang/Number"), "intValue", "()I");
 
-		result = v8::Integer::New(pEnv->CallIntMethod(value, mid));
-	}
-	else if (pEnv->IsAssignableFrom(cls, pEnv->FindClass("java/lang/Double")) == JNI_TRUE
-			|| pEnv->IsAssignableFrom(cls, pEnv->FindClass("java/lang/Float")) == JNI_TRUE)
-	{
-		static jmethodID mid = pEnv->GetMethodID(pEnv->FindClass("java/lang/Number"), "doubleValue", "()D");
+    result = v8::Integer::New(pEnv->CallIntMethod(value, mid));
+  }
+  else if (pEnv->IsAssignableFrom(cls, pEnv->FindClass("java/lang/Double")) == JNI_TRUE
+      || pEnv->IsAssignableFrom(cls, pEnv->FindClass("java/lang/Float")) == JNI_TRUE)
+  {
+    static jmethodID mid = pEnv->GetMethodID(pEnv->FindClass("java/lang/Number"), "doubleValue", "()D");
 
-		result = v8::Number::New(pEnv->CallDoubleMethod(value, mid));
-	}
-	else if (pEnv->IsAssignableFrom(cls, pEnv->FindClass("java/lang/Boolean")) == JNI_TRUE)
-	{
-		static jmethodID mid = pEnv->GetMethodID(pEnv->FindClass("java/lang/Boolean"), "booleanValue", "()Z");
+    result = v8::Number::New(pEnv->CallDoubleMethod(value, mid));
+  }
+  else if (pEnv->IsAssignableFrom(cls, pEnv->FindClass("java/lang/Boolean")) == JNI_TRUE)
+  {
+    static jmethodID mid = pEnv->GetMethodID(pEnv->FindClass("java/lang/Boolean"), "booleanValue", "()Z");
 
-		result = v8::Boolean::New(pEnv->CallBooleanMethod(value, mid));
-	}
-	else if (pEnv->IsAssignableFrom(cls, pEnv->FindClass("java/util/Date")) == JNI_TRUE)
-	{
-		static jmethodID mid = pEnv->GetMethodID(pEnv->FindClass("java/util/Date"), "getTime", "()J");
+    result = v8::Boolean::New(pEnv->CallBooleanMethod(value, mid));
+  }
+  else if (pEnv->IsAssignableFrom(cls, pEnv->FindClass("java/util/Date")) == JNI_TRUE)
+  {
+    static jmethodID mid = pEnv->GetMethodID(pEnv->FindClass("java/util/Date"), "getTime", "()J");
 
-		result = v8::Date::New(pEnv->CallLongMethod(value, mid));
-	}
-	/*
-	 else if (pEnv->IsAssignableFrom(cls, pEnv->FindClass("java/lang/reflect/Method")) == JNI_TRUE)
-	 {
-	 result = jni::CJavaFunction::Wrap(pEnv, value);
-	 }
-	 */
-	else
-	{
-		static jmethodID mid = pEnv->GetMethodID(pEnv->FindClass("java/lang/Class"), "isArray", "()Z");
+    result = v8::Date::New(pEnv->CallLongMethod(value, mid));
+  }
+  /*
+   else if (pEnv->IsAssignableFrom(cls, pEnv->FindClass("java/lang/reflect/Method")) == JNI_TRUE)
+   {
+   result = jni::CJavaFunction::Wrap(pEnv, value);
+   }
+   */
+  else
+  {
+    static jmethodID mid = pEnv->GetMethodID(pEnv->FindClass("java/lang/Class"), "isArray", "()Z");
 
-		if (pEnv->CallBooleanMethod(pEnv->GetObjectClass(value), mid))
-		{
-			size_t len = pEnv->GetArrayLength((jarray) value);
-			v8::Handle<v8::Array> items = v8::Array::New(len);
+    if (pEnv->CallBooleanMethod(pEnv->GetObjectClass(value), mid))
+    {
+      size_t len = pEnv->GetArrayLength((jarray) value);
+      v8::Handle<v8::Array> items = v8::Array::New(len);
 
-			for (size_t i=0; i<len; i++)
-			{
-				jobject item = pEnv->GetObjectArrayElement((jobjectArray) value, i);
-				items->Set(i, wrapJavaObject(pEnv, item));
-				pEnv->DeleteLocalRef(item);
-			}
+      for (size_t i=0; i<len; i++)
+      {
+        jobject item = pEnv->GetObjectArrayElement((jobjectArray) value, i);
+        items->Set(i, wrapJavaObject(pEnv, item));
+        pEnv->DeleteLocalRef(item);
+      }
 
-			result = items;
-		}
-	}
+      result = items;
+    }
+  }
 
-	return try_catch.HasCaught() ? v8::Handle<v8::Value>() : handle_scope.Close(result);
+  return try_catch.HasCaught() ? v8::Handle<v8::Value>() : handle_scope.Close(result);
 //  return ThrowIf(try_catch) ? v8::Handle<v8::Value>() : handle_scope.Close(result);
 }
