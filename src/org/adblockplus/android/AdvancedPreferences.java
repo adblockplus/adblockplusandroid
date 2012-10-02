@@ -52,6 +52,8 @@ public class AdvancedPreferences extends SummarizedPreferences
 		{
 			screen.removePreference(findPreference(getString(R.string.pref_support)));
 		}
+		else
+		{
 
 		Preference prefUpdate = findPreference(getString(R.string.pref_checkupdate));
 		prefUpdate.setOnPreferenceClickListener(new OnPreferenceClickListener() {
@@ -71,6 +73,7 @@ public class AdvancedPreferences extends SummarizedPreferences
 				return true;
 			}
 		});
+		}
 	}
 
 	@Override
