@@ -9,20 +9,20 @@ import sunlabs.brazil.server.Server;
 public class TransparentProxyHandler implements Handler
 {
 
-	@Override
-	public boolean init(Server server, String prefix)
-	{
-		return true;
-	}
+  @Override
+  public boolean init(Server server, String prefix)
+  {
+    return true;
+  }
 
-	@Override
-	public boolean respond(Request request) throws IOException
-	{
-		if (! request.url.contains("://"))
-		{
-			request.url = "http://" + request.headers.get("host") + request.url;
-		}		
-		return false;
-	}
+  @Override
+  public boolean respond(Request request) throws IOException
+  {
+    if (!request.url.contains("://"))
+    {
+      request.url = "http://" + request.headers.get("host") + request.url;
+    }
+    return false;
+  }
 
 }
