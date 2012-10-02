@@ -4,6 +4,9 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**
+ * ChunkedOutputStream implements chunked HTTP transfer encoding wrapper for OutputStream.
+ */
 public class ChunkedOutputStream extends FilterOutputStream
 {
 	private static final byte[] CRLF = {'\r', '\n'};
@@ -49,15 +52,18 @@ public class ChunkedOutputStream extends FilterOutputStream
 	
 	private void writeChunk(byte buffer[], int offset, int length) throws IOException
 	{
-		// Write the chunk length as a hex number
-		writeHex(length);
-		// Write the data
-		if (length != 0)
-			out.write(buffer, offset, length);
-		// Write a CRLF
-		out.write(CRLF);
-		// Flush the underlying stream
-		out.flush();
+	    // Zero sized buffers are ok for slow connections but not in our case - zero chunk is used to indicate end of transfer.
+	    if (length > 0)
+	    {
+	        // Write the chunk length as a hex number
+	        writeHex(length);
+	        // Write the data
+            out.write(buffer, offset, length);
+	        // Write a CRLF
+	        out.write(CRLF);
+	        // Flush the underlying stream
+	        out.flush();
+	    }
 	}
 
 	private void writeHex(int i) throws IOException

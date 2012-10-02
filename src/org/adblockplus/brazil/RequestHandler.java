@@ -273,7 +273,7 @@ public class RequestHandler implements Handler
 				{
                     in = new BufferedInputStream(his);
 				}
-				// Use chunked encoding to inject filters in page
+				// Use chunked encoding when injecting filters in page
 				if (out == null)
 				{
                     request.responseHeaders.remove("Content-Length");
