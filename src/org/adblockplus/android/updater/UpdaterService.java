@@ -21,6 +21,9 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
 
+/**
+ * Update downloader.
+ */
 public class UpdaterService extends Service
 {
   private final static String TAG = "UpdaterService";
@@ -31,6 +34,7 @@ public class UpdaterService extends Service
   public void onCreate()
   {
     super.onCreate();
+    // Use common Android path for downloads
     updateDir = new File(Environment.getExternalStorageDirectory().getPath(), "downloads");
   }
 

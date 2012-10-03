@@ -10,6 +10,9 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
 import android.util.Log;
 
+/**
+ * Writes crash data in file.
+ */
 public class CrashHandler implements UncaughtExceptionHandler
 {
   public static final String REPORT_FILE = "AdblockPlus_Crash_Report.txt";
@@ -64,11 +67,15 @@ public class CrashHandler implements UncaughtExceptionHandler
     try
     {
       PrintWriter pw = new PrintWriter(mContext.openFileOutput(filename, Context.MODE_WORLD_READABLE));
+      // Write Android version
       pw.println(Build.VERSION.SDK_INT);
+      // Write application build number
       pw.println(versionCode);
 
+      // Write exception data
       printThrowable(error, pw);
       Throwable cause = error.getCause();
+      // Write cause data
       if (cause != null)
       {
         pw.println("cause");
@@ -85,6 +92,7 @@ public class CrashHandler implements UncaughtExceptionHandler
 
   private void printThrowable(Throwable error, PrintWriter pw)
   {
+    // Use simplest format for speed - we do not have much time
     pw.println(error.getClass().getName());
     pw.println(error.getMessage());
     StackTraceElement[] trace = error.getStackTrace();

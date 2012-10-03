@@ -48,13 +48,14 @@ public class ChunkedOutputStream extends FilterOutputStream
   public void writeFinalChunk() throws IOException
   {
     out.write(FINAL_CHUNK);
+    out.flush();
     wroteFinalChunk = true;
   }
 
   private void writeChunk(byte buffer[], int offset, int length) throws IOException
   {
-    // Zero sized buffers are ok for slow connections but not in our case - zero
-    // chunk is used to indicate end of transfer.
+    // Zero sized buffers are ok on slow connections but not in our case - zero
+    // chunk is used to indicate the end of transfer.
     if (length > 0)
     {
       // Write the chunk length as a hex number
@@ -70,7 +71,7 @@ public class ChunkedOutputStream extends FilterOutputStream
 
   private void writeHex(int i) throws IOException
   {
-    this.out.write(Integer.toHexString(i).getBytes());
-    this.out.write(CRLF);
+    out.write(Integer.toHexString(i).getBytes());
+    out.write(CRLF);
   }
 }

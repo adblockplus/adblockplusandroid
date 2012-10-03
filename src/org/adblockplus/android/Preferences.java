@@ -33,6 +33,9 @@ import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
 
+/**
+ * Main settings UI.
+ */
 public class Preferences extends SummarizedPreferences
 {
   private final static String TAG = "Preferences";
@@ -79,8 +82,9 @@ public class Preferences extends SummarizedPreferences
   protected void onStart()
   {
     super.onStart();
-    AdblockPlus.getApplication().startEngine();
-    AdblockPlus.getApplication().startInteractive();
+    AdblockPlus application = AdblockPlus.getApplication();
+    application.startEngine();
+    application.startInteractive();
   }
 
   @Override
@@ -139,6 +143,7 @@ public class Preferences extends SummarizedPreferences
     else
       setPrefSummary(subscriptionList);
 
+    // Time to start listening for events
     registerReceiver(receiver, new IntentFilter(AdblockPlus.BROADCAST_SUBSCRIPTION_STATUS));
     registerReceiver(receiver, new IntentFilter(AdblockPlus.BROADCAST_FILTER_MATCHES));
     registerReceiver(receiver, new IntentFilter(ProxyService.BROADCAST_STATE_CHANGED));
@@ -194,9 +199,10 @@ public class Preferences extends SummarizedPreferences
     super.onStop();
     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
     boolean enabled = prefs.getBoolean(getString(R.string.pref_enabled), false);
-    AdblockPlus.getApplication().stopInteractive();
+    AdblockPlus application = AdblockPlus.getApplication();
+    application.stopInteractive();
     if (!enabled)
-      AdblockPlus.getApplication().stopEngine(true);
+      application.stopEngine(true);
 
     if (aboutDialog != null)
       aboutDialog.dismiss();
@@ -248,6 +254,9 @@ public class Preferences extends SummarizedPreferences
     return false;
   }
 
+  /**
+   * Copies file assets from installation package to filesystem.
+   */
   private void copyAssets()
   {
     AssetManager assetManager = getAssets();
@@ -289,6 +298,9 @@ public class Preferences extends SummarizedPreferences
     }
   }
 
+  /**
+   * Redirects user to configuration URL.
+   */
   public void onHelp(View view)
   {
     Uri uri = Uri.parse(getString(R.string.configuring_url));
@@ -296,6 +308,9 @@ public class Preferences extends SummarizedPreferences
     startActivity(intent);
   }
 
+  /**
+   * Shows about dialog.
+   */
   public void onAbout(View view)
   {
     aboutDialog = new AboutDialog(this);
@@ -329,16 +344,6 @@ public class Preferences extends SummarizedPreferences
       AdblockPlus application = AdblockPlus.getApplication();
       Subscription subscription = application.getSubscription(current);
       application.setSubscription(subscription);
-    }
-    if (getString(R.string.pref_refresh).equals(key))
-    {
-      int refresh = Integer.valueOf(sharedPreferences.getString(getString(R.string.pref_refresh), "0"));
-      findPreference(getString(R.string.pref_wifirefresh)).setEnabled(refresh > 0);
-    }
-    if (getString(R.string.pref_crashreport).equals(key))
-    {
-      AdblockPlus application = AdblockPlus.getApplication();
-      application.updateCrashReportStatus();
     }
     super.onSharedPreferenceChanged(sharedPreferences, key);
   }
@@ -400,40 +405,53 @@ public class Preferences extends SummarizedPreferences
         runOnUiThread(new Runnable() {
           public void run()
           {
-            ListPreference subscriptionList = (ListPreference) findPreference(getString(R.string.pref_subscription));
-            CharSequence summary = subscriptionList.getEntry();
-            StringBuilder builder = new StringBuilder();
-            if (summary != null)
-            {
-              builder.append(summary);
-              if (text != "")
-              {
-                builder.append(" (");
-                int id = getResources().getIdentifier(text, "string", getPackageName());
-                if (id > 0)
-                  builder.append(getString(id, text));
-                else
-                  builder.append(text);
-                if (time > 0)
-                {
-                  builder.append(": ");
-                  Calendar calendar = Calendar.getInstance();
-                  calendar.setTimeInMillis(time);
-                  Date date = calendar.getTime();
-                  builder.append(DateFormat.getDateFormat(context).format(date));
-                  builder.append(" ");
-                  builder.append(DateFormat.getTimeFormat(context).format(date));
-                }
-                builder.append(")");
-              }
-              subscriptionSummary = builder.toString();
-              subscriptionList.setSummary(subscriptionSummary);
-            }
+            setSubscriptionStatus(text, time);
           }
         });
       }
     }
   };
+
+  /**
+   * Constructs and updates subscription status text.
+   * 
+   * @param text
+   *          status message
+   * @param time
+   *          time of last change
+   */
+  private void setSubscriptionStatus(String text, long time)
+  {
+    ListPreference subscriptionList = (ListPreference) findPreference(getString(R.string.pref_subscription));
+    CharSequence summary = subscriptionList.getEntry();
+    StringBuilder builder = new StringBuilder();
+    if (summary != null)
+    {
+      builder.append(summary);
+      if (text != "")
+      {
+        builder.append(" (");
+        int id = getResources().getIdentifier(text, "string", getPackageName());
+        if (id > 0)
+          builder.append(getString(id, text));
+        else
+          builder.append(text);
+        if (time > 0)
+        {
+          builder.append(": ");
+          Calendar calendar = Calendar.getInstance();
+          calendar.setTimeInMillis(time);
+          Date date = calendar.getTime();
+          builder.append(DateFormat.getDateFormat(this).format(date));
+          builder.append(" ");
+          builder.append(DateFormat.getTimeFormat(this).format(date));
+        }
+        builder.append(")");
+      }
+      subscriptionSummary = builder.toString();
+      subscriptionList.setSummary(subscriptionSummary);
+    }
+  }
 
   @Override
   protected void onRestoreInstanceState(Bundle state)

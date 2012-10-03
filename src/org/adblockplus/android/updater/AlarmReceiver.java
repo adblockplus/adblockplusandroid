@@ -31,6 +31,9 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
+/**
+ * Processes Alarm event to check for update availability.
+ */
 public class AlarmReceiver extends BroadcastReceiver
 {
 
@@ -40,10 +43,11 @@ public class AlarmReceiver extends BroadcastReceiver
   @Override
   public void onReceive(final Context context, final Intent intent)
   {
-    Log.i(TAG, "Recurring alarm; requesting updater service");
+    Log.i(TAG, "Alarm; requesting updater service");
 
     final AdblockPlus application = AdblockPlus.getApplication();
 
+    // Indicates manual (immediate) update check which requires response to user.
     final boolean notify = intent.getBooleanExtra("notifynoupdate", false);
 
     // Check network availability
@@ -115,7 +119,7 @@ public class AlarmReceiver extends BroadcastReceiver
 
             int thisBuild = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode;
 
-            // Run updater service if newer update found
+            // Notify user if newer update was found
             if (thisBuild < newBuild)
             {
               notification.icon = R.drawable.ic_stat_download;
@@ -127,6 +131,7 @@ public class AlarmReceiver extends BroadcastReceiver
               notification.setLatestEventInfo(context, context.getText(R.string.app_name), context.getString(R.string.msg_update_available), updateIntent);
               notificationManager.notify(NOTIFICATION_ID, notification);
             }
+            // Notify user that no update was found
             else if (notify)
             {
               notification.setLatestEventInfo(context, context.getText(R.string.app_name), context.getString(R.string.msg_update_missing), emptyIntent);
@@ -156,12 +161,13 @@ public class AlarmReceiver extends BroadcastReceiver
           {
             if (!success)
             {
+              // Notify user about failure
               if (notify)
               {
                 notification.setLatestEventInfo(context, context.getText(R.string.app_name), context.getString(R.string.msg_update_fail), emptyIntent);
                 notificationManager.notify(NOTIFICATION_ID, notification);
               }
-              // Schedule retry in 1 hour
+              // Schedule retry in 1 hour - this is most probably problem on server
               application.scheduleUpdater(60);
             }
           }
@@ -171,12 +177,13 @@ public class AlarmReceiver extends BroadcastReceiver
     }
     else
     {
+      // Notify user about failure
       if (notify)
       {
         notification.setLatestEventInfo(context, context.getText(R.string.app_name), context.getString(R.string.msg_update_fail), emptyIntent);
         notificationManager.notify(NOTIFICATION_ID, notification);
       }
-      // Schedule retry in 30 minutes
+      // Schedule retry in 30 minutes - there is no connection available at this time
       application.scheduleUpdater(30);
     }
   }

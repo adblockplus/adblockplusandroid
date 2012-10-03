@@ -7,6 +7,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+/**
+ * Displays configuration warning message.
+ */
 public class ConfigurationActivity extends Activity
 {
   @Override

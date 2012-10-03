@@ -30,6 +30,8 @@ public class AboutDialog extends Dialog
   {
     requestWindowFeature(Window.FEATURE_NO_TITLE);
     setContentView(R.layout.about);
+
+    // Get package version code and name
     String versionName = "--";
     int versionCode = -1;
     try
@@ -40,8 +42,10 @@ public class AboutDialog extends Dialog
     }
     catch (NameNotFoundException ex)
     {
+      // ignore - it can not happen because we query information about ourselves
     }
 
+    // Construct html
     StringBuilder info = new StringBuilder();
     info.append("<h3>");
     info.append(mContext.getString(R.string.app_name));
@@ -58,6 +62,7 @@ public class AboutDialog extends Dialog
     appendRawTextFile(info, R.raw.info);
     appendRawTextFile(info, R.raw.legal);
 
+    // Show text
     TextView tv = (TextView) findViewById(R.id.about_text);
     tv.setText(Html.fromHtml(info.toString()));
     tv.setMovementMethod(LinkMovementMethod.getInstance());
