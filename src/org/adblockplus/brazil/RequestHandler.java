@@ -141,6 +141,7 @@ public class RequestHandler implements Handler
       return true;
     }
 
+    // Do not further process non-http requests
     if (request.url.startsWith("http:") == false && request.url.startsWith("https:") == false)
     {
       return false;

@@ -24,6 +24,9 @@ import android.view.Window;
 import android.widget.EditText;
 import android.widget.Toast;
 
+/**
+ * Shows crash report dialog asking user to submit crash report together with comments.
+ */
 public final class CrashReportDialog extends Activity
 {
   private final static String TAG = "CrashReportDialog";

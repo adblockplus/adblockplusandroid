@@ -9,6 +9,10 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceScreen;
 
+/**
+ * PreferencesActivity which automatically sets preference summaries according
+ * to its current values.
+ */
 public class SummarizedPreferences extends PreferenceActivity implements OnSharedPreferenceChangeListener
 {
   @Override

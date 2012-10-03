@@ -3,6 +3,9 @@ package org.adblockplus.android;
 import java.io.IOException;
 import java.io.Reader;
 
+/**
+ * Wrapper for JS executor native code.
+ */
 public class JSEngine
 {
   private long context;

@@ -14,6 +14,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.Window;
 
+/**
+ * Prompts user to download update or installs downloaded update.
+ */
 public class UpdaterActivity extends Activity
 {
   @Override
@@ -38,6 +41,7 @@ public class UpdaterActivity extends Activity
             @Override
             public void onClick(DialogInterface arg0, int arg1)
             {
+              // Start download service
               startService(new Intent(UpdaterActivity.this, UpdaterService.class).putExtras(extras));
               finish();
             }

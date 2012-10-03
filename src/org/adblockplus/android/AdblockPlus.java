@@ -58,16 +58,32 @@ public class AdblockPlus extends Application
 
   private final static int MSG_TOAST = 1;
 
+  /**
+   * Broadcasted when subscription status changes.
+   */
   public final static String BROADCAST_SUBSCRIPTION_STATUS = "org.adblockplus.android.subscription.status";
+  /**
+   * Broadcasted when filter match check is performed.
+   */
   public final static String BROADCAST_FILTER_MATCHES = "org.adblockplus.android.filter.matches";
 
   private List<Subscription> subscriptions;
+
   private JSThread js;
+
+  /**
+   * Indicates interactive mode (used to listen for subscription status
+   * changes).
+   */
   private boolean interactive = false;
+
   private boolean generateCrashReport = false;
 
   private static AdblockPlus myself;
 
+  /**
+   * Returns pointer to itself (singleton pattern).
+   */
   public static AdblockPlus getApplication()
   {
     return myself;
@@ -76,7 +92,7 @@ public class AdblockPlus extends Application
   /**
    * Checks if device has a WiFi connection available.
    */
-  public static boolean isConnected(Context context)
+  public static boolean isWiFiConnected(Context context)
   {
     ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
     NetworkInfo networkInfo = null;
@@ -287,7 +303,7 @@ public class AdblockPlus extends Application
   /**
    * Returns ElemHide selectors for domain.
    * 
-   * @return ready to use CSS selectors
+   * @return ready to use HTML element with CSS selectors
    */
   public String getSelectorsForDomain(final String domain)
   {
@@ -341,6 +357,22 @@ public class AdblockPlus extends Application
     }
   }
 
+  /**
+   * Checks if filters match request parameters.
+   * 
+   * @param url
+   *          Request URL
+   * @param query
+   *          Request query string
+   * @param reqHost
+   *          Request host
+   * @param refHost
+   *          Request referrer header
+   * @param accept
+   *          Request accept header
+   * @return true if matched filter was found
+   * @throws Exception
+   */
   public boolean matches(String url, String query, String reqHost, String refHost, String accept) throws Exception
   {
     Callable<Boolean> callable = new MatchesCallable(url, query, reqHost, refHost, accept);
@@ -350,6 +382,9 @@ public class AdblockPlus extends Application
     return matches;
   }
 
+  /**
+   * Notifies JS code that application entered interactive mode.
+   */
   public void startInteractive()
   {
     js.execute(new Runnable() {
@@ -362,6 +397,9 @@ public class AdblockPlus extends Application
     interactive = true;
   }
 
+  /**
+   * Notifies JS code that application quit interactive mode.
+   */
   public void stopInteractive()
   {
     js.execute(new Runnable() {
@@ -374,6 +412,9 @@ public class AdblockPlus extends Application
     interactive = false;
   }
 
+  /**
+   * Returns prefixes that match current user locale.
+   */
   public String checkLocalePrefixMatch(String[] prefixes)
   {
     if (prefixes == null || prefixes.length == 0)
@@ -388,6 +429,10 @@ public class AdblockPlus extends Application
     return null;
   }
 
+  /**
+   * Starts JS engine. It also initiates subscription refresh if it is enabled
+   * in user settings.
+   */
   public void startEngine()
   {
     if (js == null)
@@ -399,13 +444,20 @@ public class AdblockPlus extends Application
       final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
       final int refresh = Integer.valueOf(prefs.getString(getString(R.string.pref_refresh), Integer.toString(getResources().getInteger(R.integer.def_refresh))));
       final boolean wifionly = prefs.getBoolean(getString(R.string.pref_wifirefresh), getResources().getBoolean(R.bool.def_wifirefresh));
-      if (refresh == 1 && (!wifionly || isConnected(this)))
+      // Refresh if user selected refresh on each start
+      if (refresh == 1 && (!wifionly || isWiFiConnected(this)))
       {
         refreshSubscription();
       }
     }
   }
 
+  /**
+   * Stops JS engine.
+   * 
+   * @param implicitly
+   *          stop even in interactive mode
+   */
   public void stopEngine(boolean implicitly)
   {
     if ((implicitly || !interactive) && js != null)
@@ -453,7 +505,7 @@ public class AdblockPlus extends Application
   }
 
   /**
-   * Sets Alarm to call updater after specified number of minutes in a day if
+   * Sets Alarm to call updater after specified number of minutes or after one day if
    * minutes are set to 0.
    * 
    * @param minutes
@@ -535,6 +587,9 @@ public class AdblockPlus extends Application
     }
   }
 
+  /**
+   * Handler for showing toast messages from JS code.
+   */
   private final Handler messageHandler = new Handler() {
     public void handleMessage(Message msg)
     {
@@ -545,6 +600,9 @@ public class AdblockPlus extends Application
     }
   };
 
+  /**
+   * JS execution thread.
+   */
   private final class JSThread extends Thread
   {
     private JSEngine jsEngine;
@@ -640,7 +698,7 @@ public class AdblockPlus extends Application
       final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
       final int refresh = Integer.valueOf(prefs.getString(getString(R.string.pref_refresh), Integer.toString(context.getResources().getInteger(R.integer.def_refresh))));
       final boolean wifionly = prefs.getBoolean(getString(R.string.pref_wifirefresh), getResources().getBoolean(R.bool.def_wifirefresh));
-      return refresh == 2 && (!wifionly || isConnected(context));
+      return refresh == 2 && (!wifionly || isWiFiConnected(context));
     }
 
     // JS helper
@@ -772,7 +830,6 @@ public class AdblockPlus extends Application
           Runnable r = null;
           synchronized (queue)
           {
-            // Log.e(TAG, "run " + queue.isEmpty() + " " + delay);
             r = queue.poll();
           }
           if (r != null)
@@ -822,12 +879,18 @@ public class AdblockPlus extends Application
     }
   }
 
+  /**
+   * Helper class for XMLHttpRequest implementation.
+   */
   private class Task
   {
     HttpURLConnection connection;
     long callback;
   }
 
+  /**
+   * Helper class for XMLHttpRequest implementation.
+   */
   private class Result
   {
     long callback;
@@ -837,6 +900,9 @@ public class AdblockPlus extends Application
     Map<String, List<String>> headers;
   }
 
+  /**
+   * Helper class for XMLHttpRequest implementation.
+   */
   private class DownloadTask extends AsyncTask<Task, Integer, Result>
   {
     public DownloadTask(Context context)

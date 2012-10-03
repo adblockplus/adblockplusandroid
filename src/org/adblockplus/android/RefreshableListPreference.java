@@ -9,6 +9,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+/**
+ * ListPreference UI with refresh button.
+ */
 public class RefreshableListPreference extends ListPreference
 {
   private OnClickListener refreshClickListener;

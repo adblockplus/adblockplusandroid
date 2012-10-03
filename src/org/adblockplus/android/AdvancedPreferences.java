@@ -28,6 +28,9 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+/**
+ * Advanced settings UI.
+ */
 public class AdvancedPreferences extends SummarizedPreferences
 {
   private final static String TAG = "AdvancedPreferences";
@@ -54,7 +57,6 @@ public class AdvancedPreferences extends SummarizedPreferences
     }
     else
     {
-
       Preference prefUpdate = findPreference(getString(R.string.pref_checkupdate));
       prefUpdate.setOnPreferenceClickListener(new OnPreferenceClickListener() {
         public boolean onPreferenceClick(Preference preference)
