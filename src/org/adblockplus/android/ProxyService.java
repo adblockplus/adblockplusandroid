@@ -3,16 +3,12 @@ package org.adblockplus.android;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
-
-import com.stericson.RootTools.RootTools;
-import com.stericson.RootTools.RootToolsException;
 
 import sunlabs.brazil.server.Server;
 import sunlabs.brazil.util.Base64;
@@ -37,6 +33,9 @@ import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.stericson.RootTools.RootTools;
+import com.stericson.RootTools.RootToolsException;
 
 public class ProxyService extends Service implements OnSharedPreferenceChangeListener
 {
@@ -65,18 +64,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   private final static String IPTABLES_RETURN = " -t nat -m owner --uid-owner {{UID}} -A OUTPUT -p tcp -j RETURN\n";
   private final static String IPTABLES_ADD_HTTP = " -t nat -A OUTPUT -p tcp --dport 80 -j REDIRECT --to {{PORT}}\n";
 
-  private static final Class<?>[] mSetForegroundSignature = new Class[] {boolean.class};
-  private static final Class<?>[] mStartForegroundSignature = new Class[] {int.class, Notification.class};
-  private static final Class<?>[] mStopForegroundSignature = new Class[] {boolean.class};
-
   private ConnectivityManager connectivityManager;
-  private NotificationManager notificationManager;
-  private Method methodSetForeground;
-  private Method methodStartForeground;
-  private Method methodStopForeground;
-  private Object[] argsSetForeground = new Object[1];
-  private Object[] argsStartForeground = new Object[2];
-  private Object[] argsStopForeground = new Object[1];
   private Notification ongoingNotification;
   private PendingIntent contentIntent;
 
@@ -91,7 +79,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   private boolean isTransparent = false;
   /**
    * Indicates that service has autoconfigured Android proxy settings (version
-   * 4.0+).
+   * 3.1+).
    */
   private boolean isNativeProxy = false;
 
@@ -101,8 +89,6 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   public void onCreate()
   {
     super.onCreate();
-
-    initForegroundCompat();
 
     // Get port for local proxy
     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -257,7 +243,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, Preferences.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK), 0);
     ongoingNotification.icon = R.drawable.ic_stat_blocking;
     ongoingNotification.setLatestEventInfo(getApplicationContext(), getText(R.string.app_name), msg, contentIntent);
-    startForegroundCompat(ONGOING_NOTIFICATION_ID, ongoingNotification);
+    startForeground(ONGOING_NOTIFICATION_ID, ongoingNotification);
 
     sendBroadcast(new Intent(BROADCAST_STATE_CHANGED).putExtra("enabled", true).putExtra("port", port).putExtra("manual", !isTransparent && !isNativeProxy));
     Log.i(TAG, "Service started");
@@ -308,97 +294,13 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     AdblockPlus.getApplication().stopEngine(false);
 
     // Release service lock
-    stopForegroundCompat(R.string.app_name);
+    stopForeground(true);
 
     Log.i(TAG, "Service stopped");
   }
 
-  void initForegroundCompat()
-  {
-    notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-    try
-    {
-      methodStartForeground = getClass().getMethod("startForeground", mStartForegroundSignature);
-      methodStopForeground = getClass().getMethod("stopForeground", mStopForegroundSignature);
-      return;
-    }
-    catch (NoSuchMethodException e)
-    {
-      // Running on an older platform.
-      methodStartForeground = methodStopForeground = null;
-    }
-    try
-    {
-      methodSetForeground = getClass().getMethod("setForeground", mSetForegroundSignature);
-    }
-    catch (NoSuchMethodException e)
-    {
-      throw new IllegalStateException("OS doesn't have Service.startForeground OR Service.setForeground!");
-    }
-  }
-
   /**
-   * This is a wrapper around the new startForeground method, using the older
-   * APIs if it is not available.
-   */
-  void startForegroundCompat(int id, Notification notification)
-  {
-    // If we have the new startForeground API, then use it.
-    if (methodStartForeground != null)
-    {
-      argsStartForeground[0] = Integer.valueOf(id);
-      argsStartForeground[1] = notification;
-      invokeMethod(methodStartForeground, argsStartForeground);
-      return;
-    }
-
-    // Fall back on the old API.
-    argsSetForeground[0] = Boolean.TRUE;
-    invokeMethod(methodSetForeground, argsSetForeground);
-    notificationManager.notify(id, notification);
-  }
-
-  /**
-   * This is a wrapper around the new stopForeground method, using the older
-   * APIs if it is not available.
-   */
-  void stopForegroundCompat(int id)
-  {
-    // If we have the new stopForeground API, then use it.
-    if (methodStopForeground != null)
-    {
-      argsStopForeground[0] = Boolean.TRUE;
-      invokeMethod(methodStopForeground, argsStopForeground);
-      return;
-    }
-
-    // Fall back on the old API. Note to cancel BEFORE changing the
-    // foreground state, since we could be killed at that point.
-    notificationManager.cancel(id);
-    argsSetForeground[0] = Boolean.FALSE;
-    invokeMethod(methodSetForeground, argsSetForeground);
-  }
-
-  void invokeMethod(Method method, Object[] args)
-  {
-    try
-    {
-      method.invoke(this, args);
-    }
-    catch (InvocationTargetException e)
-    {
-      // Should not happen
-      Log.w(TAG, "Unable to invoke method", e);
-    }
-    catch (IllegalAccessException e)
-    {
-      // Should not happen
-      Log.w(TAG, "Unable to invoke method", e);
-    }
-  }
-
-  /**
-   * Reads system proxy settings on Android 4+ using Java reflection.
+   * Reads system proxy settings on Android 3.1+ using Java reflection.
    * 
    * @return string array of host, port and exclusion list
    */
@@ -441,7 +343,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   }
 
   /**
-   * Reads system proxy settings on Android 4+ using Java reflection.
+   * Reads system proxy settings on Android 3.1+ using Java reflection.
    * 
    * @param pp
    *          ProxyProperties object
@@ -481,7 +383,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   }
 
   /**
-   * Tries to set local proxy in system settings via native call on Android 4+
+   * Tries to set local proxy in system settings via native call on Android 3.1+
    * devices using Java reflection.
    * 
    * @return true if device supports native proxy setting
@@ -563,7 +465,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   }
 
   /**
-   * Restores system proxy settings via native call on Android 4+ devices using
+   * Restores system proxy settings via native call on Android 3.1+ devices using
    * Java reflection.
    */
   private void clearConnectionProxy()
@@ -796,6 +698,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       notrafficHandler.removeCallbacks(noTraffic);
       if (changeStatus)
       {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         ongoingNotification.setLatestEventInfo(ProxyService.this, getText(R.string.app_name), getText(R.string.notif_wifi), contentIntent);
         notificationManager.notify(ONGOING_NOTIFICATION_ID, ongoingNotification);
       }
@@ -836,6 +739,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       intent.putExtra("port", port);
       PendingIntent contentIntent = PendingIntent.getActivity(ProxyService.this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
       notification.setLatestEventInfo(ProxyService.this, getText(R.string.app_name), getString(R.string.notif_notraffic), contentIntent);
+      NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
       notificationManager.notify(NOTRAFFIC_NOTIFICATION_ID, notification);
     }
   };
