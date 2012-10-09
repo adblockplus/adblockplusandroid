@@ -1,6 +1,5 @@
 package org.adblockplus.brazil;
 
-import java.io.BufferedInputStream;
 import java.io.EOFException;
 import java.io.FilterInputStream;
 import java.io.FilterOutputStream;
@@ -266,14 +265,14 @@ public class RequestHandler implements Handler
           else
           {
             // Unsupported encoding, proxy content as-is
-            in = new BufferedInputStream(his);
+            in = his;
             out = request.out;
             selectors = null;
           }
         }
         else
         {
-          in = new BufferedInputStream(his);
+          in = his;
         }
         // Use chunked encoding when injecting filters in page
         if (out == null)
