@@ -562,7 +562,9 @@ function matchesAny(url, query, reqHost, refHost, accept)
   if (query != "")
     url = url + "?" + query;
 
-  return defaultMatcher.matchesAny(url, contentType, null, thirdParty) != null;
+  var filter = defaultMatcher.matchesAny(url, contentType, null, thirdParty);
+
+  return (filter != null && !(filter instanceof WhitelistFilter));
 }
 
 Android.load("XMLHttpRequest.jsm");
