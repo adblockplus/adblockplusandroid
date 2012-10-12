@@ -18,13 +18,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.Preference;
+import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
-import android.preference.Preference.OnPreferenceClickListener;
 import android.text.ClipboardManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -136,6 +137,16 @@ public class AdvancedPreferences extends SummarizedPreferences
           if (proxyService.isTransparent())
           {
             items.add("Running in root mode");
+            items.add("iptables output:");
+            List<String> output = proxyService.getIptablesOutput();
+            if (output != null)
+            {
+              for (String line : output)
+              {
+                if (! "".equals(line))
+                  items.add(line);
+              }
+            }
           }
           if (proxyService.isNativeProxy())
           {
@@ -161,6 +172,7 @@ public class AdvancedPreferences extends SummarizedPreferences
           items.add("Service not running");
         }
 
+        ScrollView scrollPane = new ScrollView(this);
         TextView messageText = new TextView(this);
         messageText.setPadding(12, 6, 12, 6);
         messageText.setText(TextUtils.join("\n", items));
@@ -175,9 +187,10 @@ public class AdvancedPreferences extends SummarizedPreferences
             Toast.makeText(v.getContext(), R.string.msg_clipboard, Toast.LENGTH_SHORT).show();
           }
         });
+        scrollPane.addView(messageText);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setView(messageText).setTitle(R.string.configuration_name).setIcon(android.R.drawable.ic_dialog_info).setCancelable(false)
+        builder.setView(scrollPane).setTitle(R.string.configuration_name).setIcon(android.R.drawable.ic_dialog_info).setCancelable(false)
             .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
               public void onClick(DialogInterface dialog, int id)
               {

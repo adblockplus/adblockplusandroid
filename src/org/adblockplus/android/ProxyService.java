@@ -683,6 +683,23 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 
     return path;
   }
+  
+  public List<String> getIptablesOutput()
+  {
+    if (iptables == null)
+      return null;
+
+    String command = iptables + " -L -t nat -n\n";
+    try
+    {
+      return RootTools.sendShell(command, DEFAULT_TIMEOUT);
+    }
+    catch (Exception e)
+    {
+      Log.e(TAG, "Failed to get iptables configuration", e);
+      return null;
+    }
+  }
 
   /**
    * Stops no traffic check, optionally resetting notification message.
