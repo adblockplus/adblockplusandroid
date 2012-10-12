@@ -38,6 +38,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
@@ -80,7 +81,7 @@ public class AdblockPlus extends Application
   private boolean generateCrashReport = false;
 
   private static AdblockPlus myself;
-
+  
   /**
    * Returns pointer to itself (singleton pattern).
    */
@@ -88,7 +89,7 @@ public class AdblockPlus extends Application
   {
     return myself;
   }
-
+  
   /**
    * Checks if device has a WiFi connection available.
    */

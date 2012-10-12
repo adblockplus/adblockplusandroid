@@ -38,7 +38,7 @@ import android.widget.TextView;
  */
 public class Preferences extends SummarizedPreferences
 {
-  private final static String TAG = "Preferences";
+  private static final String TAG = "Preferences";
 
   private AboutDialog aboutDialog;
   private boolean showAbout = false;
@@ -129,7 +129,8 @@ public class Preferences extends SummarizedPreferences
     }
 
     // Enable manual subscription refresh
-    subscriptionList.setOnRefreshClickListener(new View.OnClickListener() {
+    subscriptionList.setOnRefreshClickListener(new View.OnClickListener()
+    {
       @Override
       public void onClick(View v)
       {
@@ -152,7 +153,8 @@ public class Preferences extends SummarizedPreferences
     final String url = current;
 
     // Initialize subscription verification
-    (new Thread() {
+    (new Thread()
+    {
       @Override
       public void run()
       {
@@ -169,7 +171,6 @@ public class Preferences extends SummarizedPreferences
     if (enabled && !isServiceRunning())
     {
       setEnabled(false);
-      enabled = false;
     }
     // Run service if this is first application run
     else if (!enabled && firstRun)
@@ -267,17 +268,15 @@ public class Preferences extends SummarizedPreferences
     }
     catch (IOException e)
     {
-      Log.e(TAG, e.getMessage());
+      Log.e(TAG, "Failed to get assets list", e);
     }
     for (int i = 0; i < files.length; i++)
     {
-      InputStream in = null;
-      OutputStream out = null;
       try
       {
         Log.d(TAG, "Copy: install/" + files[i]);
-        in = assetManager.open("install/" + files[i]);
-        out = openFileOutput(files[i], MODE_PRIVATE);
+        InputStream in = assetManager.open("install/" + files[i]);
+        OutputStream out = openFileOutput(files[i], MODE_PRIVATE);
         byte[] buffer = new byte[1024];
         int read;
         while ((read = in.read(buffer)) != -1)
@@ -285,11 +284,8 @@ public class Preferences extends SummarizedPreferences
           out.write(buffer, 0, read);
         }
         in.close();
-        in = null;
         out.flush();
         out.close();
-        out = null;
-
       }
       catch (Exception e)
       {
@@ -304,7 +300,7 @@ public class Preferences extends SummarizedPreferences
   public void onHelp(View view)
   {
     Uri uri = Uri.parse(getString(R.string.configuring_url));
-    final Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
     startActivity(intent);
   }
 
@@ -314,7 +310,8 @@ public class Preferences extends SummarizedPreferences
   public void onAbout(View view)
   {
     aboutDialog = new AboutDialog(this);
-    aboutDialog.setOnDismissListener(new OnDismissListener() {
+    aboutDialog.setOnDismissListener(new OnDismissListener()
+    {
 
       @Override
       public void onDismiss(DialogInterface dialog)
@@ -333,9 +330,10 @@ public class Preferences extends SummarizedPreferences
     if (getString(R.string.pref_enabled).equals(key))
     {
       boolean enabled = sharedPreferences.getBoolean(key, false);
-      if (enabled && !isServiceRunning())
+      boolean serviceRunning = isServiceRunning();
+      if (enabled && !serviceRunning)
         startService(new Intent(this, ProxyService.class));
-      else if (!enabled && isServiceRunning())
+      else if (!enabled && serviceRunning)
         stopService(new Intent(this, ProxyService.class));
     }
     if (getString(R.string.pref_subscription).equals(key))
@@ -365,9 +363,10 @@ public class Preferences extends SummarizedPreferences
     configurationMsg = null;
   }
 
-  private BroadcastReceiver receiver = new BroadcastReceiver() {
+  private BroadcastReceiver receiver = new BroadcastReceiver()
+  {
     @Override
-    public void onReceive(final Context context, Intent intent)
+    public void onReceive(Context context, Intent intent)
     {
       String action = intent.getAction();
       Bundle extra = intent.getExtras();
@@ -402,7 +401,8 @@ public class Preferences extends SummarizedPreferences
       {
         final String text = extra.getString("text");
         final long time = extra.getLong("time");
-        runOnUiThread(new Runnable() {
+        runOnUiThread(new Runnable()
+        {
           public void run()
           {
             setSubscriptionStatus(text, time);

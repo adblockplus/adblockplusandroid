@@ -34,21 +34,25 @@ import android.widget.Toast;
  */
 public class AdvancedPreferences extends SummarizedPreferences
 {
-  private final static String TAG = "AdvancedPreferences";
+  private static final String TAG = "AdvancedPreferences";
 
   private static final int CONFIGURATION_DIALOG = 1;
 
   private static ProxyService proxyService = null;
+  
+  private boolean hasNativeProxy;
 
   @Override
   public void onCreate(Bundle savedInstanceState)
   {
     super.onCreate(savedInstanceState);
+    
+    hasNativeProxy = Build.VERSION.SDK_INT >= 12; // Honeycomb 3.1
 
     addPreferencesFromResource(R.xml.preferences_advanced);
 
     PreferenceScreen screen = getPreferenceScreen();
-    if (Build.VERSION.SDK_INT >= 12) // Honeycomb 3.1
+    if (hasNativeProxy) 
     {
       screen.removePreference(findPreference(getString(R.string.pref_proxy)));
     }
@@ -59,7 +63,8 @@ public class AdvancedPreferences extends SummarizedPreferences
     else
     {
       Preference prefUpdate = findPreference(getString(R.string.pref_checkupdate));
-      prefUpdate.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+      prefUpdate.setOnPreferenceClickListener(new OnPreferenceClickListener()
+      {
         public boolean onPreferenceClick(Preference preference)
         {
           Intent updater = new Intent(getApplicationContext(), AlarmReceiver.class).putExtra("notifynoupdate", true);
@@ -69,7 +74,8 @@ public class AdvancedPreferences extends SummarizedPreferences
       });
 
       Preference prefConfiguration = findPreference(getString(R.string.pref_configuration));
-      prefConfiguration.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+      prefConfiguration.setOnPreferenceClickListener(new OnPreferenceClickListener()
+      {
         public boolean onPreferenceClick(Preference preference)
         {
           showDialog(CONFIGURATION_DIALOG);
@@ -120,17 +126,18 @@ public class AdvancedPreferences extends SummarizedPreferences
     {
       case CONFIGURATION_DIALOG:
         List<String> items = new ArrayList<String>();
-        int versionCode = -1;
+        int buildNumber = -1;
         try
         {
           PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(), 0);
-          versionCode = pi.versionCode;
+          buildNumber = pi.versionCode;
         }
         catch (NameNotFoundException e)
         {
           // ignore - this shouldn't happen
+          e.printStackTrace();
         }
-        items.add(String.format("API: %d Build: %d", Build.VERSION.SDK_INT, versionCode));
+        items.add(String.format("API: %d Build: %d", Build.VERSION.SDK_INT, buildNumber));
         if (proxyService != null)
         {
           items.add(String.format("Local port: %d", proxyService.port));
@@ -143,7 +150,7 @@ public class AdvancedPreferences extends SummarizedPreferences
             {
               for (String line : output)
               {
-                if (! "".equals(line))
+                if (!"".equals(line))
                   items.add(line);
               }
             }
@@ -152,7 +159,7 @@ public class AdvancedPreferences extends SummarizedPreferences
           {
             items.add("Uses native proxy");
           }
-          if (Build.VERSION.SDK_INT >= 12) // Honeycomb 3.1
+          if (hasNativeProxy)
           {
             String[] px = proxyService.getUserProxy();
             if (px != null)
@@ -176,7 +183,8 @@ public class AdvancedPreferences extends SummarizedPreferences
         TextView messageText = new TextView(this);
         messageText.setPadding(12, 6, 12, 6);
         messageText.setText(TextUtils.join("\n", items));
-        messageText.setOnClickListener(new View.OnClickListener() {
+        messageText.setOnClickListener(new View.OnClickListener()
+        {
 
           @Override
           public void onClick(View v)
@@ -191,7 +199,8 @@ public class AdvancedPreferences extends SummarizedPreferences
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(scrollPane).setTitle(R.string.configuration_name).setIcon(android.R.drawable.ic_dialog_info).setCancelable(false)
-            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener()
+            {
               public void onClick(DialogInterface dialog, int id)
               {
                 dialog.cancel();
@@ -214,7 +223,8 @@ public class AdvancedPreferences extends SummarizedPreferences
     proxyService = null;
   }
 
-  private ServiceConnection proxyServiceConnection = new ServiceConnection() {
+  private ServiceConnection proxyServiceConnection = new ServiceConnection()
+  {
     public void onServiceConnected(ComponentName className, IBinder service)
     {
       proxyService = ((ProxyService.LocalBinder) service).getService();

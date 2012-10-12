@@ -19,7 +19,6 @@ public class SummarizedPreferences extends PreferenceActivity implements OnShare
   public void onResume()
   {
     super.onResume();
-    // initialize list summaries
     initSummaries(getPreferenceScreen());
     getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
   }

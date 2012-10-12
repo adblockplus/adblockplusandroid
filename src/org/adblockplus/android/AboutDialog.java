@@ -17,12 +17,12 @@ import android.widget.TextView;
 
 public class AboutDialog extends Dialog
 {
-  private static Context mContext = null;
+  private static Context context = null;
 
   public AboutDialog(Context context)
   {
     super(context);
-    mContext = context;
+    AboutDialog.context = context;
   }
 
   @Override
@@ -36,7 +36,7 @@ public class AboutDialog extends Dialog
     int versionCode = -1;
     try
     {
-      PackageInfo pi = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
+      PackageInfo pi = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
       versionName = pi.versionName;
       versionCode = pi.versionCode;
     }
@@ -48,14 +48,14 @@ public class AboutDialog extends Dialog
     // Construct html
     StringBuilder info = new StringBuilder();
     info.append("<h3>");
-    info.append(mContext.getString(R.string.app_name));
+    info.append(context.getString(R.string.app_name));
     info.append("</h3>");
     info.append("<p>");
-    info.append(mContext.getString(R.string.version));
+    info.append(context.getString(R.string.version));
     info.append(": ");
     info.append(versionName);
     info.append(" ");
-    info.append(mContext.getString(R.string.build));
+    info.append(context.getString(R.string.build));
     info.append(" ");
     info.append(versionCode);
     info.append("</p>");
@@ -70,7 +70,7 @@ public class AboutDialog extends Dialog
 
   public static void appendRawTextFile(StringBuilder text, int id)
   {
-    InputStream inputStream = mContext.getResources().openRawResource(id);
+    InputStream inputStream = context.getResources().openRawResource(id);
     InputStreamReader in = new InputStreamReader(inputStream);
     BufferedReader buf = new BufferedReader(in);
     String line;
@@ -81,6 +81,7 @@ public class AboutDialog extends Dialog
     }
     catch (IOException e)
     {
+      e.printStackTrace();
     }
   }
 }
