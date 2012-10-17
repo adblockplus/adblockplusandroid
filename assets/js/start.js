@@ -529,7 +529,7 @@ function stopInteractive()
 function matchesAny(url, query, reqHost, refHost, accept)
 {
   var contentType = null;
-  var thirdParty = false;
+  var thirdParty = true;
 
   if (accept != "")
   {
