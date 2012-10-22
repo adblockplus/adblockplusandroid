@@ -1,5 +1,5 @@
 <p>This is an open source project, it's source can be found at
- <a href="https://hg.adblockplus.org/android/">https://hg.adblockplus.org/adblockplusandroid/</a></p>
+ <a href="https://hg.adblockplus.org/adblockplusandroid/">https://hg.adblockplus.org/adblockplusandroid/</a></p>
 <br/>
 <h4>License</h4>
 <p>This program is subject to the terms of the Mozilla Public License, v. 2.0.
