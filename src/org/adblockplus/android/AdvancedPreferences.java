@@ -12,8 +12,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -126,18 +124,8 @@ public class AdvancedPreferences extends SummarizedPreferences
     {
       case CONFIGURATION_DIALOG:
         List<String> items = new ArrayList<String>();
-        int buildNumber = -1;
-        try
-        {
-          PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(), 0);
-          buildNumber = pi.versionCode;
-        }
-        catch (NameNotFoundException e)
-        {
-          // ignore - this shouldn't happen
-          e.printStackTrace();
-        }
-        items.add(String.format("API: %d Build: %d", Build.VERSION.SDK_INT, buildNumber));
+        items.add(AdblockPlus.getDeviceName());
+        items.add(String.format("API: %d Build: %d", Build.VERSION.SDK_INT, AdblockPlus.getApplication().getBuildNumber()));
         if (proxyService != null)
         {
           items.add(String.format("Local port: %d", proxyService.port));
