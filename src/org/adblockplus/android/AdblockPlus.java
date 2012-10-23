@@ -45,6 +45,7 @@ import android.content.res.AssetManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -81,7 +82,7 @@ public class AdblockPlus extends Application
   private boolean generateCrashReport = false;
 
   private static AdblockPlus myself;
-  
+
   /**
    * Returns pointer to itself (singleton pattern).
    */
@@ -89,7 +90,47 @@ public class AdblockPlus extends Application
   {
     return myself;
   }
-  
+
+  public int getBuildNumber()
+  {
+    int buildNumber = -1;
+    try
+    {
+      PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(), 0);
+      buildNumber = pi.versionCode;
+    }
+    catch (NameNotFoundException e)
+    {
+      // ignore - this shouldn't happen
+      e.printStackTrace();
+    }
+    return buildNumber;
+  }
+
+  /**
+   * Returns device name in user-friendly format
+   */
+  public static String getDeviceName()
+  {
+    String manufacturer = Build.MANUFACTURER;
+    String model = Build.MODEL;
+    if (model.startsWith(manufacturer))
+      return capitalize(model);
+    else
+      return capitalize(manufacturer) + " " + model;
+  }
+
+  private static String capitalize(String s)
+  {
+    if (s == null || s.length() == 0)
+      return "";
+    char first = s.charAt(0);
+    if (Character.isUpperCase(first))
+      return s;
+    else
+      return Character.toUpperCase(first) + s.substring(1);
+  }
+
   /**
    * Checks if device has a WiFi connection available.
    */
@@ -193,7 +234,8 @@ public class AdblockPlus extends Application
         jsonSub.put("url", subscription.url);
         jsonSub.put("title", subscription.title);
         jsonSub.put("homepage", subscription.homepage);
-        js.execute(new Runnable() {
+        js.execute(new Runnable()
+        {
           @Override
           public void run()
           {
@@ -215,7 +257,8 @@ public class AdblockPlus extends Application
    */
   public void refreshSubscription()
   {
-    js.execute(new Runnable() {
+    js.execute(new Runnable()
+    {
       @Override
       public void run()
       {
@@ -276,7 +319,8 @@ public class AdblockPlus extends Application
    */
   public boolean verifySubscriptions()
   {
-    Future<Boolean> future = js.submit(new Callable<Boolean>() {
+    Future<Boolean> future = js.submit(new Callable<Boolean>()
+    {
       @Override
       public Boolean call() throws Exception
       {
@@ -308,7 +352,8 @@ public class AdblockPlus extends Application
    */
   public String getSelectorsForDomain(final String domain)
   {
-    Future<String> future = js.submit(new Callable<String>() {
+    Future<String> future = js.submit(new Callable<String>()
+    {
       @Override
       public String call() throws Exception
       {
@@ -388,7 +433,8 @@ public class AdblockPlus extends Application
    */
   public void startInteractive()
   {
-    js.execute(new Runnable() {
+    js.execute(new Runnable()
+    {
       @Override
       public void run()
       {
@@ -403,7 +449,8 @@ public class AdblockPlus extends Application
    */
   public void stopInteractive()
   {
-    js.execute(new Runnable() {
+    js.execute(new Runnable()
+    {
       @Override
       public void run()
       {
@@ -506,7 +553,8 @@ public class AdblockPlus extends Application
   }
 
   /**
-   * Sets Alarm to call updater after specified number of minutes or after one day if
+   * Sets Alarm to call updater after specified number of minutes or after one
+   * day if
    * minutes are set to 0.
    * 
    * @param minutes
@@ -591,7 +639,8 @@ public class AdblockPlus extends Application
   /**
    * Handler for showing toast messages from JS code.
    */
-  private final Handler messageHandler = new Handler() {
+  private final Handler messageHandler = new Handler()
+  {
     public void handleMessage(Message msg)
     {
       if (msg.what == MSG_TOAST)
@@ -707,7 +756,8 @@ public class AdblockPlus extends Application
     public void httpSend(final String method, final String url, final String[][] headers, final boolean async, final long callback)
     {
       Log.e(TAG, "httpSend('" + method + "', '" + url + "')");
-      messageHandler.post(new Runnable() {
+      messageHandler.post(new Runnable()
+      {
         @Override
         public void run()
         {
@@ -939,7 +989,8 @@ public class AdblockPlus extends Application
         params[1] = result.message;
         params[2] = headers;
         params[3] = result.data;
-        js.execute(new Runnable() {
+        js.execute(new Runnable()
+        {
           @Override
           public void run()
           {
