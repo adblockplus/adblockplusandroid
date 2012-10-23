@@ -2,6 +2,10 @@ package org.adblockplus.android.updater;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Locale;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -29,6 +33,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.util.Log;
 
 /**
@@ -82,7 +87,13 @@ public class AlarmReceiver extends BroadcastReceiver
           {
             // Read updates manifest
             DefaultHttpClient httpClient = new DefaultHttpClient();
-            HttpGet httpGet = new HttpGet(context.getString(R.string.update_url));
+            
+            String locale = Locale.getDefault().toString().toLowerCase();
+            String device = AdblockPlus.getDeviceName();
+            URL updateUrl = new URL(String.format(context.getString(R.string.update_url), Build.VERSION.SDK_INT, AdblockPlus.getApplication().getBuildNumber(), locale, device));
+            // The following line correctly url-encodes query string parameters
+            URI uri = new URI(updateUrl.getProtocol(), updateUrl.getUserInfo(), updateUrl.getHost(), updateUrl.getPort(), updateUrl.getPath(), updateUrl.getQuery(), updateUrl.getRef());
+            HttpGet httpGet = new HttpGet(uri);
 
             HttpResponse httpResponse = httpClient.execute(httpGet);
             HttpEntity httpEntity = httpResponse.getEntity();
@@ -154,6 +165,10 @@ public class AlarmReceiver extends BroadcastReceiver
           {
           }
           catch (SAXException e)
+          {
+            Log.e(TAG, "Error", e);
+          }
+          catch (URISyntaxException e)
           {
             Log.e(TAG, "Error", e);
           }
