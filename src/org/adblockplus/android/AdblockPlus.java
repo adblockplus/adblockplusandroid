@@ -81,14 +81,14 @@ public class AdblockPlus extends Application
 
   private boolean generateCrashReport = false;
 
-  private static AdblockPlus myself;
+  private static AdblockPlus instance;
 
   /**
    * Returns pointer to itself (singleton pattern).
    */
   public static AdblockPlus getApplication()
   {
-    return myself;
+    return instance;
   }
 
   public int getBuildNumber()
@@ -102,7 +102,7 @@ public class AdblockPlus extends Application
     catch (NameNotFoundException e)
     {
       // ignore - this shouldn't happen
-      e.printStackTrace();
+      Log.e(TAG, e.getMessage(), e);
     }
     return buildNumber;
   }
@@ -175,17 +175,17 @@ public class AdblockPlus extends Application
       catch (ParserConfigurationException e)
       {
         // TODO Auto-generated catch block
-        e.printStackTrace();
+        Log.e(TAG, e.getMessage(), e);
       }
       catch (SAXException e)
       {
         // TODO Auto-generated catch block
-        e.printStackTrace();
+        Log.e(TAG, e.getMessage(), e);
       }
       catch (IOException e)
       {
         // TODO Auto-generated catch block
-        e.printStackTrace();
+        Log.e(TAG, e.getMessage(), e);
       }
     }
     return subscriptions;
@@ -217,15 +217,6 @@ public class AdblockPlus extends Application
    */
   public void setSubscription(Subscription subscription)
   {
-    /*
-     * Subscription test = new Subscription();
-     * test.url =
-     * "https://easylist-downloads.adblockplus.org/exceptionrules.txt";
-     * test.title = "Test";
-     * test.homepage = "https://easylist-downloads.adblockplus.org/";
-     * selectedItem = test;
-     */
-
     if (subscription != null)
     {
       final JSONObject jsonSub = new JSONObject();
@@ -247,7 +238,7 @@ public class AdblockPlus extends Application
       catch (JSONException e)
       {
         // TODO Auto-generated catch block
-        e.printStackTrace();
+        Log.e(TAG, e.getMessage(), e);
       }
     }
   }
@@ -335,12 +326,12 @@ public class AdblockPlus extends Application
     catch (InterruptedException e)
     {
       // TODO Auto-generated catch block
-      e.printStackTrace();
+      Log.e(TAG, e.getMessage(), e);
     }
     catch (ExecutionException e)
     {
       // TODO Auto-generated catch block
-      e.printStackTrace();
+      Log.e(TAG, e.getMessage(), e);
     }
     return false;
   }
@@ -368,12 +359,12 @@ public class AdblockPlus extends Application
     catch (InterruptedException e)
     {
       // TODO Auto-generated catch block
-      e.printStackTrace();
+      Log.e(TAG, e.getMessage(), e);
     }
     catch (ExecutionException e)
     {
       // TODO Auto-generated catch block
-      e.printStackTrace();
+      Log.e(TAG, e.getMessage(), e);
     }
     return null;
   }
@@ -485,7 +476,7 @@ public class AdblockPlus extends Application
   {
     if (js == null)
     {
-      Log.e(TAG, "startEngine");
+      Log.i(TAG, "startEngine");
       js = new JSThread(this);
       js.start();
 
@@ -517,7 +508,7 @@ public class AdblockPlus extends Application
       }
       catch (InterruptedException e)
       {
-        e.printStackTrace();
+        Log.e(TAG, e.getMessage(), e);
       }
       js = null;
     }
@@ -584,7 +575,6 @@ public class AdblockPlus extends Application
     PendingIntent recurringUpdate = PendingIntent.getBroadcast(this, 0, updater, PendingIntent.FLAG_CANCEL_CURRENT);
     // Set non-waking alarm
     AlarmManager alarms = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-    Log.e(TAG, "Set updater alarm");
     alarms.set(AlarmManager.RTC, updateTime.getTimeInMillis(), recurringUpdate);
   }
 
@@ -592,7 +582,7 @@ public class AdblockPlus extends Application
   public void onCreate()
   {
     super.onCreate();
-    myself = this;
+    instance = this;
 
     // Check for crash report
     try
@@ -624,7 +614,7 @@ public class AdblockPlus extends Application
     catch (IOException e)
     {
       // TODO Auto-generated catch block
-      e.printStackTrace();
+      Log.e(TAG, e.getMessage(), e);
     }
 
     if (!getResources().getBoolean(R.bool.def_release))
@@ -639,13 +629,13 @@ public class AdblockPlus extends Application
   /**
    * Handler for showing toast messages from JS code.
    */
-  private final Handler messageHandler = new Handler()
+  private static final Handler messageHandler = new Handler()
   {
     public void handleMessage(Message msg)
     {
       if (msg.what == MSG_TOAST)
       {
-        Toast.makeText(AdblockPlus.this, msg.getData().getString("message"), Toast.LENGTH_LONG).show();
+        Toast.makeText(AdblockPlus.getApplication(), msg.getData().getString("message"), Toast.LENGTH_LONG).show();
       }
     }
   };
@@ -689,7 +679,7 @@ public class AdblockPlus extends Application
       }
       catch (IOException e)
       {
-        e.printStackTrace();
+        Log.e(TAG, e.getMessage(), e);
       }
       return result;
     }
@@ -697,7 +687,7 @@ public class AdblockPlus extends Application
     // JS helper
     public FileInputStream getInputStream(String path)
     {
-      Log.e(TAG, path);
+      Log.d(TAG, path);
       File f = new File(path);
       try
       {
@@ -705,7 +695,7 @@ public class AdblockPlus extends Application
       }
       catch (FileNotFoundException e)
       {
-        e.printStackTrace();
+        Log.e(TAG, e.getMessage(), e);
       }
       return null;
     }
@@ -713,7 +703,7 @@ public class AdblockPlus extends Application
     // JS helper
     public FileOutputStream getOutputStream(String path)
     {
-      Log.e(TAG, path);
+      Log.d(TAG, path);
       File f = new File(path);
       try
       {
@@ -721,7 +711,7 @@ public class AdblockPlus extends Application
       }
       catch (FileNotFoundException e)
       {
-        e.printStackTrace();
+        Log.e(TAG, e.getMessage(), e);
       }
       return null;
     }
@@ -755,7 +745,7 @@ public class AdblockPlus extends Application
     @SuppressWarnings("unused")
     public void httpSend(final String method, final String url, final String[][] headers, final boolean async, final long callback)
     {
-      Log.e(TAG, "httpSend('" + method + "', '" + url + "')");
+      Log.d(TAG, "httpSend('" + method + "', '" + url + "')");
       messageHandler.post(new Runnable()
       {
         @Override
@@ -780,7 +770,7 @@ public class AdblockPlus extends Application
           }
           catch (Exception e)
           {
-            e.printStackTrace();
+            Log.e(TAG, e.getMessage(), e);
             js.callback(callback, null);
           }
         }
@@ -798,7 +788,7 @@ public class AdblockPlus extends Application
     @SuppressWarnings("unused")
     public void showToast(String text)
     {
-      Log.e(TAG, "Toast: " + text);
+      Log.d(TAG, "Toast: " + text);
       Message msg = messageHandler.obtainMessage(MSG_TOAST);
       Bundle data = new Bundle();
       data.putString("message", text);
@@ -871,7 +861,7 @@ public class AdblockPlus extends Application
       }
       catch (Exception e)
       {
-        e.printStackTrace();
+        Log.e(TAG, e.getMessage(), e);
       }
 
       while (run)
@@ -916,13 +906,14 @@ public class AdblockPlus extends Application
               }
               catch (InterruptedException e)
               {
+                Log.e(TAG, e.getMessage(), e);
               }
             }
           }
         }
         catch (Exception e)
         {
-          e.printStackTrace();
+          Log.e(TAG, e.getMessage(), e);
         }
       }
 
@@ -1017,7 +1008,7 @@ public class AdblockPlus extends Application
         HttpURLConnection connection = task.connection;
         connection.connect();
         int lenghtOfFile = connection.getContentLength();
-        Log.w("D", "S: " + lenghtOfFile);
+        Log.d("D", "S: " + lenghtOfFile);
 
         result.code = connection.getResponseCode();
         result.message = connection.getResponseMessage();
@@ -1049,7 +1040,7 @@ public class AdblockPlus extends Application
       }
       catch (Exception e)
       {
-        e.printStackTrace();
+        Log.e(TAG, e.getMessage(), e);
         result.data = "";
         result.code = HttpURLConnection.HTTP_INTERNAL_ERROR;
         result.message = e.toString();
@@ -1059,7 +1050,7 @@ public class AdblockPlus extends Application
 
     protected void onProgressUpdate(Integer... progress)
     {
-      Log.i("HTTP", "Progress: " + progress[0].intValue());
+      Log.d("HTTP", "Progress: " + progress[0].intValue());
     }
   }
 }
