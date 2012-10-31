@@ -3,6 +3,7 @@ package org.adblockplus.android;
 import java.io.PrintWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
 
+import android.annotation.SuppressLint;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -18,13 +19,21 @@ public class CrashHandler implements UncaughtExceptionHandler
   public static final String REPORT_FILE = "AdblockPlus_Crash_Report.txt";
   private UncaughtExceptionHandler defaultUEH;
   private NotificationManager notificationManager;
-  private Context mContext;
+  private Context context;
+
+  private boolean generateReport;
+  private boolean restoreProxy;
+  private String host;
+  private String port;
+  private String excl;
 
   public CrashHandler(Context context)
   {
     defaultUEH = Thread.getDefaultUncaughtExceptionHandler();
-    mContext = context;
+    this.context = context;
     notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    generateReport = false;
+    restoreProxy = false;
   }
 
   public UncaughtExceptionHandler getDefault()
@@ -35,7 +44,12 @@ public class CrashHandler implements UncaughtExceptionHandler
   @Override
   public void uncaughtException(Thread t, Throwable e)
   {
-    writeToFile(e, REPORT_FILE);
+    if (generateReport)
+      writeToFile(e, REPORT_FILE);
+
+    if (restoreProxy)
+      clearProxySettings();
+
     if (notificationManager != null)
     {
       try
@@ -52,13 +66,19 @@ public class CrashHandler implements UncaughtExceptionHandler
     defaultUEH.uncaughtException(t, e);
   }
 
+  public void generateReport(boolean report)
+  {
+    generateReport = report;
+  }
+
+  @SuppressLint("WorldReadableFiles")
   private void writeToFile(Throwable error, String filename)
   {
     Log.e("DCR", "Writing crash report");
     int versionCode = -1;
     try
     {
-      PackageInfo pi = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
+      PackageInfo pi = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
       versionCode = pi.versionCode;
     }
     catch (NameNotFoundException ex)
@@ -66,7 +86,7 @@ public class CrashHandler implements UncaughtExceptionHandler
     }
     try
     {
-      PrintWriter pw = new PrintWriter(mContext.openFileOutput(filename, Context.MODE_WORLD_READABLE));
+      PrintWriter pw = new PrintWriter(context.openFileOutput(filename, Context.MODE_WORLD_READABLE));
       // Write Android version
       pw.println(Build.VERSION.SDK_INT);
       // Write application build number
@@ -109,5 +129,30 @@ public class CrashHandler implements UncaughtExceptionHandler
       pw.print(element.getLineNumber());
       pw.println();
     }
+  }
+
+  public void saveProxySettings(String host, String port, String excl)
+  {
+    Log.e("DCR", "Saving proxy " + host + ":" + port + "/" + excl);
+    this.host = host;
+    this.port = port;
+    this.excl = excl;
+    restoreProxy = true;
+  }
+
+  public void clearProxySettings()
+  {
+    Log.e("DCR", "Clearing proxy");
+    restoreProxy = false;
+    int p = 0;
+    try
+    {
+      p = Integer.valueOf(port);
+    }
+    catch (NumberFormatException e)
+    {
+      // ignore - no valid port, it will be correctly processed later
+    }
+    ProxySettings.setConnectionProxy(context, host, p, excl);
   }
 }

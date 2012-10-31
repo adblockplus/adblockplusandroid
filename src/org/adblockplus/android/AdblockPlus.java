@@ -79,8 +79,6 @@ public class AdblockPlus extends Application
    */
   private boolean interactive = false;
 
-  private boolean generateCrashReport = false;
-
   private static AdblockPlus instance;
 
   /**
@@ -515,35 +513,6 @@ public class AdblockPlus extends Application
   }
 
   /**
-   * Sets or removes crash handler according to user setting
-   */
-  public void updateCrashReportStatus()
-  {
-    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-    boolean report = prefs.getBoolean(getString(R.string.pref_crashreport), getResources().getBoolean(R.bool.def_crashreport));
-    if (report != generateCrashReport)
-    {
-      if (report)
-      {
-        Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(this));
-      }
-      else
-      {
-        try
-        {
-          CrashHandler handler = (CrashHandler) Thread.getDefaultUncaughtExceptionHandler();
-          Thread.setDefaultUncaughtExceptionHandler(handler.getDefault());
-        }
-        catch (ClassCastException e)
-        {
-          // ignore - already default handler
-        }
-      }
-      generateCrashReport = report;
-    }
-  }
-
-  /**
    * Sets Alarm to call updater after specified number of minutes or after one
    * day if
    * minutes are set to 0.
@@ -617,10 +586,11 @@ public class AdblockPlus extends Application
       Log.e(TAG, e.getMessage(), e);
     }
 
+    // Set crash handler
+    Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(this));
+
     if (!getResources().getBoolean(R.bool.def_release))
     {
-      // Set crash handler
-      updateCrashReportStatus();
       // Initiate update check
       scheduleUpdater(0);
     }

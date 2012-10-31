@@ -2,7 +2,6 @@ package org.adblockplus.android;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -29,7 +28,6 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -64,7 +62,6 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   private final static String IPTABLES_RETURN = " -t nat -m owner --uid-owner {{UID}} -A OUTPUT -p tcp -j RETURN\n";
   private final static String IPTABLES_ADD_HTTP = " -t nat -A OUTPUT -p tcp --dport 80 -j REDIRECT --to {{PORT}}\n";
 
-  private ConnectivityManager connectivityManager;
   private Notification ongoingNotification;
   private PendingIntent contentIntent;
 
@@ -103,8 +100,6 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       port = getResources().getInteger(R.integer.def_port);
     }
 
-    connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-
     // Try to read user proxy settings
     String proxyHost = null;
     String proxyPort = null;
@@ -119,10 +114,10 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       proxyPort = System.getProperty("http.proxyPort");
       proxyExcl = System.getProperty("http.nonProxyHosts");
 
-      Log.e(TAG, "PRX: " + proxyHost + ":" + proxyPort + "(" + proxyExcl + ")");
-      String[] px = getUserProxy(); // not used but left for future reference
+      Log.d(TAG, "PRX: " + proxyHost + ":" + proxyPort + "(" + proxyExcl + ")");
+      String[] px = ProxySettings.getUserProxy(getApplicationContext()); // not used but left for future reference
       if (px != null)
-        Log.e(TAG, "PRX: " + px[0] + ":" + px[1] + "(" + px[2] + ")");
+        Log.d(TAG, "PRX: " + px[0] + ":" + px[1] + "(" + px[2] + ")");
     }
     else
     {
@@ -173,7 +168,8 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     if (!isTransparent)
     {
       // Try to set native proxy
-      isNativeProxy = setConnectionProxy();
+      isNativeProxy = ProxySettings.setConnectionProxy(getApplicationContext(), "127.0.0.1", port, "");
+
       if (isNativeProxy)
       {
         registerReceiver(connectionReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
@@ -300,226 +296,25 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   }
 
   /**
-   * Reads system proxy settings on Android 3.1+ using Java reflection.
-   * 
-   * @return string array of host, port and exclusion list
-   */
-  public String[] getUserProxy()
-  {
-    Method method = null;
-    try
-    {
-      /*
-       * ProxyProperties proxyProperties = ConnectivityManager.getProxy();
-       */
-      method = ConnectivityManager.class.getMethod("getProxy");
-    }
-    catch (NoSuchMethodException e)
-    {
-      // This is normal situation for pre-ICS devices
-      return null;
-    }
-    catch (Exception e)
-    {
-      // This should not happen
-      Log.e(TAG, "getProxy failure", e);
-      return null;
-    }
-
-    try
-    {
-      Object pp = method.invoke(connectivityManager);
-      if (pp == null)
-        return null;
-
-      return getUserProxy(pp);
-    }
-    catch (Exception e)
-    {
-      // This should not happen
-      Log.e(TAG, "getProxy failure", e);
-      return null;
-    }
-  }
-
-  /**
-   * Reads system proxy settings on Android 3.1+ using Java reflection.
-   * 
-   * @param pp
-   *          ProxyProperties object
-   * @return string array of host, port and exclusion list
-   * @throws Exception
-   */
-  private String[] getUserProxy(Object pp) throws Exception
-  {
-    String[] userProxy = new String[3];
-
-    String className = "android.net.ProxyProperties";
-    Class<?> c = Class.forName(className);
-    Method method;
-
-    /*
-     * String proxyHost = pp.getHost()
-     */
-    method = c.getMethod("getHost");
-    userProxy[0] = (String) method.invoke(pp);
-
-    /*
-     * int proxyPort = pp.getPort();
-     */
-    method = c.getMethod("getPort");
-    userProxy[1] = String.valueOf((Integer) method.invoke(pp));
-
-    /*
-     * String proxyEL = pp.getExclusionList()
-     */
-    method = c.getMethod("getExclusionList");
-    userProxy[2] = (String) method.invoke(pp);
-
-    if (userProxy[0] != null)
-      return userProxy;
-    else
-      return null;
-  }
-
-  /**
-   * Tries to set local proxy in system settings via native call on Android 3.1+
-   * devices using Java reflection.
-   * 
-   * @return true if device supports native proxy setting
-   */
-  private boolean setConnectionProxy()
-  {
-    Method method = null;
-    try
-    {
-      /*
-       * android.net.LinkProperties lp =
-       * ConnectivityManager.getActiveLinkProperties();
-       */
-      method = ConnectivityManager.class.getMethod("getActiveLinkProperties");
-    }
-    catch (NoSuchMethodException e)
-    {
-      // This is normal situation for pre-ICS devices
-      return false;
-    }
-    catch (Exception e)
-    {
-      // This should not happen
-      Log.e(TAG, "setHttpProxy failure", e);
-      return false;
-    }
-    try
-    {
-      Object lp = method.invoke(connectivityManager);
-      if (lp == null)
-        return true;
-      /*
-       * ProxyProperties pp = new ProxyProperties("127.0.0.1", port, "");
-       */
-      String className = "android.net.ProxyProperties";
-      Class<?> c = Class.forName(className);
-      Class<?>[] parameter = new Class[] {String.class, int.class, String.class};
-      Object args[] = new Object[3];
-      args[0] = "127.0.0.1";
-      args[1] = new Integer(port);
-      args[2] = "";
-      Constructor<?> cons = c.getConstructor(parameter);
-      Object pp = cons.newInstance(args);
-      /*
-       * lp.setHttpProxy(pp);
-       */
-      method = lp.getClass().getMethod("setHttpProxy", pp.getClass());
-      method.invoke(lp, pp);
-
-      Intent intent = null;
-      NetworkInfo ni = connectivityManager.getActiveNetworkInfo();
-      switch (ni.getType())
-      {
-        case ConnectivityManager.TYPE_WIFI:
-          intent = new Intent("android.net.wifi.LINK_CONFIGURATION_CHANGED");
-          break;
-        case ConnectivityManager.TYPE_MOBILE:
-          // TODO We leave it here for future, it does not work now
-          // intent = new Intent("android.intent.action.ANY_DATA_STATE");
-          break;
-      }
-      if (intent != null)
-      {
-        if (lp != null)
-        {
-          intent.putExtra("linkProperties", (Parcelable) lp);
-        }
-        sendBroadcast(intent);
-      }
-
-      return true;
-    }
-    catch (Exception e)
-    {
-      // This should not happen
-      Log.e(TAG, "setHttpProxy failure", e);
-      return false;
-    }
-  }
-
-  /**
    * Restores system proxy settings via native call on Android 3.1+ devices using
    * Java reflection.
    */
   private void clearConnectionProxy()
   {
+    String proxyHost = (String) proxy.props.getProperty("adblock.proxyHost");
+    String proxyPort = (String) proxy.props.getProperty("adblock.proxyPort");
+    String proxyExcl = (String) proxy.props.getProperty("adblock.proxyExcl");
+    int port = 0;
     try
     {
-      /*
-       * android.net.LinkProperties lp =
-       * ConnectivityManager.getActiveLinkProperties();
-       */
-      Method method = ConnectivityManager.class.getMethod("getActiveLinkProperties");
-      Object lp = method.invoke(connectivityManager);
-
-      String proxyHost = (String) proxy.props.getProperty("adblock.proxyHost");
-      String proxyPort = (String) proxy.props.getProperty("adblock.proxyPort");
-      String proxyExcl = (String) proxy.props.getProperty("adblock.proxyExcl");
-
-      String className = "android.net.ProxyProperties";
-      Class<?> c = Class.forName(className);
-      method = lp.getClass().getMethod("setHttpProxy", c);
       if (proxyHost != null)
-      {
-        /*
-         * ProxyProperties pp = new ProxyProperties(proxyHost, proxyPort,
-         * proxyExcl);
-         */
-        Class<?>[] parameter = new Class[] {String.class, int.class, String.class};
-        Object args[] = new Object[3];
-        args[0] = proxyHost;
-        args[1] = new Integer(proxyPort);
-        args[2] = proxyExcl;
-        Constructor<?> cons = c.getConstructor(parameter);
-        Object pp = cons.newInstance(args);
-        /*
-         * lp.setHttpProxy(pp);
-         */
-        method.invoke(lp, pp);
-      }
-      else
-      {
-        /*
-         * lp.setHttpProxy(null);
-         */
-        method.invoke(lp, new Object[] {null});
-      }
-
-      Intent intent = new Intent("android.net.wifi.LINK_CONFIGURATION_CHANGED");
-      intent.putExtra("linkProperties", (Parcelable) lp);
-      sendBroadcast(intent);
+        port = Integer.valueOf(proxyPort);
     }
-    catch (Exception e)
+    catch (NumberFormatException e)
     {
-      e.printStackTrace();
+      Log.e(TAG, "Bad port setting", e);
     }
+    ProxySettings.setConnectionProxy(getApplicationContext(), proxyHost, port, proxyExcl);
   }
 
   /**
@@ -539,6 +334,9 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       config.remove("https.auth");
     }
 
+    if (isNativeProxy)
+      passProxySettings(proxyHost, proxyPort, proxyExcl);
+
     // Check if there are any settings
     if (proxyHost == null || "".equals(proxyHost))
       return;
@@ -547,9 +345,9 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     // proxy points to ourselves
     // proxy port is null, 0 or not a number
     // proxy is 127.0.0.1:8080
-    int p = 0;
     if (proxyPort == null)
       return;
+    int p = 0;
     try
     {
       p = Integer.valueOf(proxyPort);
@@ -559,7 +357,11 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       return;
     }
     if (p == 0 || isLocalHost(proxyHost) && (p == port || p == 8080))
+    {
+      if (isNativeProxy)
+        passProxySettings(null, null, null);
       return;
+    }
 
     config.put("adblock.proxyHost", proxyHost);
     config.put("adblock.proxyPort", proxyPort);
@@ -580,6 +382,19 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       config.put("adblock.auth", proxyAuth);
       if (!isTransparent)
         config.put("https.auth", proxyAuth);
+    }
+  }
+
+  private void passProxySettings(String proxyHost, String proxyPort, String proxyExcl)
+  {
+    try
+    {
+      CrashHandler handler = (CrashHandler) Thread.getDefaultUncaughtExceptionHandler();
+      handler.saveProxySettings(proxyHost, proxyPort, proxyExcl);
+    }
+    catch (ClassCastException e)
+    {
+      // ignore - default handler in use
     }
   }
 
@@ -805,7 +620,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
         boolean available = info.isAvailable();
         Log.i(TAG, "Network Type: " + typeName + ", subtype: " + subtypeName + ", available: " + available);
         if (info.getType() == ConnectivityManager.TYPE_WIFI)
-          setConnectionProxy();
+          ProxySettings.setConnectionProxy(getApplicationContext(), "127.0.0.1", port, "");
       }
       else if ("android.net.wifi.LINK_CONFIGURATION_CHANGED".equals(action))
       {
@@ -819,7 +634,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
           method = lp.getClass().getMethod("getHttpProxy");
           Object pp = method.invoke(lp);
 
-          String[] userProxy = getUserProxy(pp);
+          String[] userProxy = ProxySettings.getUserProxy(pp);
           if (userProxy != null && Integer.valueOf(userProxy[1]) != port)
           {
             Log.i(TAG, "User has set new proxy: " + userProxy[0] + ":" + userProxy[1] + "(" + userProxy[2] + ")");

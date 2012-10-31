@@ -105,13 +105,21 @@ public class AdvancedPreferences extends SummarizedPreferences
   {
     if (getString(R.string.pref_refresh).equals(key))
     {
-      int refresh = Integer.valueOf(sharedPreferences.getString(getString(R.string.pref_refresh), "0"));
+      int refresh = Integer.valueOf(sharedPreferences.getString(key, "0"));
       findPreference(getString(R.string.pref_wifirefresh)).setEnabled(refresh > 0);
     }
     if (getString(R.string.pref_crashreport).equals(key))
     {
-      AdblockPlus application = AdblockPlus.getApplication();
-      application.updateCrashReportStatus();
+      boolean report = sharedPreferences.getBoolean(key, getResources().getBoolean(R.bool.def_crashreport));
+      try
+      {
+        CrashHandler handler = (CrashHandler) Thread.getDefaultUncaughtExceptionHandler();
+        handler.generateReport(report);
+      }
+      catch (ClassCastException e)
+      {
+        // ignore - default handler in use
+      }
     }
     super.onSharedPreferenceChanged(sharedPreferences, key);
   }
@@ -149,7 +157,7 @@ public class AdvancedPreferences extends SummarizedPreferences
           }
           if (hasNativeProxy)
           {
-            String[] px = proxyService.getUserProxy();
+            String[] px = ProxySettings.getUserProxy(getApplicationContext());
             if (px != null)
             {
               items.add("System settings:");
