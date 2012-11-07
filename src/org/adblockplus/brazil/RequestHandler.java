@@ -136,7 +136,7 @@ public class RequestHandler implements Handler
 
     if (block)
     {
-      request.sendError(502, "Blocked by Adblock Plus");
+      request.sendHeaders(204, null, 0);
       return true;
     }
 
