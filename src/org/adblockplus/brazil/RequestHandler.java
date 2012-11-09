@@ -77,7 +77,7 @@ public class RequestHandler implements Handler
   private int proxyPort = 80;
   private String auth;
 
-  private boolean shouldLog; // if true, log all headers
+  private boolean shouldLogHeaders;
 
   @Override
   public boolean init(Server server, String prefix)
@@ -96,11 +96,12 @@ public class RequestHandler implements Handler
     }
     catch (Exception e)
     {
+      // use default port
     }
 
     auth = props.getProperty(prefix + AUTH);
 
-    shouldLog = (props.getProperty(prefix + "proxylog") != null);
+    shouldLogHeaders = (props.getProperty(prefix + "proxylog") != null);
 
     via = " " + server.hostName + ":" + server.listen.getLocalPort() + " (" + server.name + ")";
 
@@ -114,25 +115,36 @@ public class RequestHandler implements Handler
     String reqHost = null;
     String refHost = null;
 
+    String referrer = request.getRequestHeader("referer");
+    
     try
     {
       reqHost = (new URL(request.url)).getHost();
-      refHost = (new URL(request.getRequestHeader("referer"))).getHost();
+      if (referrer != null)
+        refHost = (new URL(referrer)).getHost();
     }
     catch (MalformedURLException e)
     {
+      // We are transparent, it's not our deal if it's malformed.
     }
 
     try
     {
-      block = application.matches(request.url, request.query, reqHost, refHost, request.getRequestHeader("accept"));
+      if (referrer != null)
+        block = application.matches(request.url, request.query, reqHost, refHost, request.getRequestHeader("accept"));
     }
     catch (Exception e)
     {
       Log.e(prefix, "Filter error", e);
     }
 
-    request.log(Server.LOG_LOG, prefix, block + ": " + request.url);
+    request.log(Server.LOG_LOG, prefix, block + ": " + request.url + " ("+ refHost +")");
+
+    int count = request.server.requestCount;
+    if (shouldLogHeaders)
+    {
+      System.err.println(dumpHeaders(count, request, request.headers, true));
+    }
 
     if (block)
     {
@@ -151,12 +163,6 @@ public class RequestHandler implements Handler
     if ((request.query != null) && (request.query.length() > 0))
     {
       url += "?" + request.query;
-    }
-
-    int count = request.server.requestCount;
-    if (shouldLog)
-    {
-      System.err.println(dumpHeaders(count, request, request.headers, true));
     }
 
     /*
@@ -196,7 +202,7 @@ public class RequestHandler implements Handler
 
       target.connect();
 
-      if (shouldLog)
+      if (shouldLogHeaders)
       {
         System.err.println("      " + target.status + "\n" + dumpHeaders(count, request, target.responseHeaders, false));
       }
@@ -288,8 +294,6 @@ public class RequestHandler implements Handler
 
         byte[] buf = new byte[Math.min(4096, size)];
 
-        Log.e(prefix, request.url);
-
         boolean sent = selectors == null;
         // TODO Do we need to set encoding here?
         BoyerMoore matcher = new BoyerMoore("<html".getBytes());
@@ -333,14 +337,8 @@ public class RequestHandler implements Handler
         // The correct way would be to close ChunkedOutputStream
         // but we can not do it because underlying output stream is
         // used later in caller code. So we use this ugly hack:
-        try
-        {
+        if (out instanceof ChunkedOutputStream)
           ((ChunkedOutputStream) out).writeFinalChunk();
-        }
-        catch (ClassCastException e)
-        {
-          // ignore
-        }
       }
     }
     catch (InterruptedIOException e)
