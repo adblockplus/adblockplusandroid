@@ -75,10 +75,11 @@ XMLHttpRequest.prototype =
       throw new Error("INVALID_STATE_ERR");
     else
     {
+      var lcHeader = header.toLowerCase();
       var returnedHeaders = [];
       for (var rHeader in this.responseHeaders)
       {
-        if (rHeader.match(new RegExp(header, "i")))
+        if (this.responseHeaders.hasOwnProperty(rHeader) && rHeader.toLowerCase() == lcHeader)
           returnedHeaders.push(this.responseHeaders[rHeader]);
       }
 

@@ -4,6 +4,11 @@
  * http://mozilla.org/MPL/2.0/.
  */
 
+function removeTrailingDots(string)
+{
+  return string.replace(/\.+$/, "");
+}
+
 /**
  * Checks whether a request is third party for the given document, uses
  * information from the public suffix list to determine the effective domain
@@ -11,9 +16,8 @@
  */
 function isThirdParty(requestHost, documentHost)
 {
-  // Remove trailing dots
-  requestHost = requestHost.replace(/\.+$/, "");
-  documentHost = documentHost.replace(/\.+$/, "");
+  requestHost = removeTrailingDots(requestHost);
+  documentHost = removeTrailingDots(documentHost);
 
   // Extract domain name - leave IP addresses unchanged, otherwise leave only base domain
   var documentDomain = getBaseDomain(documentHost);

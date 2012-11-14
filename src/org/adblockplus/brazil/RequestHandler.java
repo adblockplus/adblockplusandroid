@@ -11,7 +11,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.List;
-import java.util.Properties;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
 
@@ -19,7 +19,6 @@ import org.adblockplus.ChunkedOutputStream;
 import org.adblockplus.android.AdblockPlus;
 import org.literateprograms.BoyerMoore;
 
-import sunlabs.brazil.server.Handler;
 import sunlabs.brazil.server.Request;
 import sunlabs.brazil.server.Server;
 import sunlabs.brazil.util.MatchString;
@@ -62,47 +61,21 @@ import android.util.Log;
  * respond} for a more detailed explanation.
  */
 
-public class RequestHandler implements Handler
+public class RequestHandler extends BaseRequestHandler
 {
-  public static final String PROXY_HOST = "proxyHost";
-  public static final String PROXY_PORT = "proxyPort";
-  public static final String AUTH = "auth";
-
   private AdblockPlus application;
-  private String prefix;
-
   private String via;
-
-  private String proxyHost;
-  private int proxyPort = 80;
-  private String auth;
+  private static Pattern RE_HTTP = Pattern.compile("^https?:");
 
   private boolean shouldLogHeaders;
 
   @Override
   public boolean init(Server server, String prefix)
   {
-    this.prefix = prefix;
+    super.init(server, prefix);
+
     application = AdblockPlus.getApplication();
-
-    Properties props = server.props;
-
-    proxyHost = props.getProperty(prefix + PROXY_HOST);
-
-    String s = props.getProperty(prefix + PROXY_PORT);
-    try
-    {
-      proxyPort = Integer.decode(s).intValue();
-    }
-    catch (Exception e)
-    {
-      // use default port
-    }
-
-    auth = props.getProperty(prefix + AUTH);
-
-    shouldLogHeaders = (props.getProperty(prefix + "proxylog") != null);
-
+    shouldLogHeaders = (server.props.getProperty(prefix + "proxylog") != null);
     via = " " + server.hostName + ":" + server.listen.getLocalPort() + " (" + server.name + ")";
 
     return true;
@@ -153,7 +126,7 @@ public class RequestHandler implements Handler
     }
 
     // Do not further process non-http requests
-    if (request.url.startsWith("http:") == false && request.url.startsWith("https:") == false)
+    if (!RE_HTTP.matcher(request.url).find())
     {
       return false;
     }
