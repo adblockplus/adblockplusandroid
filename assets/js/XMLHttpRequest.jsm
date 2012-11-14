@@ -3,6 +3,16 @@ XMLHttpRequest = function()
 {
   this.headers = {};
   this.responseHeaders = {};
+  this.progressEventListeners = [];
+  this.loadendEventListeners = [];
+  this.loadEventListeners = [];
+  this.errorEventListeners = [];
+  this.abortEventListeners = [];
+  this.aborted = false;
+  this.async = true;
+  this.readyState = XMLHttpRequest.UNSENT;
+  this.responseText = "";
+  this.status = 0;
 };
 
 XMLHttpRequest.UNSENT = 0;
@@ -143,17 +153,7 @@ XMLHttpRequest.prototype =
       var listener = listeners[i];
       listener();
     }
-  },
-  progressEventListeners: [],
-  loadendEventListeners: [],
-  loadEventListeners: [],
-  errorEventListeners: [],
-  abortEventListeners: [],
-  aborted: false,
-  async: true,
-  readyState: XMLHttpRequest.UNSENT,
-  responseText: "",
-  status: 0
+  }	
 };
 
 XMLHttpRequest.prototype.channel =
