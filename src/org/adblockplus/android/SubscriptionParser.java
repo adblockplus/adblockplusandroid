@@ -17,7 +17,7 @@ class SubscriptionParser extends DefaultHandler
   private static final String AUTHOR = "author";
 
   private List<Subscription> subscriptions;
-  private Subscription subscription;
+  private Subscription currentSubscription;
 
   public SubscriptionParser(List<Subscription> subscriptions)
   {
@@ -30,18 +30,18 @@ class SubscriptionParser extends DefaultHandler
   {
     if (localName.equalsIgnoreCase(SUBSCRIPTION))
     {
-      subscription = new Subscription();
-      subscription.title = attributes.getValue(TITLE);
-      subscription.specialization = attributes.getValue(SPECIALIZATION);
-      subscription.url = attributes.getValue(URL);
-      subscription.homepage = attributes.getValue(HOMEPAGE);
+      currentSubscription = new Subscription();
+      currentSubscription.title = attributes.getValue(TITLE);
+      currentSubscription.specialization = attributes.getValue(SPECIALIZATION);
+      currentSubscription.url = attributes.getValue(URL);
+      currentSubscription.homepage = attributes.getValue(HOMEPAGE);
       String prefix = attributes.getValue(PREFIXES);
       if (prefix != null)
       {
         String[] prefixes = prefix.split(",");
-        subscription.prefixes = prefixes;
+        currentSubscription.prefixes = prefixes;
       }
-      subscription.author = attributes.getValue(AUTHOR);
+      currentSubscription.author = attributes.getValue(AUTHOR);
     }
     super.startElement(uri, localName, qName, attributes);
   }
@@ -51,11 +51,11 @@ class SubscriptionParser extends DefaultHandler
   {
     if (localName.equalsIgnoreCase(SUBSCRIPTION))
     {
-      if (subscriptions != null && subscription != null)
+      if (subscriptions != null && currentSubscription != null)
       {
-        subscriptions.add(subscription);
+        subscriptions.add(currentSubscription);
       }
-      subscription = null;
+      currentSubscription = null;
     }
     super.endElement(uri, localName, qName);
   }

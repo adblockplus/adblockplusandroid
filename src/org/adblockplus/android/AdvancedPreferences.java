@@ -38,19 +38,15 @@ public class AdvancedPreferences extends SummarizedPreferences
 
   private static ProxyService proxyService = null;
   
-  private boolean hasNativeProxy;
-
   @Override
   public void onCreate(Bundle savedInstanceState)
   {
     super.onCreate(savedInstanceState);
-    
-    hasNativeProxy = Build.VERSION.SDK_INT >= 12; // Honeycomb 3.1
 
     addPreferencesFromResource(R.xml.preferences_advanced);
 
     PreferenceScreen screen = getPreferenceScreen();
-    if (hasNativeProxy) 
+    if (ProxyService.hasNativeProxy) 
     {
       screen.removePreference(findPreference(getString(R.string.pref_proxy)));
     }
@@ -155,7 +151,7 @@ public class AdvancedPreferences extends SummarizedPreferences
           {
             items.add("Uses native proxy");
           }
-          if (hasNativeProxy)
+          if (ProxyService.hasNativeProxy)
           {
             String[] px = ProxySettings.getUserProxy(getApplicationContext());
             if (px != null)

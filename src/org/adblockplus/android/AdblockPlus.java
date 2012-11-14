@@ -148,7 +148,6 @@ public class AdblockPlus extends Application
    */
   public boolean checkWriteExternalPermission()
   {
-
     String permission = "android.permission.WRITE_EXTERNAL_STORAGE";
     int res = checkCallingOrSelfPermission(permission);
     return res == PackageManager.PERMISSION_GRANTED;
