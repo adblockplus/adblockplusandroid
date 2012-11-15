@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.adblockplus.android"
-    android:versionCode="101"
-    android:versionName="0.13" >
+    android:versionCode="135"
+    android:versionName="0.14" >
 
     <uses-sdk
         android:minSdkVersion="7"
@@ -48,9 +48,14 @@
         <service android:name=".ProxyService" />
         <service android:name=".updater.UpdaterService" />
 
-        <receiver android:name=".BootBroadcastReceiver" >
+        <receiver android:name=".Starter" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_REPLACED" />
+
+                <data android:scheme="package" />
             </intent-filter>
         </receiver>
         <receiver android:name=".updater.AlarmReceiver" />
