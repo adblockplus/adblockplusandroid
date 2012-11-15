@@ -103,8 +103,7 @@ public class RequestHandler extends BaseRequestHandler
 
     try
     {
-      if (referrer != null)
-        block = application.matches(request.url, request.query, reqHost, refHost, request.getRequestHeader("accept"));
+      block = application.matches(request.url, request.query, reqHost, refHost, request.getRequestHeader("accept"));
     }
     catch (Exception e)
     {
