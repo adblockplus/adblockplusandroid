@@ -559,14 +559,17 @@ function matchesAny(url, query, reqHost, refHost, accept)
     contentType = "OTHER";
 
   if (refHost != "")
-  {
     thirdParty = isThirdParty(reqHost, refHost);
-  }
 
   if (query != "")
     url = url + "?" + query;
 
   var filter = defaultMatcher.matchesAny(url, contentType, null, thirdParty);
+
+  // hack: if there is no referrer block only if filter is domain-specific
+  // (to re-enable in-app ads blocking, proposed on 12.11.2012 Monday meeting)
+  if (filter != null && refHost == "" && filter.text.indexOf("||") != 0)
+    filter = null;
 
   return (filter != null && !(filter instanceof WhitelistFilter));
 }
