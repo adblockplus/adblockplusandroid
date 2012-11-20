@@ -1,3 +1,20 @@
+/*
+ * This file is part of the Adblock Plus,
+ * Copyright (C) 2006-2012 Eyeo GmbH
+ *
+ * Adblock Plus is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * Adblock Plus is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Adblock Plus.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package org.adblockplus.android;
 
 import java.io.File;
@@ -476,7 +493,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 
   /**
    * Initializes iptables executable.
-   * 
+   *
    * @throws FileNotFoundException If iptables initialization failed due to provided reasons.
    */
   private void initIptables() throws IOException, RootToolsException, TimeoutException, FileNotFoundException
@@ -491,7 +508,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       Log.e(TAG, "No iptables excutable found");
       throw new FileNotFoundException("No iptables executable");
     }
-    
+
     String path = ipt.getAbsolutePath();
 
     RootTools.sendShell("chmod 700 " + path, DEFAULT_TIMEOUT);
@@ -518,7 +535,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 
     iptables = path;
   }
-  
+
   public List<String> getIptablesOutput()
   {
     if (iptables == null)
@@ -538,7 +555,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 
   /**
    * Stops no traffic check, optionally resetting notification message.
-   * 
+   *
    * @param changeStatus
    *          true if notification message should be set to normal operating
    *          mode

@@ -1,3 +1,20 @@
+/*
+ * This file is part of the Adblock Plus,
+ * Copyright (C) 2006-2012 Eyeo GmbH
+ *
+ * Adblock Plus is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * Adblock Plus is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Adblock Plus.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package org.adblockplus.android;
 
 import java.lang.reflect.Constructor;
@@ -13,10 +30,10 @@ import android.util.Log;
 public class ProxySettings
 {
   private static final String TAG = "ProxySettings";
-  
+
   /**
    * Reads system proxy settings on Android 3.1+ using Java reflection.
-   * 
+   *
    * @return string array of host, port and exclusion list
    */
   public static String[] getUserProxy(Context context)
@@ -60,7 +77,7 @@ public class ProxySettings
 
   /**
    * Reads system proxy settings on Android 3.1+ using Java reflection.
-   * 
+   *
    * @param pp
    *          ProxyProperties object
    * @return string array of host, port and exclusion list
@@ -101,7 +118,7 @@ public class ProxySettings
   /**
    * Tries to set local proxy in system settings via native call on Android 3.1+
    * devices using Java reflection.
-   * 
+   *
    * @return true if device supports native proxy setting
    */
   public static boolean setConnectionProxy(Context context, String host, int port, String excl)
@@ -132,7 +149,7 @@ public class ProxySettings
       Object lp = method.invoke(connectivityManager);
       if (lp == null) // There is no active link now, but device has native proxy support
         return true;
-      
+
       String className = "android.net.ProxyProperties";
       Class<?> c = Class.forName(className);
       method = lp.getClass().getMethod("setHttpProxy", c);
