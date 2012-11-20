@@ -2,8 +2,8 @@
  <a href="https://hg.adblockplus.org/adblockplusandroid/">https://hg.adblockplus.org/adblockplusandroid/</a></p>
 <br/>
 <h4>License</h4>
-<p>This program is subject to the terms of the Mozilla Public License, v. 2.0.
- You can obtain a copy of the MPL at <a href="http://mozilla.org/MPL/2.0/">http://mozilla.org/MPL/2.0/</a>.</p>
+<p>This program is subject to the terms of the GNU General Public License v3.0.
+ You can obtain a copy of the GPL at <a href="http://www.gnu.org/licenses/gpl.html">http://www.gnu.org/licenses/gpl.html</a>.</p>
 <br/>
 <h4>Credits</h4>
 <p>Adblock Plus contains code from the following projects:</p>
