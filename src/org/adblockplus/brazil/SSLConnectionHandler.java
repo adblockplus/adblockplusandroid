@@ -1,3 +1,20 @@
+/*
+ * This file is part of the Adblock Plus,
+ * Copyright (C) 2006-2012 Eyeo GmbH
+ *
+ * Adblock Plus is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * Adblock Plus is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Adblock Plus.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package org.adblockplus.brazil;
 
 import java.io.IOException;
@@ -12,11 +29,11 @@ import sunlabs.brazil.util.MatchString;
 
 /**
  * <code>RequestHandler</code> implements a SSL tunnel.
- * 
+ *
  * The following configuration parameters are used to initialize this
  * <code>Handler</code>:
  * <dl class=props>
- * 
+ *
  * <dt>prefix, suffix, glob, match
  * <dd>Specify the URL that triggers this handler. (See {@link MatchString}).
  * <dt>auth
@@ -26,20 +43,20 @@ import sunlabs.brazil.util.MatchString;
  * <dd>If specified, the name of the upstream proxy
  * <dt>proxyPort
  * <dd>The upstream proxy port, if a proxyHost is specified (defaults to 80)
- * 
+ *
  * </dl>
- * 
+ *
  * A sample set of configuration parameters illustrating how to use this
  * handler follows:
- * 
+ *
  * <pre>
  * handler=https
  * https.class=org.adblockplus.brazil.SSLConnectionHandler
  * </pre>
- * 
+ *
  * See the description under {@link sunlabs.brazil.server.Handler#respond
  * respond} for a more detailed explanation.
- * 
+ *
  * Original source by Jochen Luell, PAW (http://paw-project.sourceforge.net/)
  */
 

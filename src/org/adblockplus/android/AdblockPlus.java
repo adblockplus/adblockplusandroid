@@ -1,3 +1,20 @@
+/*
+ * This file is part of the Adblock Plus,
+ * Copyright (C) 2006-2012 Eyeo GmbH
+ *
+ * Adblock Plus is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * Adblock Plus is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Adblock Plus.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package org.adblockplus.android;
 
 import java.io.BufferedReader;
@@ -190,7 +207,7 @@ public class AdblockPlus extends Application
 
   /**
    * Returns subscription information.
-   * 
+   *
    * @param url
    *          subscription url
    */
@@ -208,7 +225,7 @@ public class AdblockPlus extends Application
 
   /**
    * Adds provided subscription and removes previous subscriptions if any.
-   * 
+   *
    * @param subscription
    *          Subscription to add
    */
@@ -257,7 +274,7 @@ public class AdblockPlus extends Application
 
   /**
    * Selects which subscription to offer for the first time.
-   * 
+   *
    * @return offered subscription
    */
   public Subscription offerSubscription()
@@ -302,7 +319,7 @@ public class AdblockPlus extends Application
   /**
    * Verifies that subscriptions are loaded and returns flag of subscription
    * presence.
-   * 
+   *
    * @return true if at least one subscription is present and downloaded
    */
   public boolean verifySubscriptions()
@@ -335,7 +352,7 @@ public class AdblockPlus extends Application
 
   /**
    * Returns ElemHide selectors for domain.
-   * 
+   *
    * @return ready to use HTML element with CSS selectors
    */
   public String getSelectorsForDomain(final String domain)
@@ -393,7 +410,7 @@ public class AdblockPlus extends Application
 
   /**
    * Checks if filters match request parameters.
-   * 
+   *
    * @param url
    *          Request URL
    * @param query
@@ -490,7 +507,7 @@ public class AdblockPlus extends Application
 
   /**
    * Stops JS engine.
-   * 
+   *
    * @param implicitly
    *          stop even in interactive mode
    */
@@ -515,7 +532,7 @@ public class AdblockPlus extends Application
    * Sets Alarm to call updater after specified number of minutes or after one
    * day if
    * minutes are set to 0.
-   * 
+   *
    * @param minutes
    *          number of minutes to wait
    */
