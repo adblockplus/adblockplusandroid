@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <string name="app_name">Adblock Plus</string>
+  <string name="crash_name">Absturz festgestellt</string>
+  <string name="configuration_name">Konfigurationsinformationen</string>
+
+  <string name="notif_wifi">Werbung wird auf WiFi Verbindungen blockiert</string>
+  <string name="notif_all">Werbung wird auf allen Verbindungen blockiert</string>
+  <string name="notif_waiting">Warte auf Datenverkehr</string>
+  <string name="notif_notraffic">Bitte überprüfen Sie die Konfiguration</string>
+
+  <string name="crash_dialog_text">Adblock Plus hat offenbar ein Problem festgestellt und wurde unsanft beendet. Sie können uns helfen dieses Problem zu beheben indem Sie uns einen Fehlerbericht schicken, klicken Sie hierfür auf \'OK\'.</string>
+  <string name="crash_dialog_comment_prompt">Hier können Sie zusätzliche Anmerkungen erfassen:</string>
+
+  <string name="msg_crash_submission_failure">Fehlerbericht konnte nicht versendet werden, wird später erneut versucht.</string>
+  <string name="msg_subscription_offer">Wir haben die folgende Filterliste für Sie ausgewählt: \'%s\'. Sie können in den Einstellungen jederzeit eine andere auswählen.</string>
+  <string name="msg_notraffic">Scheinbar wird kein Datenverkehr durch Adblock Plus geleitet.</string>
+  <string name="msg_configuration">Bitte stellen Sie sicher dass in den Netzwerkeinstellungen \'localhost\' als Proxy-Server und \'%d\' als Proxy-Port konfiguriert sind.</string>
+  <string name="msg_badport">Ungültiger Port</string>
+  <string name="msg_clipboard">Text wurde in die Zwischenablage kopiert</string>
+  <string name="msg_update_available">Neue Version verfügbar</string>
+  <string name="msg_update_missing">Sie haben bereits die neueste Version</string>
+  <string name="msg_update_description">Eine neue Version kann heruntergeladen werden. Fortfahren?</string>
+  <string name="msg_update_downloading">Neue Version wird heruntergeladen: %d%%</string>
+  <string name="msg_update_ready">Neue Version kann installiert werden</string>
+  <string name="msg_update_fail">Überprüfung auf neue Versionen fehlgeschlagen, bitte versuchen Sie es später erneut</string>
+
+  <string name="configuring_url">https://adblockplus.org/de/android-config</string>
+  <string name="configuring_proxy_url">https://adblockplus.org/de/android-config#proxy</string>
+
+  <string name="ok">OK</string>
+  <string name="cancel">Abbrechen</string>
+  <string name="error">Fehler</string>
+  <string name="about">Über</string>
+  <string name="help">Hilfe</string>
+  <string name="version">Version</string>
+  <string name="build">build#</string>
+  <string name="gotit">Verstanden</string>
+
+  <string name="synchronize_in_progress">herunterladen&#8230;</string>
+  <string name="synchronize_invalid_url">fehlerhafte URL</string>
+  <string name="synchronize_connection_error">verbindungsfehler</string>
+  <string name="synchronize_invalid_data">fehlerhafte Daten</string>
+  <string name="synchronize_checksum_mismatch">Prüfsummenvergleich fehlgeschlagen</string>
+  <string name="synchronize_last_at">letzte Aktualisierung</string>
+  <string name="synchronize_never">nicht geladen</string>
+
+  <string name="pref_enabled_title">Aktivieren</string>
+  <string name="pref_enabled_summary_on">Adblock Plus ist aktiv</string>
+  <string name="pref_enabled_summary_off">Adblock Plus ist nicht aktiv</string>
+  <string name="pref_startatboot_title">Bei Starten aktivieren</string>
+  <string name="pref_startatboot_summary_on">Adblock Plus wird beim Starten des Gerätes automatisch gestartet, wenn aktiv</string>
+  <string name="pref_startatboot_summary_off">Adblock Plus muss nach dem Starten des Gerätes manuell gestartet werden</string>
+  <string name="pref_subscription_title">Filterabonnement</string>
+  <string name="pref_refresh_title">Abonnement-Aktualisierung</string>
+  <string name="pref_wifirefresh_title">Nur über WiFi aktualisieren</string>
+  <string name="pref_wifirefresh_summary_on">Wird nur bei bestehender WiFi Verbindung automatisch aktualisiert</string>
+  <string name="pref_wifirefresh_summary_off">Wird auch über mobile Datenverbindungen automatisch aktualisiert</string>
+  <string name="pref_advanced_title">Erweiterte Einstellungen</string>
+  <string name="pref_proxy_title">Proxy</string>
+  <string name="pref_proxyhost_title">Host</string>
+  <string name="pref_proxyport_title">Port</string>
+  <string name="pref_proxyuser_title">Benutzername</string>
+  <string name="pref_proxypass_title">Passwort</string>
+  <string name="pref_support_title">Unterstützung</string>
+  <string name="pref_crashreport_title">Fehlerbericht</string>
+  <string name="pref_crashreport_summary_on">Im Falle eines Absturzes wird ein Fehlerbericht erstellt, der beim nächsten Starten verschickt werden kann</string>
+  <string name="pref_crashreport_summary_off">Im Falle eines Absturzes wird kein Fehlerbericht erstellt</string>
+  <string name="pref_checkupdate_title">Auf neue Versionen prüfen</string>
+  <string name="pref_configuration_title">Konfiguration anzeigen</string>
+  <string name="menu_advanced">Erweiterte Einstellungen</string>
+
+</resources>
