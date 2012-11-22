@@ -69,7 +69,8 @@ public class UpdaterService extends Service
     updateDir.mkdirs();
 
     // Start download
-    new DownloadTask(this).execute(intent.getStringExtra("url"));
+    if (intent != null && intent.hasExtra("url"))
+      new DownloadTask(this).execute(intent.getStringExtra("url"));
   }
 
   @Override
