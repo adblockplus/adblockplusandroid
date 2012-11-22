@@ -10,7 +10,7 @@
   <string name="notif_waiting">Waiting for traffic</string>
   <string name="notif_notraffic">You probably need to adjust configuration</string>
 
-  <string name="crash_dialog_text">It seems that application encounted a problem and was forcefully stopped on previous launch. You can help us fix this if you send us error report by clicking \'OK\'.</string>
+  <string name="crash_dialog_text">It seems that the application encountered a problem and was forcefully stopped on previous launch. You can help us fix this if you send us error report by clicking \'OK\'.</string>
   <string name="crash_dialog_comment_prompt">You might add your comments about the problem below:</string>
 
   <string name="msg_crash_submission_failure">Failed to submit crash report, will try again later.</string>
