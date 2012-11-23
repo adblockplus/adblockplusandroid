@@ -5,7 +5,7 @@
   <string name="crash_name">Absturz festgestellt</string>
   <string name="configuration_name">Konfigurationsinformationen</string>
 
-  <string name="notif_wifi">Werbung wird auf WLAN Verbindungen blockiert</string>
+  <string name="notif_wifi">Werbung wird auf WLAN-Verbindungen blockiert</string>
   <string name="notif_all">Werbung wird auf allen Verbindungen blockiert</string>
   <string name="notif_waiting">Warte auf Datenverkehr</string>
   <string name="notif_notraffic">Bitte überprüfen Sie die Konfiguration</string>
@@ -55,7 +55,7 @@
   <string name="pref_subscription_title">Filterabonnement</string>
   <string name="pref_refresh_title">Abonnement-Aktualisierung</string>
   <string name="pref_wifirefresh_title">Nur über WLAN aktualisieren</string>
-  <string name="pref_wifirefresh_summary_on">Wird nur bei bestehender WLAN Verbindung automatisch aktualisiert</string>
+  <string name="pref_wifirefresh_summary_on">Wird nur bei bestehender WLAN-Verbindung automatisch aktualisiert</string>
   <string name="pref_wifirefresh_summary_off">Wird auch über mobile Datenverbindungen automatisch aktualisiert</string>
   <string name="pref_advanced_title">Erweiterte Einstellungen</string>
   <string name="pref_proxy_title">Proxy</string>
