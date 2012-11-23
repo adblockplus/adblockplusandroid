@@ -269,7 +269,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     ongoingNotification.setLatestEventInfo(getApplicationContext(), getText(R.string.app_name), msg, contentIntent);
     startForeground(ONGOING_NOTIFICATION_ID, ongoingNotification);
 
-    sendBroadcast(new Intent(BROADCAST_STATE_CHANGED).putExtra("enabled", true).putExtra("port", port).putExtra("manual", !transparent && !nativeProxy));
+    sendBroadcast(new Intent(BROADCAST_STATE_CHANGED).putExtra("enabled", true).putExtra("port", port).putExtra("manual", isManual()));
     Log.i(TAG, "Service started");
   }
 
@@ -458,6 +458,14 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   public boolean isNativeProxy()
   {
     return nativeProxy;
+  }
+
+  /**
+   * Checks if user has to set proxy settings manually
+   */
+  public boolean isManual()
+  {
+    return !transparent && !nativeProxy;
   }
 
   /**

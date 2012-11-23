@@ -28,8 +28,10 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.ServiceConnection;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -38,6 +40,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.PreferenceManager;
@@ -57,9 +60,11 @@ public class Preferences extends SummarizedPreferences
 {
   private static final String TAG = "Preferences";
 
+  private static ProxyService proxyService = null;
+
   private AboutDialog aboutDialog;
   private boolean showAbout = false;
-  private String configurationMsg;
+  private boolean trafficDetected = false;
   private String subscriptionSummary;
 
   @Override
@@ -196,12 +201,10 @@ public class Preferences extends SummarizedPreferences
       setEnabled(true);
     }
 
-    // Process screen rotation
-    if (configurationMsg != null)
-      showConfigurationMsg(configurationMsg);
-
     if (showAbout)
       onAbout(findViewById(R.id.btn_about));
+    
+    bindService(new Intent(this, ProxyService.class), proxyServiceConnection, 0);
   }
 
   @Override
@@ -209,6 +212,8 @@ public class Preferences extends SummarizedPreferences
   {
     super.onPause();
     unregisterReceiver(receiver);
+    unbindService(proxyServiceConnection);
+    proxyService = null;
   }
 
   @Override
@@ -368,16 +373,12 @@ public class Preferences extends SummarizedPreferences
     TextView msg = (TextView) findViewById(R.id.txt_configuration);
     msg.setText(message);
     msg.setVisibility(View.VISIBLE);
-    configurationMsg = message;
   }
 
   private void hideConfigurationMsg()
   {
-    if (configurationMsg == null)
-      return;
     TextView msg = (TextView) findViewById(R.id.txt_configuration);
     msg.setVisibility(View.GONE);
-    configurationMsg = null;
   }
 
   private BroadcastReceiver receiver = new BroadcastReceiver()
@@ -405,8 +406,10 @@ public class Preferences extends SummarizedPreferences
       }
       if (action.equals(AdblockPlus.BROADCAST_FILTER_MATCHES))
       {
-        // Hide configuration message if traffic is detected
-        hideConfigurationMsg();
+        // Hide configuration message if traffic is detected for the first time
+        if (! trafficDetected)
+          hideConfigurationMsg();
+        trafficDetected = true;
       }
       if (action.equals(ProxyService.BROADCAST_PROXY_FAILED))
       {
@@ -475,7 +478,7 @@ public class Preferences extends SummarizedPreferences
   {
     super.onRestoreInstanceState(state);
     showAbout = state.getBoolean("showAbout");
-    configurationMsg = state.getString("configurationMsg");
+    trafficDetected = state.getBoolean("trafficDetected");
     subscriptionSummary = state.getString("subscriptionSummary");
   }
 
@@ -483,8 +486,26 @@ public class Preferences extends SummarizedPreferences
   protected void onSaveInstanceState(Bundle outState)
   {
     outState.putString("subscriptionSummary", subscriptionSummary);
-    outState.putString("configurationMsg", configurationMsg);
+    outState.putBoolean("trafficDetected", trafficDetected);
     outState.putBoolean("showAbout", showAbout);
     super.onSaveInstanceState(outState);
   }
+
+  private ServiceConnection proxyServiceConnection = new ServiceConnection()
+  {
+    public void onServiceConnected(ComponentName className, IBinder service)
+    {
+      proxyService = ((ProxyService.LocalBinder) service).getService();
+      Log.d(TAG, "Proxy service connected");
+
+      if (! trafficDetected && proxyService.isManual())
+          showConfigurationMsg(getString(R.string.msg_configuration, proxyService.port));
+    }
+
+    public void onServiceDisconnected(ComponentName className)
+    {
+      proxyService = null;
+      Log.d(TAG, "Proxy service disconnected");
+    }
+  };
 }
