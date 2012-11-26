@@ -26,8 +26,8 @@
   <string name="msg_update_ready">Neue Version kann installiert werden</string>
   <string name="msg_update_fail">Überprüfung auf neue Versionen fehlgeschlagen, bitte versuchen Sie es später erneut</string>
 
-  <string name="configuring_url">https://adblockplus.org/de/android-config</string>
-  <string name="configuring_proxy_url">https://adblockplus.org/de/android-config#proxy</string>
+  <string name="configuring_url">https://adblockplus.org/en/android-config</string>
+  <string name="configuring_proxy_url">https://adblockplus.org/en/android-config#proxy</string>
 
   <string name="ok">OK</string>
   <string name="cancel">Abbrechen</string>
