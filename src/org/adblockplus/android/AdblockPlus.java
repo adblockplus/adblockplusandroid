@@ -454,6 +454,11 @@ public class AdblockPlus extends Application
    */
   public void stopInteractive()
   {
+    // onStop is sometimes called without prior calling onStart
+    // by Android system
+    if (js == null)
+      return;
+    
     js.execute(new Runnable()
     {
       @Override
