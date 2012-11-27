@@ -62,6 +62,8 @@ public class Preferences extends SummarizedPreferences
 
   private static ProxyService proxyService = null;
 
+  private RefreshableListPreference subscriptionList;
+  
   private AboutDialog aboutDialog;
   private boolean showAbout = false;
   private boolean trafficDetected = false;
@@ -98,6 +100,23 @@ public class Preferences extends SummarizedPreferences
     {
       copyAssets();
     }
+
+    AdblockPlus application = AdblockPlus.getApplication();
+
+    // Initialize subscription list
+    subscriptionList = (RefreshableListPreference) findPreference(getString(R.string.pref_subscription));
+    List<Subscription> subscriptions = application.getSubscriptions();
+    String[] entries = new String[subscriptions.size()];
+    String[] entryValues = new String[subscriptions.size()];
+    int i = 0;
+    for (Subscription subscription : subscriptions)
+    {
+      entries[i] = subscription.title;
+      entryValues[i] = subscription.url;
+      i++;
+    }
+    subscriptionList.setEntries(entries);
+    subscriptionList.setEntryValues(entryValues);  
   }
 
   @Override
@@ -117,24 +136,11 @@ public class Preferences extends SummarizedPreferences
 
     final AdblockPlus application = AdblockPlus.getApplication();
 
-    // Construct subscription list
-    RefreshableListPreference subscriptionList = (RefreshableListPreference) findPreference(getString(R.string.pref_subscription));
-    List<Subscription> subscriptions = application.getSubscriptions();
-    String[] entries = new String[subscriptions.size()];
-    String[] entryValues = new String[subscriptions.size()];
-    String current = prefs.getString(getString(R.string.pref_subscription), (String) null);
-    int i = 0;
-    for (Subscription subscription : subscriptions)
-    {
-      entries[i] = subscription.title;
-      entryValues[i] = subscription.url;
-      i++;
-    }
-    subscriptionList.setEntries(entries);
-    subscriptionList.setEntryValues(entryValues);
-
     boolean firstRun = false;
 
+    // Get current subscription
+    String current = prefs.getString(getString(R.string.pref_subscription), (String) null);
+    
     // If there is no current subscription autoselect one
     if (current == null)
     {
