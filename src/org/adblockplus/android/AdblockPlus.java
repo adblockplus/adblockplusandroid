@@ -971,6 +971,11 @@ public class AdblockPlus extends Application
         params[1] = result.message;
         params[2] = headers;
         params[3] = result.data;
+
+        // Do not run callback if engine was stopped
+        if (js == null)
+          return;
+
         js.execute(new Runnable()
         {
           @Override
