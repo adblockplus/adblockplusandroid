@@ -26,6 +26,9 @@
  *
  * Version Histories:
  *
+ * unversioned 12/11/27-15:37:00 (Andrey Novikov)
+ *   fixed StringIndexOutOfBoundsException in formatTime(long time)
+ *
  * 2.3 04/11/30-15:19:46 (suhler)
  *   fixed sccs version string
  *
@@ -291,7 +294,11 @@ public class HttpUtil
     public static String
     formatTime(long time)
     {
-	return dateFormat.format(new Date(time)).substring(0, 29);
+	String date = dateFormat.format(new Date(time));
+	int plus = date.indexOf('+');
+	if (plus > 0)
+		date = date.substring(0, plus);
+	return date;
     }
 
     /**
