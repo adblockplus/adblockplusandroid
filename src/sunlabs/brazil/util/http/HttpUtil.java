@@ -2,22 +2,22 @@
  * HttpUtil.java
  *
  * Brazil project web application toolkit,
- * export version: 2.3 
+ * export version: 2.3
  * Copyright (c) 1999-2004 Sun Microsystems, Inc.
  *
  * Sun Public License Notice
  *
- * The contents of this file are subject to the Sun Public License Version 
- * 1.0 (the "License"). You may not use this file except in compliance with 
+ * The contents of this file are subject to the Sun Public License Version
+ * 1.0 (the "License"). You may not use this file except in compliance with
  * the License. A copy of the License is included as the file "license.terms",
  * and also available at http://www.sun.com/
- * 
+ *
  * The Original Code is from:
  *    Brazil project web application toolkit release 2.3.
  * The Initial Developer of the Original Code is: cstevens.
  * Portions created by cstevens are Copyright (C) Sun Microsystems, Inc.
  * All Rights Reserved.
- * 
+ *
  * Contributor(s): cstevens, guym, suhler.
  *
  * Version:  2.3
@@ -219,7 +219,7 @@ public class HttpUtil
 
 	return result.toString();
     }
-	
+
     /**
      * Decodes a URL-encoded string by replacing all the "%XX" escape
      * sequences in the string with the corresponding character.
@@ -259,7 +259,7 @@ public class HttpUtil
 	}
 	return result.toString();
     }
-	
+
     /**
      * The format describing an http date.
      */
@@ -270,7 +270,7 @@ public class HttpUtil
 	dateFormat.setTimeZone(new SimpleTimeZone(0, "GMT"));
 	dateFormat.setLenient(true);
     }
-    
+
     /**
      * Returns a string containing the current time as an HTTP-formatted
      * date.
@@ -297,7 +297,7 @@ public class HttpUtil
 	String date = dateFormat.format(new Date(time));
 	int plus = date.indexOf('+');
 	if (plus > 0)
-		date = date.substring(0, plus);
+	    date = date.substring(0, plus);
 	return date;
     }
 
