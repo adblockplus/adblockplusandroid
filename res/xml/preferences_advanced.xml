@@ -8,6 +8,12 @@
         android:summaryOff="@string/pref_startatboot_summary_off"
         android:summaryOn="@string/pref_startatboot_summary_on"
         android:title="@string/pref_startatboot_title" />
+    <CheckBoxPreference
+        android:defaultValue="@bool/def_priority"
+        android:key="@string/pref_priority"
+        android:summaryOff="@string/pref_priority_summary_off"
+        android:summaryOn="@string/pref_priority_summary_on"
+        android:title="@string/pref_priority_title" />
 
     <PreferenceCategory android:title="@string/pref_subscription_title" >
         <ListPreference

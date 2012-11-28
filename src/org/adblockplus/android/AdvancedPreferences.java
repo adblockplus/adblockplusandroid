@@ -52,6 +52,7 @@ public class AdvancedPreferences extends SummarizedPreferences
   private static final String TAG = "AdvancedPreferences";
 
   private static final int CONFIGURATION_DIALOG = 1;
+  private static final int PRIORITY_WARNING_DIALOG = 2;
 
   private static ProxyService proxyService = null;
 
@@ -116,6 +117,11 @@ public class AdvancedPreferences extends SummarizedPreferences
   @Override
   public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
   {
+    if (getString(R.string.pref_priority).equals(key))
+    {
+      if (!sharedPreferences.getBoolean(key, false))
+        showDialog(PRIORITY_WARNING_DIALOG);
+    }
     if (getString(R.string.pref_refresh).equals(key))
     {
       int refresh = Integer.valueOf(sharedPreferences.getString(key, "0"));
@@ -141,8 +147,26 @@ public class AdvancedPreferences extends SummarizedPreferences
   protected Dialog onCreateDialog(int id)
   {
     Dialog dialog = null;
+    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
     switch (id)
     {
+      case PRIORITY_WARNING_DIALOG:
+        // @formatter:off
+        builder.setTitle(R.string.warning)
+               .setIcon(android.R.drawable.ic_dialog_alert)
+               .setMessage(R.string.msg_priority_warning)
+               .setCancelable(false)
+               .setPositiveButton(R.string.gotit, new DialogInterface.OnClickListener()
+                {
+                  public void onClick(DialogInterface dialog, int id)
+                  {
+                    dialog.cancel();
+                  }
+                });
+        // @formatter:on
+        dialog = builder.create();
+        break;
       case CONFIGURATION_DIALOG:
         List<String> items = new ArrayList<String>();
         items.add(AdblockPlus.getDeviceName());
@@ -206,15 +230,19 @@ public class AdvancedPreferences extends SummarizedPreferences
         });
         scrollPane.addView(messageText);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setView(scrollPane).setTitle(R.string.configuration_name).setIcon(android.R.drawable.ic_dialog_info).setCancelable(false)
-            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener()
-            {
-              public void onClick(DialogInterface dialog, int id)
-              {
-                dialog.cancel();
-              }
-            });
+        // @formatter:off
+        builder.setView(scrollPane)
+               .setTitle(R.string.configuration_name)
+               .setIcon(android.R.drawable.ic_dialog_info)
+               .setCancelable(false)
+               .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener()
+                {
+                  public void onClick(DialogInterface dialog, int id)
+                  {
+                    dialog.cancel();
+                  }
+                });
+        // @formatter:on
         dialog = builder.create();
         break;
     }
