@@ -311,7 +311,8 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     sendBroadcast(new Intent(BROADCAST_STATE_CHANGED).putExtra("enabled", false));
 
     // Stop proxy server
-    proxy.close();
+    if (proxy != null)
+      proxy.close();
 
     // Stop engine if not in interactive mode
     AdblockPlus.getApplication().stopEngine(false);
