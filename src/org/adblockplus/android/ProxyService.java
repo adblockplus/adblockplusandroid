@@ -40,6 +40,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Binder;
@@ -114,10 +115,11 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 
     // Get port for local proxy
     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+    Resources resources = getResources();
     String p = prefs.getString(getString(R.string.pref_port), null);
     try
     {
-      port = p != null ? Integer.valueOf(p) : getResources().getInteger(R.integer.def_port);
+      port = p != null ? Integer.valueOf(p) : resources.getInteger(R.integer.def_port);
     }
     catch (NumberFormatException e)
     {
@@ -261,15 +263,27 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       notrafficHandler = new Handler();
       notrafficHandler.postDelayed(noTraffic, NO_TRAFFIC_TIMEOUT);
     }
-    // Lock service
+    // Prepare notification
     ongoingNotification = new Notification();
     ongoingNotification.when = 0;
     contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, Preferences.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK), 0);
     ongoingNotification.icon = R.drawable.ic_stat_blocking;
     ongoingNotification.setLatestEventInfo(getApplicationContext(), getText(R.string.app_name), msg, contentIntent);
 
+    // Lock service
+    if (prefs.getBoolean(getString(R.string.pref_priority), resources.getBoolean(R.bool.def_priority)))
+    {
+      startForeground(ONGOING_NOTIFICATION_ID, ongoingNotification);
+    }
+
     sendBroadcast(new Intent(BROADCAST_STATE_CHANGED).putExtra("enabled", true).putExtra("port", port).putExtra("manual", isManual()));
     Log.i(TAG, "Service started");
+  }
+
+  @Override
+  public int onStartCommand(Intent intent, int flags, int startId)
+  {
+    return START_STICKY;
   }
 
   @Override
@@ -316,6 +330,9 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 
     // Stop engine if not in interactive mode
     AdblockPlus.getApplication().stopEngine(false);
+
+    // Release service lock
+    stopForeground(true);
 
     Log.i(TAG, "Service stopped");
   }
@@ -426,6 +443,18 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   @Override
   public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
   {
+    if (getString(R.string.pref_priority).equals(key))
+    {
+      if (sharedPreferences.getBoolean(key, false))
+      {
+        startForeground(ONGOING_NOTIFICATION_ID, ongoingNotification);
+      }
+      else
+      {
+        stopForeground(true);
+      }
+      return;
+    }
     if (hasNativeProxy)
     {
       String ketHost = getString(R.string.pref_proxyhost);
