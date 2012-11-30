@@ -3,6 +3,5 @@
     <bool name="def_startatboot">true</bool>
     <bool name="def_wifirefresh">true</bool>
     <bool name="def_crashreport">true</bool>
-    <bool name="def_priority">true</bool>
     <bool name="def_release">true</bool>
 </resources>
