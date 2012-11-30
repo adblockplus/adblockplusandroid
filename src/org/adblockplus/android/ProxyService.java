@@ -95,6 +95,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 
   protected ProxyServer proxy = null;
   protected int port;
+  private Properties proxyConfiguration = new Properties();
 
   /**
    * Indicates that service is working with root privileges.
@@ -228,29 +229,28 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
         return;
       }
 
-      Properties config = new Properties();
-      config.put("handler", "main");
-      config.put("main.prefix", "");
-      config.put("main.class", "sunlabs.brazil.server.ChainHandler");
+      proxyConfiguration.put("handler", "main");
+      proxyConfiguration.put("main.prefix", "");
+      proxyConfiguration.put("main.class", "sunlabs.brazil.server.ChainHandler");
       if (transparent)
       {
-        config.put("main.handlers", "urlmodifier adblock");
-        config.put("urlmodifier.class", "org.adblockplus.brazil.TransparentProxyHandler");
+        proxyConfiguration.put("main.handlers", "urlmodifier adblock");
+        proxyConfiguration.put("urlmodifier.class", "org.adblockplus.brazil.TransparentProxyHandler");
       }
       else
       {
-        config.put("main.handlers", "https adblock");
-        config.put("https.class", "org.adblockplus.brazil.SSLConnectionHandler");
+        proxyConfiguration.put("main.handlers", "https adblock");
+        proxyConfiguration.put("https.class", "org.adblockplus.brazil.SSLConnectionHandler");
       }
-      config.put("adblock.class", "org.adblockplus.brazil.RequestHandler");
+      proxyConfiguration.put("adblock.class", "org.adblockplus.brazil.RequestHandler");
       if (logRequests)
-        config.put("adblock.proxylog", "yes");
+        proxyConfiguration.put("adblock.proxylog", "yes");
 
-      configureUserProxy(config, proxyHost, proxyPort, proxyExcl, proxyUser, proxyPass);
+      configureUserProxy(proxyConfiguration, proxyHost, proxyPort, proxyExcl, proxyUser, proxyPass);
 
       proxy = new ProxyServer();
       proxy.logLevel = Server.LOG_DIAGNOSTIC;
-      proxy.setup(listen, config.getProperty("handler"), config);
+      proxy.setup(listen, proxyConfiguration.getProperty("handler"), proxyConfiguration);
       proxy.start();
     }
 
@@ -343,9 +343,9 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
    */
   private void clearConnectionProxy()
   {
-    String proxyHost = (String) proxy.props.getProperty("adblock.proxyHost");
-    String proxyPort = (String) proxy.props.getProperty("adblock.proxyPort");
-    String proxyExcl = (String) proxy.props.getProperty("adblock.proxyExcl");
+    String proxyHost = (String) proxyConfiguration.getProperty("adblock.proxyHost");
+    String proxyPort = (String) proxyConfiguration.getProperty("adblock.proxyPort");
+    String proxyExcl = (String) proxyConfiguration.getProperty("adblock.proxyExcl");
     int port = 0;
     try
     {
@@ -469,8 +469,8 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
         String proxyPass = sharedPreferences.getString(keyPass, null);
         if (proxy != null)
         {
-          configureUserProxy(proxy.props, proxyHost, proxyPort, null, proxyUser, proxyPass);
-          proxy.restart(proxy.props.getProperty("handler"));
+          configureUserProxy(proxyConfiguration, proxyHost, proxyPort, null, proxyUser, proxyPass);
+          proxy.restart(proxyConfiguration.getProperty("handler"));
         }
       }
     }
@@ -711,8 +711,8 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
             Log.i(TAG, "User has set new proxy: " + userProxy[0] + ":" + userProxy[1] + "(" + userProxy[2] + ")");
             if (proxy != null)
             {
-              configureUserProxy(proxy.props, userProxy[0], userProxy[1], userProxy[2], null, null);
-              proxy.restart(proxy.props.getProperty("handler"));
+              configureUserProxy(proxyConfiguration, userProxy[0], userProxy[1], userProxy[2], null, null);
+              proxy.restart(proxyConfiguration.getProperty("handler"));
             }
           }
         }
