@@ -54,7 +54,7 @@ public class AdvancedPreferences extends SummarizedPreferences
   private static final int CONFIGURATION_DIALOG = 1;
   private static final int PRIORITY_WARNING_DIALOG = 2;
 
-  private static ProxyService proxyService = null;
+  private ProxyService proxyService = null;
 
   @Override
   public void onCreate(Bundle savedInstanceState)
