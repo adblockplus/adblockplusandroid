@@ -413,7 +413,7 @@ public class Preferences extends SummarizedPreferences
       if (action.equals(AdblockPlus.BROADCAST_FILTER_MATCHES))
       {
         // Hide configuration message if traffic is detected for the first time
-        if (! trafficDetected)
+        if (!trafficDetected)
           hideConfigurationMsg();
         trafficDetected = true;
       }
@@ -504,7 +504,7 @@ public class Preferences extends SummarizedPreferences
       proxyService = ((ProxyService.LocalBinder) service).getService();
       Log.d(TAG, "Proxy service connected");
 
-      if (! trafficDetected && proxyService.isManual())
+      if (!trafficDetected && proxyService.isManual())
           showConfigurationMsg(getString(R.string.msg_configuration, proxyService.port));
     }
 
