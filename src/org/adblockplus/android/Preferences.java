@@ -217,7 +217,14 @@ public class Preferences extends SummarizedPreferences
   public void onPause()
   {
     super.onPause();
-    unregisterReceiver(receiver);
+    try
+    {
+      unregisterReceiver(receiver);
+    }
+    catch (IllegalArgumentException e)
+    {
+      // ignore - it is thrown if receiver is not registered but it can not be true in normal conditions
+    }
     unbindService(proxyServiceConnection);
     proxyService = null;
   }
