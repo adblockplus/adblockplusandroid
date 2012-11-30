@@ -267,6 +267,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, Preferences.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK), 0);
     ongoingNotification.icon = R.drawable.ic_stat_blocking;
     ongoingNotification.setLatestEventInfo(getApplicationContext(), getText(R.string.app_name), msg, contentIntent);
+    startForeground(ONGOING_NOTIFICATION_ID, ongoingNotification);
 
     sendBroadcast(new Intent(BROADCAST_STATE_CHANGED).putExtra("enabled", true).putExtra("port", port).putExtra("manual", isManual()));
     Log.i(TAG, "Service started");
@@ -316,6 +317,9 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 
     // Stop engine if not in interactive mode
     AdblockPlus.getApplication().stopEngine(false);
+
+    // Release service lock
+    stopForeground(true);
 
     Log.i(TAG, "Service stopped");
   }
