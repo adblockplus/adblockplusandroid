@@ -25,13 +25,15 @@
   <string name="msg_update_downloading">Neue Version wird heruntergeladen: %d%%</string>
   <string name="msg_update_ready">Neue Version kann installiert werden</string>
   <string name="msg_update_fail">Überprüfung auf neue Versionen fehlgeschlagen, bitte versuchen Sie es später erneut</string>
-
+  <string name="msg_hideicon_warning">Hinweis: Alles was wir tun können um das Icon zu verstecken, ist es unsichtbar zu machen. Wenn wir es entfernen, könnte Adblock Plus jederzeit vom Android-System beendet werden, was zu einem Verbindungsverlust führt.</string>
+  
   <string name="configuring_url">https://adblockplus.org/en/android-config</string>
   <string name="configuring_proxy_url">https://adblockplus.org/en/android-config#proxy</string>
 
   <string name="ok">OK</string>
   <string name="cancel">Abbrechen</string>
   <string name="error">Fehler</string>
+  <string name="warning">Warnung</string>
   <string name="about">Über</string>
   <string name="help">Hilfe</string>
   <string name="version">Version</string>
@@ -57,6 +59,9 @@
   <string name="pref_wifirefresh_title">Nur über WLAN aktualisieren</string>
   <string name="pref_wifirefresh_summary_on">Wird nur bei bestehender WLAN-Verbindung automatisch aktualisiert</string>
   <string name="pref_wifirefresh_summary_off">Wird auch über mobile Datenverbindungen automatisch aktualisiert</string>
+  <string name="pref_hideicon_title">Icon verstecken</string>
+  <string name="pref_hideicon_summary_on">Verwendet ein unsichtbares Icon um es zu verstecken</string>
+  <string name="pref_hideicon_summary_off">Verwendet das normale Icon</string>
   <string name="pref_advanced_title">Erweiterte Einstellungen</string>
   <string name="pref_proxy_title">Proxy</string>
   <string name="pref_proxyhost_title">Host</string>
