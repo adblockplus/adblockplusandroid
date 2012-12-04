@@ -25,6 +25,7 @@
   <string name="msg_update_downloading">Downloading update: %d%%</string>
   <string name="msg_update_ready">Ready to install update</string>
   <string name="msg_update_fail">Failed to check for updates, please try again later</string>
+  <string name="msg_hideicon_warning">Please note that we cannot completely remove the icon, only make it invisible. Without the icon Android might stop Adblock Plus any time which will result in loss of connectivity.</string>
 
   <string name="configuring_url">https://adblockplus.org/en/android-config</string>
   <string name="configuring_proxy_url">https://adblockplus.org/en/android-config#proxy</string>
@@ -32,6 +33,7 @@
   <string name="ok">OK</string>
   <string name="cancel">Cancel</string>
   <string name="error">Error</string>
+  <string name="warning">Warning</string>
   <string name="about">About</string>
   <string name="help">Help</string>
   <string name="version">Version</string>
@@ -57,6 +59,9 @@
   <string name="pref_wifirefresh_title">Refresh over WiFi only</string>
   <string name="pref_wifirefresh_summary_on">Automatic refreshes will be performed only over WiFi connections</string>
   <string name="pref_wifirefresh_summary_off">Automatic refreshes will be performed over any connection</string>
+  <string name="pref_hideicon_title">Hide icon</string>
+  <string name="pref_hideicon_summary_on">Transparent notification icon is used to reduce annoyance</string>
+  <string name="pref_hideicon_summary_off">Normal notification icon is used</string>
   <string name="pref_advanced_title">Advanced settings</string>
   <string name="pref_proxy_title">Proxy</string>
   <string name="pref_proxyhost_title">Host</string>

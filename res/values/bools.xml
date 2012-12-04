@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <bool name="def_startatboot">true</bool>
+    <bool name="def_hideicon">false</bool>
     <bool name="def_wifirefresh">true</bool>
     <bool name="def_crashreport">true</bool>
     <bool name="def_release">true</bool>

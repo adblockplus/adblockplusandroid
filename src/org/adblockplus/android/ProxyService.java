@@ -40,6 +40,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Binder;
@@ -115,15 +116,17 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 
     // Get port for local proxy
     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+    Resources resources = getResources();
+    
     String p = prefs.getString(getString(R.string.pref_port), null);
     try
     {
-      port = p != null ? Integer.valueOf(p) : getResources().getInteger(R.integer.def_port);
+      port = p != null ? Integer.valueOf(p) : resources.getInteger(R.integer.def_port);
     }
     catch (NumberFormatException e)
     {
       Toast.makeText(this, getString(R.string.msg_badport) + ": " + p, Toast.LENGTH_LONG).show();
-      port = getResources().getInteger(R.integer.def_port);
+      port = resources.getInteger(R.integer.def_port);
     }
 
     // Try to read user proxy settings
@@ -262,10 +265,11 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       notrafficHandler.postDelayed(noTraffic, NO_TRAFFIC_TIMEOUT);
     }
     // Lock service
+    boolean hideIcon = prefs.getBoolean(getString(R.string.pref_hideicon), resources.getBoolean(R.bool.def_hideicon));
     ongoingNotification = new Notification();
     ongoingNotification.when = 0;
     contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, Preferences.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK), 0);
-    ongoingNotification.icon = R.drawable.ic_stat_blocking;
+    ongoingNotification.icon = hideIcon ? R.drawable.transparent : R.drawable.ic_stat_blocking;
     ongoingNotification.setLatestEventInfo(getApplicationContext(), getText(R.string.app_name), msg, contentIntent);
     startForeground(ONGOING_NOTIFICATION_ID, ongoingNotification);
 
@@ -588,6 +592,13 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       }
     }
     notrafficHandler = null;
+  }
+  
+  public void setEmptyIcon(boolean empty)
+  {
+    ongoingNotification.icon = empty ? R.drawable.transparent : R.drawable.ic_stat_blocking;
+    NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);    
+    notificationManager.notify(ONGOING_NOTIFICATION_ID, ongoingNotification);
   }
 
   private final IBinder binder = new LocalBinder();
