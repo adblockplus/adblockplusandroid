@@ -7,6 +7,7 @@
     <string name="pref_enabled">enabled</string>
     <string name="pref_startatboot">startatboot</string>
     <string name="pref_subscription">subscription</string>
+    <string name="pref_hideicon">hideicon</string>
     <string name="pref_refresh">refresh</string>
     <string name="pref_wifirefresh">wifirefresh</string>
     <string name="pref_port">port</string>
