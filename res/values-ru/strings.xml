@@ -21,11 +21,13 @@
     <string name="msg_update_downloading">Загрузка обновления: %d%%</string>
     <string name="msg_update_ready">Обновление готово к установке</string>
     <string name="msg_update_fail">Ошибка проверки наличия обновления, пожалуйста, попробуйте позже</string>
+    <string name="msg_hideicon_warning">Обратите внимание: лучшее, что мы можем - это сделать иконку уведомления невидимой. Если мы уберём иконку, Android может остановить Adblock Plus в любое время, что приведёт к потере соединения с сетью.</string>
     <string name="configuring_url">https://adblockplus.org/en/android-config</string>
     <string name="configuring_proxy_url">https://adblockplus.org/en/android-config#proxy</string>
     <string name="ok">OK</string>
     <string name="cancel">Отмена</string>
     <string name="error">Ошибка</string>
+    <string name="warning">Внимание</string>
     <string name="about">О приложении</string>
     <string name="help">Помощь</string>
     <string name="version">Версия</string>
@@ -49,6 +51,9 @@
     <string name="pref_wifirefresh_title">Обновление только через WiFi</string>
     <string name="pref_wifirefresh_summary_on">Автоматическия обновления будут осуществляться только при наличии подключения по WiFi</string>
     <string name="pref_wifirefresh_summary_off">Автоматическия обновления будут осуществляться при наличии любого подключения</string>
+    <string name="pref_hideicon_title">Спрятать иконку</string>
+    <string name="pref_hideicon_summary_on">Используется прозрачная иконка уведомления для снижения раздражения</string>
+    <string name="pref_hideicon_summary_off">Используется обычная иконка уведомления</string>
     <string name="pref_advanced_title">Расширенные настройки</string>
     <string name="pref_proxy_title">Прокси</string>
     <string name="pref_proxyhost_title">Хост</string>
