@@ -25,7 +25,7 @@
   <string name="msg_update_downloading">Downloading update: %d%%</string>
   <string name="msg_update_ready">Ready to install update</string>
   <string name="msg_update_fail">Failed to check for updates, please try again later</string>
-  <string name="msg_hideicon_warning">Please note that we cannot completely remove the icon, only make it invisible. Without the icon Android might stop Adblock Plus any time which will result in loss of connectivity.</string>
+  <string name="msg_hideicon_warning">Please note: The best we can do is make the icon invisible. If we remove the icon, Android could stop Adblock Plus any time, which will result in loss of connectivity.</string>
 
   <string name="configuring_url">https://adblockplus.org/en/android-config</string>
   <string name="configuring_proxy_url">https://adblockplus.org/en/android-config#proxy</string>
