@@ -27,14 +27,14 @@ import java.util.List;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.ServiceConnection;
-import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
@@ -60,12 +60,13 @@ public class Preferences extends SummarizedPreferences
 {
   private static final String TAG = "Preferences";
 
+  private static final int ABOUT_DIALOG = 1;
+  private static final int HIDEICONWARNING_DIALOG = 2;
+  
   private static ProxyService proxyService = null;
 
   private RefreshableListPreference subscriptionList;
   
-  private AboutDialog aboutDialog;
-  private boolean showAbout = false;
   private boolean trafficDetected = false;
   private String subscriptionSummary;
 
@@ -207,9 +208,6 @@ public class Preferences extends SummarizedPreferences
       setEnabled(true);
     }
 
-    if (showAbout)
-      onAbout(findViewById(R.id.btn_about));
-    
     bindService(new Intent(this, ProxyService.class), proxyServiceConnection, 0);
   }
 
@@ -239,9 +237,6 @@ public class Preferences extends SummarizedPreferences
     application.stopInteractive();
     if (!enabled)
       application.stopEngine(true);
-
-    if (aboutDialog != null)
-      aboutDialog.dismiss();
   }
 
   @Override
@@ -344,19 +339,32 @@ public class Preferences extends SummarizedPreferences
    */
   public void onAbout(View view)
   {
-    aboutDialog = new AboutDialog(this);
-    aboutDialog.setOnDismissListener(new OnDismissListener()
-    {
+    showDialog(ABOUT_DIALOG);
+  }
 
-      @Override
-      public void onDismiss(DialogInterface dialog)
-      {
-        showAbout = false;
-        aboutDialog = null;
-      }
-    });
-    showAbout = true;
-    aboutDialog.show();
+  @Override
+  protected Dialog onCreateDialog(int id)
+  {
+    Dialog dialog = null;
+    switch (id)
+    {
+      case ABOUT_DIALOG:
+        dialog = new AboutDialog(this);
+        break;
+      case HIDEICONWARNING_DIALOG:
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.warning).setMessage(R.string.msg_hideicon_warning).setIcon(android.R.drawable.ic_dialog_alert).setCancelable(false)
+            .setPositiveButton(R.string.gotit, new DialogInterface.OnClickListener()
+            {
+              public void onClick(DialogInterface dialog, int id)
+              {
+                dialog.cancel();
+              }
+            });
+        dialog = builder.create();
+        break;
+    }
+    return dialog;
   }
 
   @Override
@@ -371,12 +379,20 @@ public class Preferences extends SummarizedPreferences
       else if (!enabled && serviceRunning)
         stopService(new Intent(this, ProxyService.class));
     }
-    if (getString(R.string.pref_subscription).equals(key))
+    else if (getString(R.string.pref_subscription).equals(key))
     {
       String current = sharedPreferences.getString(key, null);
       AdblockPlus application = AdblockPlus.getApplication();
       Subscription subscription = application.getSubscription(current);
       application.setSubscription(subscription);
+    }
+    else if (getString(R.string.pref_hideicon).equals(key))
+    {
+      boolean hideIcon = sharedPreferences.getBoolean(key, false);
+      if (hideIcon)
+        showDialog(HIDEICONWARNING_DIALOG);
+      if (proxyService != null)
+        proxyService.setEmptyIcon(hideIcon);
     }
     super.onSharedPreferenceChanged(sharedPreferences, key);
   }
@@ -490,7 +506,6 @@ public class Preferences extends SummarizedPreferences
   protected void onRestoreInstanceState(Bundle state)
   {
     super.onRestoreInstanceState(state);
-    showAbout = state.getBoolean("showAbout");
     trafficDetected = state.getBoolean("trafficDetected");
     subscriptionSummary = state.getString("subscriptionSummary");
   }
@@ -500,7 +515,6 @@ public class Preferences extends SummarizedPreferences
   {
     outState.putString("subscriptionSummary", subscriptionSummary);
     outState.putBoolean("trafficDetected", trafficDetected);
-    outState.putBoolean("showAbout", showAbout);
     super.onSaveInstanceState(outState);
   }
 

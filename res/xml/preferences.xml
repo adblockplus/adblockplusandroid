@@ -11,4 +11,10 @@
         android:key="@string/pref_subscription"
         android:title="@string/pref_subscription_title" />
 
+    <CheckBoxPreference
+        android:key="@string/pref_hideicon"
+        android:summaryOff="@string/pref_hideicon_summary_off"
+        android:summaryOn="@string/pref_hideicon_summary_on"
+        android:title="@string/pref_hideicon_title" />
+
 </PreferenceScreen>
