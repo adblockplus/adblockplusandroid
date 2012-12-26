@@ -17,12 +17,13 @@
 
 package org.adblockplus.android;
 
+import com.actionbarsherlock.app.SherlockPreferenceActivity;
+
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceScreen;
 
@@ -30,7 +31,7 @@ import android.preference.PreferenceScreen;
  * PreferencesActivity which automatically sets preference summaries according
  * to its current values.
  */
-public class SummarizedPreferences extends PreferenceActivity implements OnSharedPreferenceChangeListener
+public class SummarizedPreferences extends SherlockPreferenceActivity implements OnSharedPreferenceChangeListener
 {
   @Override
   public void onResume()

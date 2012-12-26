@@ -46,12 +46,13 @@ import android.preference.ListPreference;
 import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.TextView;
+
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 
 /**
  * Main settings UI.
@@ -73,8 +74,6 @@ public class Preferences extends SummarizedPreferences
   @Override
   public void onCreate(Bundle savedInstanceState)
   {
-    requestWindowFeature(Window.FEATURE_NO_TITLE);
-
     super.onCreate(savedInstanceState);
 
     PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
@@ -242,7 +241,7 @@ public class Preferences extends SummarizedPreferences
   @Override
   public boolean onCreateOptionsMenu(Menu menu)
   {
-    MenuInflater inflater = getMenuInflater();
+    MenuInflater inflater = getSupportMenuInflater();
     inflater.inflate(R.menu.menu_preferences, menu);
     return true;
   }
@@ -252,6 +251,14 @@ public class Preferences extends SummarizedPreferences
   {
     switch (item.getItemId())
     {
+      case R.id.menu_help:
+        Uri uri = Uri.parse(getString(R.string.configuring_url));
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        startActivity(intent);
+        return true;
+      case R.id.menu_about:
+        showDialog(ABOUT_DIALOG);
+        return true;
       case R.id.menu_advanced:
         startActivity(new Intent(this, AdvancedPreferences.class));
         return true;
@@ -322,24 +329,6 @@ public class Preferences extends SummarizedPreferences
         Log.e(TAG, "Asset copy error", e);
       }
     }
-  }
-
-  /**
-   * Redirects user to configuration URL.
-   */
-  public void onHelp(View view)
-  {
-    Uri uri = Uri.parse(getString(R.string.configuring_url));
-    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-    startActivity(intent);
-  }
-
-  /**
-   * Shows about dialog.
-   */
-  public void onAbout(View view)
-  {
-    showDialog(ABOUT_DIALOG);
   }
 
   @Override
