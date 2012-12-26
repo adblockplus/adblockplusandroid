@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <style name="MessageText">
-        <item name="android:background">#ff888888</item>
-        <item name="android:padding">3dip</item>
+        <item name="android:background">#88888888</item>
+        <item name="android:textColor">?attr/textColorPrimary</item>
+        <item name="android:padding">6dip</item>
     </style>
 
 </resources>
