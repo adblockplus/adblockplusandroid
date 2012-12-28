@@ -18,7 +18,7 @@
 #include <v8.h>
 #include <jni.h>
 
-extern JNIEnv* jniEnv;
+extern JavaVM* globalJvm;
 extern jobject jniCallback;
 
 extern v8::Handle<v8::Value> loadImpl(const v8::Arguments& args);
