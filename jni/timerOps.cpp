@@ -17,6 +17,7 @@
 
 #include <unistd.h>
 #include <list>
+#include "debug.h"
 #include "ops.h"
 
 typedef struct __QueueEntry
@@ -29,7 +30,12 @@ static std::list<QueueEntry*> queue;
 
 v8::Handle<v8::Value> setTimeoutImpl(const v8::Arguments& args)
 {
+  D(D_WARN, "setTimeout()");
   v8::HandleScope handle_scope;
+
+  JNIEnv* jniEnv = NULL;
+  if (globalJvm->AttachCurrentThread(&jniEnv, NULL) != 0)
+    return v8::ThrowException(v8::String::New("Failed to get JNI environment"));
 
   if (args.Length() < 2)
     return v8::ThrowException(v8::String::New("Not enough parameters"));
@@ -59,6 +65,7 @@ v8::Handle<v8::Value> setTimeoutImpl(const v8::Arguments& args)
 
 long RunNextCallback(v8::Handle<v8::Context> context)
 {
+  D(D_WARN, "RunNextCallback()");
   if (queue.size() == 0)
     return -1;
 
