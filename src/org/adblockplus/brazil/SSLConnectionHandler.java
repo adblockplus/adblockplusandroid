@@ -20,7 +20,7 @@ package org.adblockplus.brazil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import sunlabs.brazil.server.Request;
@@ -93,8 +93,9 @@ public class SSLConnectionHandler extends BaseRequestHandler
       }
 
       // Connect to server or upstream proxy
-      InetAddress addr = InetAddress.getByName(host);
-      serverSocket = new Socket(addr, port);
+      serverSocket = new Socket();
+      serverSocket.setKeepAlive(true);
+      serverSocket.connect(new InetSocketAddress(host, port));
     }
     catch (Exception e)
     {
