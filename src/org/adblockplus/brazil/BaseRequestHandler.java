@@ -20,7 +20,9 @@ package org.adblockplus.brazil;
 import java.util.Properties;
 
 import sunlabs.brazil.server.Handler;
+import sunlabs.brazil.server.Request;
 import sunlabs.brazil.server.Server;
+import sunlabs.brazil.util.http.MimeHeaders;
 
 public abstract class BaseRequestHandler implements Handler
 {
@@ -31,6 +33,7 @@ public abstract class BaseRequestHandler implements Handler
   protected String proxyHost;
   protected int proxyPort = 80;
   protected String auth;
+  protected boolean shouldLogHeaders;
 
   protected String prefix;
 
@@ -54,7 +57,35 @@ public abstract class BaseRequestHandler implements Handler
 
     auth = props.getProperty(prefix + AUTH);
 
+    shouldLogHeaders = (server.props.getProperty(prefix + "proxylog") != null);
+
     return true;
   }
 
+  /**
+   * Dump the headers on stderr
+   */
+  public static String dumpHeaders(int count, Request request, MimeHeaders headers, boolean sent)
+  {
+    String prompt;
+    StringBuffer sb = new StringBuffer();
+    String label = "   " + count;
+    label = label.substring(label.length() - 4);
+    if (sent)
+    {
+      prompt = label + "> ";
+      sb.append(prompt).append(request.toString()).append("\n");
+    }
+    else
+    {
+      prompt = label + "< ";
+    }
+
+    for (int i = 0; i < headers.size(); i++)
+    {
+      sb.append(prompt).append(headers.getKey(i));
+      sb.append(": ").append(headers.get(i)).append("\n");
+    }
+    return (sb.toString());
+  }
 }

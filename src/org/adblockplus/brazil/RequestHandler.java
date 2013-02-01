@@ -41,7 +41,6 @@ import sunlabs.brazil.server.Server;
 import sunlabs.brazil.util.MatchString;
 import sunlabs.brazil.util.http.HttpInputStream;
 import sunlabs.brazil.util.http.HttpRequest;
-import sunlabs.brazil.util.http.MimeHeaders;
 import android.util.Log;
 
 /**
@@ -84,15 +83,12 @@ public class RequestHandler extends BaseRequestHandler
   private String via;
   private static Pattern RE_HTTP = Pattern.compile("^https?:");
 
-  private boolean shouldLogHeaders;
-
   @Override
   public boolean init(Server server, String prefix)
   {
     super.init(server, prefix);
 
     application = AdblockPlus.getApplication();
-    shouldLogHeaders = (server.props.getProperty(prefix + "proxylog") != null);
     via = " " + server.hostName + ":" + server.listen.getLocalPort() + " (" + server.name + ")";
 
     return true;
@@ -372,32 +368,5 @@ public class RequestHandler extends BaseRequestHandler
       target.close();
     }
     return true;
-  }
-
-  /**
-   * Dump the headers on stderr
-   */
-  public static String dumpHeaders(int count, Request request, MimeHeaders headers, boolean sent)
-  {
-    String prompt;
-    StringBuffer sb = new StringBuffer();
-    String label = "   " + count;
-    label = label.substring(label.length() - 4);
-    if (sent)
-    {
-      prompt = label + "> ";
-      sb.append(prompt).append(request.toString()).append("\n");
-    }
-    else
-    {
-      prompt = label + "< ";
-    }
-
-    for (int i = 0; i < headers.size(); i++)
-    {
-      sb.append(prompt).append(headers.getKey(i));
-      sb.append(": ").append(headers.get(i)).append("\n");
-    }
-    return (sb.toString());
   }
 }
