@@ -10,5 +10,6 @@
 1. <a href="http://code.google.com/p/v8/">V8</a> (<a href="https://developers.google.com/v8/terms">licence</a>)<br/>
 2. <a href="http://code.google.com/p/roottools/">RootTools</a> (<a href="http://www.apache.org/licenses/LICENSE-2.0">licence</a>)<br/>
 3. <a href="http://freecode.com/projects/brazil">Brazil</a> (<a href="http://java.sun.com/spl.html">licence</a>)<br/>
-4. <a href="http://paw-project.sourceforge.net/">PAW</a> (<a href="http://paw-project.sourceforge.net/license.html">licence</a>)<br/>
+4. <a href="http://actionbarsherlock.com/">ActionBarSherlock</a> (<a href="https://github.com/JakeWharton/ActionBarSherlock/blob/master/LICENSE.txt">licence</a>)<br/>
+5. <a href="http://paw-project.sourceforge.net/">PAW</a> (<a href="http://paw-project.sourceforge.net/license.html">licence</a>)<br/>
 </p>

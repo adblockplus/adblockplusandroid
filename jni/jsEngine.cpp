@@ -18,12 +18,13 @@
 #include <string>
 #include <android/log.h>
 #include <jni.h>
+#include "debug.h"
 #include "wrap.h"
 #include "ops.h"
 
 const char* scriptDir;
 const char* dataDir;
-JNIEnv* jniEnv;
+JavaVM* globalJvm;
 jobject jniCallback;
 
 extern "C"
@@ -62,6 +63,7 @@ static ObjMethod methods[] =
 
 void reportException(v8::TryCatch* try_catch)
 {
+  D(D_WARN, "reportException()");
   v8::HandleScope handle_scope;
   v8::String::Utf8Value exception(try_catch->Exception());
   v8::Handle < v8::Message > message = try_catch->Message();
@@ -94,6 +96,7 @@ void reportException(v8::TryCatch* try_catch)
 
 const std::string getString(JNIEnv *pEnv, jstring str)
 {
+  D(D_WARN, "getString()");
   jboolean iscopy;
 
   const char *s = pEnv->GetStringUTFChars(str, &iscopy);
@@ -108,7 +111,7 @@ const std::string getString(JNIEnv *pEnv, jstring str)
 
 jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
 {
-  return JNI_VERSION_1_2;
+  return JNI_VERSION_1_6;
 }
 
 void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved)
@@ -118,7 +121,8 @@ void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved)
 JNIEXPORT jlong JNICALL Java_org_adblockplus_android_JSEngine_nativeInitialize
   (JNIEnv *pEnv, jobject, jobject pCallback)
 {
-  jniEnv = pEnv;
+  D(D_WARN, "nativeInitialize()");
+  int status = pEnv->GetJavaVM(&globalJvm);
   jniCallback = pEnv->NewGlobalRef(pCallback);
 
   v8::HandleScope handle_scope;
@@ -136,19 +140,22 @@ JNIEXPORT jlong JNICALL Java_org_adblockplus_android_JSEngine_nativeInitialize
 JNIEXPORT void JNICALL Java_org_adblockplus_android_JSEngine_nativeRelease
   (JNIEnv *pEnv, jobject, jlong pContext)
 {
+  D(D_WARN, "nativeRelease()");
   ClearQueue();
   if (pContext)
   {
     v8::Persistent<v8::Context> context((v8::Context *) pContext);
     context.Dispose();
   }
+  pEnv->DeleteGlobalRef(jniCallback);
   jniCallback = NULL;
-  jniEnv = NULL;
+  globalJvm = NULL;
 }
 
 JNIEXPORT jobject JNICALL Java_org_adblockplus_android_JSEngine_nativeExecute
   (JNIEnv *pEnv, jobject pObj, jstring pScript, jlong pContext)
 {
+  D(D_WARN, "nativeExecute()");
   v8::HandleScope handle_scope;
 
   v8::Persistent<v8::Context> context((v8::Context *) pContext);
@@ -176,6 +183,7 @@ JNIEXPORT jobject JNICALL Java_org_adblockplus_android_JSEngine_nativeExecute
 JNIEXPORT jobject JNICALL Java_org_adblockplus_android_JSEngine_nativeGet
   (JNIEnv *pEnv, jobject pObj, jstring pKey, jlong pContext)
 {
+  D(D_WARN, "nativeGet()");
   v8::HandleScope handle_scope;
 
   v8::Persistent<v8::Context> context((v8::Context *) pContext);
@@ -202,6 +210,7 @@ JNIEXPORT jobject JNICALL Java_org_adblockplus_android_JSEngine_nativeGet
 JNIEXPORT jobject JNICALL Java_org_adblockplus_android_JSEngine_nativePut
   (JNIEnv *pEnv, jobject pObj, jstring pKey, jobject pValue, jlong pContext)
 {
+  D(D_WARN, "nativePut()");
   v8::HandleScope handle_scope;
 
   v8::Persistent<v8::Context> context((v8::Context *) pContext);
@@ -222,6 +231,7 @@ JNIEXPORT jobject JNICALL Java_org_adblockplus_android_JSEngine_nativePut
 JNIEXPORT void JNICALL Java_org_adblockplus_android_JSEngine_nativeCallback
   (JNIEnv *pEnv, jobject pObj, jlong pCallback, jobjectArray pParams, jlong pContext)
 {
+  D(D_WARN, "nativeCallback()");
   v8::HandleScope handle_scope;
 
   v8::Persistent<v8::Context> context((v8::Context *) pContext);
@@ -252,6 +262,7 @@ JNIEXPORT void JNICALL Java_org_adblockplus_android_JSEngine_nativeCallback
 JNIEXPORT jlong JNICALL Java_org_adblockplus_android_JSEngine_nativeRunCallbacks
   (JNIEnv *pEnv, jobject pObj, jlong pContext)
 {
+  D(D_WARN, "nativeRunCallbacks()");
   v8::HandleScope handle_scope;
 
   v8::Persistent<v8::Context> context((v8::Context *) pContext);

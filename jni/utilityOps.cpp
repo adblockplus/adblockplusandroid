@@ -16,13 +16,19 @@
  */
 
 #include <string>
-#include <android/log.h>
+#include "debug.h"
 #include "ops.h"
 #include "wrap.h"
 
 v8::Handle<v8::Value> loadImpl(const v8::Arguments& args)
 {
+  D(D_WARN, "load()");
   v8::HandleScope handle_scope;
+
+  JNIEnv* jniEnv = NULL;
+  if (globalJvm->AttachCurrentThread(&jniEnv, NULL) != 0)
+    return v8::ThrowException(v8::String::New("Failed to get JNI environment"));
+
   if (args.Length() < 1)
     return v8::ThrowException(v8::String::New("File name expected"));
 
@@ -54,7 +60,12 @@ v8::Handle<v8::Value> loadImpl(const v8::Arguments& args)
 
 v8::Handle<v8::Value> setStatusImpl(const v8::Arguments& args)
 {
+  D(D_WARN, "setStatus()");
   v8::HandleScope handle_scope;
+
+  JNIEnv* jniEnv = NULL;
+  if (globalJvm->AttachCurrentThread(&jniEnv, NULL) != 0)
+    return v8::ThrowException(v8::String::New("Failed to get JNI environment"));
 
   if (args.Length() < 2)
     return v8::ThrowException(v8::String::New("Not enough parameters"));
@@ -82,7 +93,12 @@ v8::Handle<v8::Value> setStatusImpl(const v8::Arguments& args)
 
 v8::Handle<v8::Value> canAutoupdateImpl(const v8::Arguments& args)
 {
+  D(D_WARN, "canAutoupdate()");
   v8::HandleScope handle_scope;
+
+  JNIEnv* jniEnv = NULL;
+  if (globalJvm->AttachCurrentThread(&jniEnv, NULL) != 0)
+    return v8::ThrowException(v8::String::New("Failed to get JNI environment"));
 
   jboolean result;
   jclass cls = jniEnv->GetObjectClass(jniCallback);
@@ -94,14 +110,20 @@ v8::Handle<v8::Value> canAutoupdateImpl(const v8::Arguments& args)
 
 v8::Handle<v8::Value> showToastImpl(const v8::Arguments& args)
 {
+  D(D_WARN, "showToast()");
   v8::HandleScope handle_scope;
+
+  JNIEnv* jniEnv = NULL;
+  if (globalJvm->AttachCurrentThread(&jniEnv, NULL) != 0)
+    return v8::ThrowException(v8::String::New("Failed to get JNI environment"));
+
   if (args.Length() < 1)
     return v8::ThrowException(v8::String::New("String expected"));
 
   v8::String::Utf8Value str(args[0]);
   if (!*str)
       return v8::ThrowException(v8::String::New("Parameter cannot be converted to string"));
-  __android_log_print(ANDROID_LOG_INFO, "ST", *str);
+
   jstring jstr = jniEnv->NewStringUTF(*str);
 
   static jclass cls = jniEnv->GetObjectClass(jniCallback);
@@ -110,11 +132,12 @@ v8::Handle<v8::Value> showToastImpl(const v8::Arguments& args)
       jniEnv->CallVoidMethod(jniCallback, mid, jstr);
   jniEnv->DeleteLocalRef(jstr);
 
-    return v8::Undefined();
+  return v8::Undefined();
 }
 
 v8::Handle<v8::Value> printImpl(const v8::Arguments& args)
 {
+  D(D_WARN, "print()");
   bool first = true;
   std::string msg = "";
   for (int i = 0; i < args.Length(); i++)
@@ -129,6 +152,6 @@ v8::Handle<v8::Value> printImpl(const v8::Arguments& args)
       return v8::ThrowException(v8::String::New("Parameter cannot be converted to string"));
     msg += *str;
   }
-  __android_log_print(ANDROID_LOG_INFO, "JS", msg.c_str());
+
   return v8::Undefined();
 }
