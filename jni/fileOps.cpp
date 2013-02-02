@@ -19,11 +19,12 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include <android/log.h>
+#include "debug.h"
 #include "ops.h"
 
 v8::Handle<v8::Value> fileExistsImpl(const v8::Arguments& args)
 {
+  D(D_WARN, "fileExists()");
   v8::HandleScope handle_scope;
 
   if (args.Length() < 1)
@@ -35,7 +36,7 @@ v8::Handle<v8::Value> fileExistsImpl(const v8::Arguments& args)
   {
     return v8::ThrowException(v8::String::New("File name isn't a string"));
   }
-  __android_log_print(ANDROID_LOG_INFO, "JS", "fileExists(%s)", *fileName);
+  D(D_INFO, "fileExists(%s)", *fileName);
 
   struct stat buf;
   int result = stat(*fileName, &buf);
@@ -45,6 +46,7 @@ v8::Handle<v8::Value> fileExistsImpl(const v8::Arguments& args)
 
 v8::Handle<v8::Value> fileLastModifiedImpl(const v8::Arguments& args)
 {
+  D(D_WARN, "fileLastModified()");
   v8::HandleScope handle_scope;
 
   if (args.Length() < 1)
@@ -56,7 +58,7 @@ v8::Handle<v8::Value> fileLastModifiedImpl(const v8::Arguments& args)
   {
     return v8::ThrowException(v8::String::New("File name isn't a string"));
   }
-  __android_log_print(ANDROID_LOG_INFO, "JS", "fileLastModified(%s)", *fileName);
+  D(D_INFO, "fileLastModified(%s)", *fileName);
 
   struct stat buf;
   int result = stat(*fileName, &buf);
@@ -66,6 +68,7 @@ v8::Handle<v8::Value> fileLastModifiedImpl(const v8::Arguments& args)
 
 v8::Handle<v8::Value> fileRemoveImpl(const v8::Arguments& args)
 {
+  D(D_WARN, "fileRemove()");
   v8::HandleScope handle_scope;
 
   if (args.Length() < 1)
@@ -77,7 +80,7 @@ v8::Handle<v8::Value> fileRemoveImpl(const v8::Arguments& args)
   {
     return v8::ThrowException(v8::String::New("File name isn't a string"));
   }
-  __android_log_print(ANDROID_LOG_INFO, "JS", "fileRemove(%s)", *fileName);
+  D(D_INFO, "fileRemove(%s)", *fileName);
 
   int result = unlink(*fileName);
 
@@ -89,6 +92,7 @@ v8::Handle<v8::Value> fileRemoveImpl(const v8::Arguments& args)
 
 v8::Handle<v8::Value> fileRenameImpl(const v8::Arguments& args)
 {
+  D(D_WARN, "fileRename()");
   v8::HandleScope handle_scope;
 
   if (args.Length() < 2)
@@ -106,7 +110,7 @@ v8::Handle<v8::Value> fileRenameImpl(const v8::Arguments& args)
   {
     return v8::ThrowException(v8::String::New("File name isn't a string"));
   }
-  __android_log_print(ANDROID_LOG_INFO, "JS", "fileRename(%s, %s)", *fileName, *newPath);
+  D(D_INFO, "fileRename(%s, %s)", *fileName, *newPath);
 
   int result = rename(*fileName, *newPath);
 
@@ -118,6 +122,7 @@ v8::Handle<v8::Value> fileRenameImpl(const v8::Arguments& args)
 
 v8::Handle<v8::Value> fileReadImpl(const v8::Arguments& args)
 {
+  D(D_WARN, "fileRead()");
   v8::HandleScope handle_scope;
 
   if (args.Length() < 1)
@@ -129,7 +134,7 @@ v8::Handle<v8::Value> fileReadImpl(const v8::Arguments& args)
   {
     return v8::ThrowException(v8::String::New("File name isn't a string"));
   }
-  __android_log_print(ANDROID_LOG_INFO, "JS", "fileRead(%s)", *fileName);
+  D(D_INFO, "JS", "fileRead(%s)", *fileName);
 
   FILE* file = fopen(*fileName, "rb");
   if (!file)
@@ -163,6 +168,7 @@ v8::Handle<v8::Value> fileReadImpl(const v8::Arguments& args)
 
 v8::Handle<v8::Value> fileWriteImpl(const v8::Arguments& args)
 {
+  D(D_WARN, "fileWrite()");
   v8::HandleScope handle_scope;
 
   if (args.Length() < 1)
@@ -174,7 +180,7 @@ v8::Handle<v8::Value> fileWriteImpl(const v8::Arguments& args)
   {
     return v8::ThrowException(v8::String::New("File name isn't a string"));
   }
-  __android_log_print(ANDROID_LOG_INFO, "JS", "fileWrite(%s)", *fileName);
+  D(D_INFO, "fileWrite(%s)", *fileName);
 
   if (args.Length() < 2)
   {

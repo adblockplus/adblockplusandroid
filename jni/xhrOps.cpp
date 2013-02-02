@@ -16,11 +16,17 @@
  */
 
 #include <string>
+#include "debug.h"
 #include "ops.h"
 
 v8::Handle<v8::Value> httpSendImpl(const v8::Arguments& args)
 {
+  D(D_WARN, "httpSend()");
   v8::HandleScope handle_scope;
+
+  JNIEnv* jniEnv = NULL;
+  if (globalJvm->AttachCurrentThread(&jniEnv, NULL) != 0)
+    return v8::ThrowException(v8::String::New("Failed to get JNI environment"));
 
   if (args.Length() < 5)
     return v8::ThrowException(v8::String::New("Not enough parameters"));
@@ -43,7 +49,6 @@ v8::Handle<v8::Value> httpSendImpl(const v8::Arguments& args)
   if (!*url)
     return v8::ThrowException(v8::String::New("Url must be set"));
 
-
   v8::Handle<v8::Object> headerObj = v8::Handle<v8::Object>::Cast(args[2]);
   v8::Handle<v8::Array> headers = headerObj->GetPropertyNames();
 
@@ -57,32 +62,32 @@ v8::Handle<v8::Value> httpSendImpl(const v8::Arguments& args)
   jstring jmethod = jniEnv->NewStringUTF(*method);
   jstring jurl = jniEnv->NewStringUTF(*url);
 
-    static jclass stringClass = jniEnv->FindClass("java/lang/String");
-    static jclass stringArrayClass = jniEnv->GetObjectClass(stringClass);
+  static jclass stringClass = reinterpret_cast<jclass>(jniEnv->NewGlobalRef(jniEnv->FindClass("java/lang/String")));
+  static jclass stringArrayClass = reinterpret_cast<jclass>(jniEnv->NewGlobalRef(jniEnv->GetObjectClass(stringClass)));
 
-    jobjectArray jheaders = jniEnv->NewObjectArray((jsize) headers->Length(), stringArrayClass, NULL);
+  jobjectArray jheaders = jniEnv->NewObjectArray((jsize) headers->Length(), stringArrayClass, NULL);
 
-    for (unsigned int i = 0; i < headers->Length(); i++)
-    {
-      v8::String::Utf8Value name(headers->Get(v8::Integer::New(i)));
+  for (unsigned int i = 0; i < headers->Length(); i++)
+  {
+    v8::String::Utf8Value name(headers->Get(v8::Integer::New(i)));
     v8::String::Utf8Value value(headerObj->Get(headers->Get(v8::Integer::New(i))));
-        jobjectArray stringArray = jniEnv->NewObjectArray(2, stringClass, NULL);
-         jniEnv->SetObjectArrayElement(stringArray, 0, jniEnv->NewStringUTF(*name));
-         jniEnv->SetObjectArrayElement(stringArray, 1, jniEnv->NewStringUTF(*value));
-        jniEnv->SetObjectArrayElement(jheaders, (jsize) i, stringArray);
-        jniEnv->DeleteLocalRef(stringArray);
-    }
+    jobjectArray stringArray = jniEnv->NewObjectArray(2, stringClass, NULL);
+    jniEnv->SetObjectArrayElement(stringArray, 0, jniEnv->NewStringUTF(*name));
+    jniEnv->SetObjectArrayElement(stringArray, 1, jniEnv->NewStringUTF(*value));
+    jniEnv->SetObjectArrayElement(jheaders, (jsize) i, stringArray);
+    jniEnv->DeleteLocalRef(stringArray);
+  }
 
-    jlong jcallback = (jlong) *callback;
+  jlong jcallback = (jlong) *callback;
 
-  static jclass cls = jniEnv->GetObjectClass(jniCallback);
+  static jclass cls = reinterpret_cast<jclass>(jniEnv->NewGlobalRef(jniEnv->GetObjectClass(jniCallback)));
   static jmethodID mid = jniEnv->GetMethodID(cls, "httpSend", "(Ljava/lang/String;Ljava/lang/String;[[Ljava/lang/String;ZJ)V");
   if (mid)
-      jniEnv->CallVoidMethod(jniCallback, mid, jmethod, jurl, jheaders, jasync, jcallback);
+    jniEnv->CallVoidMethod(jniCallback, mid, jmethod, jurl, jheaders, jasync, jcallback);
 
   jniEnv->DeleteLocalRef(jmethod);
   jniEnv->DeleteLocalRef(jurl);
   jniEnv->DeleteLocalRef(jheaders);
 
-    return v8::Undefined();
+  return v8::Undefined();
 }

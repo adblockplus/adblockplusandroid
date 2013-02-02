@@ -22,28 +22,28 @@
 
 jobject NewBoolean(JNIEnv *pEnv, jboolean value)
 {
-  static jclass cls = pEnv->FindClass("java/lang/Boolean");
+  static jclass cls = reinterpret_cast<jclass>(pEnv->NewGlobalRef(pEnv->FindClass("java/lang/Boolean")));
   static jmethodID cid = pEnv->GetMethodID(cls, "<init>", "(Z)V");
   return pEnv->NewObject(cls, cid, value);
 }
 
 jobject NewInt(JNIEnv *pEnv, jint value)
 {
-  static jclass cls = pEnv->FindClass("java/lang/Integer");
+  static jclass cls = reinterpret_cast<jclass>(pEnv->NewGlobalRef(pEnv->FindClass("java/lang/Integer")));
   static jmethodID cid = pEnv->GetMethodID(cls, "<init>", "(I)V");
   return pEnv->NewObject(cls, cid, value);
 }
 
 jobject NewLong(JNIEnv *pEnv, jlong value)
 {
-  static jclass cls = pEnv->FindClass("java/lang/Long");
+  static jclass cls = reinterpret_cast<jclass>(pEnv->NewGlobalRef(pEnv->FindClass("java/lang/Long")));
   static jmethodID cid = pEnv->GetMethodID(cls, "<init>", "(J)V");
   return pEnv->NewObject(cls, cid, value);
 }
 
 jobject NewDouble(JNIEnv *pEnv, jdouble value)
 {
-  static jclass cls = pEnv->FindClass("java/lang/Double");
+  static jclass cls = reinterpret_cast<jclass>(pEnv->NewGlobalRef(pEnv->FindClass("java/lang/Double")));
   static jmethodID cid = pEnv->GetMethodID(cls, "<init>", "(D)V");
   return pEnv->NewObject(cls, cid, value);
 }
@@ -55,7 +55,7 @@ jstring NewString(JNIEnv *pEnv, v8::Handle<v8::String> str)
 
 jobject NewDate(JNIEnv *pEnv, v8::Handle<v8::Date> date)
 {
-  static jclass cls = pEnv->FindClass("java/lang/Double");
+  static jclass cls = reinterpret_cast<jclass>(pEnv->NewGlobalRef(pEnv->FindClass("java/lang/Double")));
   static jmethodID cid = pEnv->GetMethodID(cls, "<init>", "(J)V");
   jlong value = floor(date->NumberValue());
   return pEnv->NewObject(cls, cid, value);
