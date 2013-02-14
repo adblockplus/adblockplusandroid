@@ -677,7 +677,8 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       Log.i(TAG, "Action: " + action);
       if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action))
       {
-        NetworkInfo info = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = connectivityManager.getActiveNetworkInfo();
         if (info == null)
           return;
         String typeName = info.getTypeName();
