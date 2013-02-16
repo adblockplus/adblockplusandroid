@@ -31,9 +31,40 @@ public class ProxySettings
 {
   private static final String TAG = "ProxySettings";
 
+  public static Object getActiveLinkProxy(ConnectivityManager connectivityManager) throws Exception
+  {
+    /*
+     * LinkProperties lp = connectivityManager.getActiveLinkProperties()
+     */
+    Method method = connectivityManager.getClass().getMethod("getActiveLinkProperties");
+    Object lp = method.invoke(connectivityManager);
+
+    Object pp = ProxySettings.getLinkProxy(lp);
+    return pp;
+  }
+
+  /**
+   * Reads proxy settings from link properties on Android 3.1+ using Java
+   * reflection.
+   * 
+   * @param linkProperties
+   *          android.net.LinkProperties
+   * @return ProxyProperties
+   * @throws Exception
+   */
+  public static Object getLinkProxy(Object linkProperties) throws Exception
+  {
+    /*
+     * linkProperties.getHttpProxy();
+     */
+    Method method = linkProperties.getClass().getMethod("getHttpProxy");
+    Object pp = method.invoke(linkProperties);
+    return pp;
+  }
+
   /**
    * Reads system proxy settings on Android 3.1+ using Java reflection.
-   *
+   * 
    * @return string array of host, port and exclusion list
    */
   public static String[] getUserProxy(Context context)
@@ -77,7 +108,7 @@ public class ProxySettings
 
   /**
    * Reads system proxy settings on Android 3.1+ using Java reflection.
-   *
+   * 
    * @param pp
    *          ProxyProperties object
    * @return string array of host, port and exclusion list
@@ -118,7 +149,7 @@ public class ProxySettings
   /**
    * Tries to set local proxy in system settings via native call on Android 3.1+
    * devices using Java reflection.
-   *
+   * 
    * @return true if device supports native proxy setting
    */
   public static boolean setConnectionProxy(Context context, String host, int port, String excl)
@@ -147,7 +178,8 @@ public class ProxySettings
     {
       ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
       Object lp = method.invoke(connectivityManager);
-      if (lp == null) // There is no active link now, but device has native proxy support
+      if (lp == null) // There is no active link now, but device has native
+                      // proxy support
         return true;
 
       String className = "android.net.ProxyProperties";
@@ -200,6 +232,11 @@ public class ProxySettings
       }
 
       return true;
+    }
+    catch (SecurityException e)
+    {
+      // This is ok for 4.1.2+, 4.2.2+ and later
+      return false;
     }
     catch (Exception e)
     {

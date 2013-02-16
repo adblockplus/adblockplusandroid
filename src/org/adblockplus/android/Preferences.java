@@ -52,7 +52,6 @@ import android.widget.TextView;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.Window;
 
 /**
  * Main settings UI.
@@ -63,12 +62,11 @@ public class Preferences extends SummarizedPreferences
 
   private static final int ABOUT_DIALOG = 1;
   private static final int HIDEICONWARNING_DIALOG = 2;
-  
+
   private static ProxyService proxyService = null;
 
   private RefreshableListPreference subscriptionList;
-  
-  private boolean trafficDetected = false;
+
   private String subscriptionSummary;
 
   @Override
@@ -116,7 +114,7 @@ public class Preferences extends SummarizedPreferences
       i++;
     }
     subscriptionList.setEntries(entries);
-    subscriptionList.setEntryValues(entryValues);  
+    subscriptionList.setEntryValues(entryValues);
   }
 
   @Override
@@ -140,7 +138,7 @@ public class Preferences extends SummarizedPreferences
 
     // Get current subscription
     String current = prefs.getString(getString(R.string.pref_subscription), (String) null);
-    
+
     // If there is no current subscription autoselect one
     if (current == null)
     {
@@ -174,7 +172,6 @@ public class Preferences extends SummarizedPreferences
 
     // Time to start listening for events
     registerReceiver(receiver, new IntentFilter(AdblockPlus.BROADCAST_SUBSCRIPTION_STATUS));
-    registerReceiver(receiver, new IntentFilter(AdblockPlus.BROADCAST_FILTER_MATCHES));
     registerReceiver(receiver, new IntentFilter(ProxyService.BROADCAST_STATE_CHANGED));
     registerReceiver(receiver, new IntentFilter(ProxyService.BROADCAST_PROXY_FAILED));
 
@@ -220,10 +217,13 @@ public class Preferences extends SummarizedPreferences
     }
     catch (IllegalArgumentException e)
     {
-      // ignore - it is thrown if receiver is not registered but it can not be true in normal conditions
+      // ignore - it is thrown if receiver is not registered but it can not be
+      // true in normal conditions
     }
     unbindService(proxyServiceConnection);
     proxyService = null;
+    
+    hideConfigurationMsg();
   }
 
   @Override
@@ -277,7 +277,7 @@ public class Preferences extends SummarizedPreferences
 
   /**
    * Checks if ProxyService is running.
-   *
+   * 
    * @return true if service is running
    */
   private boolean isServiceRunning()
@@ -410,10 +410,14 @@ public class Preferences extends SummarizedPreferences
       {
         if (extra.getBoolean("enabled"))
         {
-          // If service is enabled in manual mode, show configuration message
+          // Service is enabled in manual mode
           if (extra.getBoolean("manual"))
           {
-            showConfigurationMsg(getString(R.string.msg_configuration, extra.getInt("port")));
+            // Proxy is properly configured
+            if (extra.getBoolean("configured"))
+              hideConfigurationMsg();
+            else
+              showConfigurationMsg(getString(R.string.msg_configuration, extra.getInt("port")));
           }
         }
         else
@@ -421,13 +425,6 @@ public class Preferences extends SummarizedPreferences
           setEnabled(false);
           hideConfigurationMsg();
         }
-      }
-      if (action.equals(AdblockPlus.BROADCAST_FILTER_MATCHES))
-      {
-        // Hide configuration message if traffic is detected for the first time
-        if (!trafficDetected)
-          hideConfigurationMsg();
-        trafficDetected = true;
       }
       if (action.equals(ProxyService.BROADCAST_PROXY_FAILED))
       {
@@ -452,7 +449,7 @@ public class Preferences extends SummarizedPreferences
 
   /**
    * Constructs and updates subscription status text.
-   *
+   * 
    * @param text
    *          status message
    * @param time
@@ -495,7 +492,6 @@ public class Preferences extends SummarizedPreferences
   protected void onRestoreInstanceState(Bundle state)
   {
     super.onRestoreInstanceState(state);
-    trafficDetected = state.getBoolean("trafficDetected");
     subscriptionSummary = state.getString("subscriptionSummary");
   }
 
@@ -503,7 +499,6 @@ public class Preferences extends SummarizedPreferences
   protected void onSaveInstanceState(Bundle outState)
   {
     outState.putString("subscriptionSummary", subscriptionSummary);
-    outState.putBoolean("trafficDetected", trafficDetected);
     super.onSaveInstanceState(outState);
   }
 
@@ -514,8 +509,8 @@ public class Preferences extends SummarizedPreferences
       proxyService = ((ProxyService.LocalBinder) service).getService();
       Log.d(TAG, "Proxy service connected");
 
-      if (!trafficDetected && proxyService.isManual())
-          showConfigurationMsg(getString(R.string.msg_configuration, proxyService.port));
+      if (proxyService.isManual() && proxyService.noTraffic())
+        showConfigurationMsg(getString(R.string.msg_configuration, proxyService.port));
     }
 
     public void onServiceDisconnected(ComponentName className)
