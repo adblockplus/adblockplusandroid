@@ -41,6 +41,12 @@
             android:launchMode="singleInstance"
             android:theme="@style/Theme.Sherlock.Dialog" />
         <activity
+            android:name=".ProxyConfigurationActivity"
+            android:excludeFromRecents="true"
+            android:label="@string/proxysettings_name"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.Sherlock.Dialog" />
+        <activity
             android:name=".CrashReportDialog"
             android:excludeFromRecents="true"
             android:label="@string/crash_name"

@@ -23,6 +23,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -133,6 +134,23 @@ public class AdblockPlus extends Application
       return capitalize(model);
     else
       return capitalize(manufacturer) + " " + model;
+  }
+
+  public static void appendRawTextFile(Context context, StringBuilder text, int id)
+  {
+    InputStream inputStream = context.getResources().openRawResource(id);
+    InputStreamReader in = new InputStreamReader(inputStream);
+    BufferedReader buf = new BufferedReader(in);
+    String line;
+    try
+    {
+      while ((line = buf.readLine()) != null)
+        text.append(line);
+    }
+    catch (IOException e)
+    {
+      e.printStackTrace();
+    }
   }
 
   private static String capitalize(String s)

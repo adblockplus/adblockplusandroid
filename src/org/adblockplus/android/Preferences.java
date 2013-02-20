@@ -44,9 +44,11 @@ import android.os.IBinder;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.PreferenceManager;
+import android.text.Html;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.actionbarsherlock.view.Menu;
@@ -331,6 +333,11 @@ public class Preferences extends SummarizedPreferences
     }
   }
 
+  public void showProxySettings(View v)
+  {
+    this.startActivity(new Intent(this, ProxyConfigurationActivity.class).putExtra("port", proxyService.port));
+  }
+
   @Override
   protected Dialog onCreateDialog(int id)
   {
@@ -388,15 +395,18 @@ public class Preferences extends SummarizedPreferences
 
   private void showConfigurationMsg(String message)
   {
+    ViewGroup grp = (ViewGroup) findViewById(R.id.grp_configuration);
     TextView msg = (TextView) findViewById(R.id.txt_configuration);
-    msg.setText(message);
-    msg.setVisibility(View.VISIBLE);
+    msg.setText(Html.fromHtml(message));
+    View btn = findViewById(R.id.btn_configuration);
+    btn.setVisibility(ProxyService.hasNativeProxy ? View.VISIBLE : View.GONE);
+    grp.setVisibility(View.VISIBLE);
   }
 
   private void hideConfigurationMsg()
   {
-    TextView msg = (TextView) findViewById(R.id.txt_configuration);
-    msg.setVisibility(View.GONE);
+    ViewGroup grp = (ViewGroup) findViewById(R.id.grp_configuration);
+    grp.setVisibility(View.GONE);
   }
 
   private BroadcastReceiver receiver = new BroadcastReceiver()
