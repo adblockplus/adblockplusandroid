@@ -52,7 +52,6 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.stericson.RootTools.RootTools;
 import com.stericson.RootTools.RootToolsException;
@@ -72,6 +71,8 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 
   private static final String TAG = "ProxyService";
   private static final boolean logRequests = false;
+
+  private static final int[] portVariants = new int[] {8080, 8888, 1111, 2222, 3333, 4444, 5555, 6666, 7777, 9999, 26571, 0};
 
   private final static int DEFAULT_TIMEOUT = 3000;
   private final static int NO_TRAFFIC_TIMEOUT = 5 * 60 * 1000; // 5 minutes
@@ -122,17 +123,6 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     // Get port for local proxy
     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
     Resources resources = getResources();
-
-    String p = prefs.getString(getString(R.string.pref_port), null);
-    try
-    {
-      port = p != null ? Integer.valueOf(p) : resources.getInteger(R.integer.def_port);
-    }
-    catch (NumberFormatException e)
-    {
-      Toast.makeText(this, getString(R.string.msg_badport) + ": " + p, Toast.LENGTH_LONG).show();
-      port = resources.getInteger(R.integer.def_port);
-    }
 
     // Try to read user proxy settings
     String proxyHost = null;
@@ -224,15 +214,24 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     if (proxy == null)
     {
       ServerSocket listen = null;
-      try
+      String msg = null;
+      for (int p : portVariants)
       {
-        // TODO Add port travel
-        listen = new ServerSocket(port, 1024);
+        try
+        {
+          listen = new ServerSocket(p, 1024);
+          port = p;
+          break;
+        }
+        catch (IOException e)
+        {
+          Log.e(TAG, null, e);
+          msg = e.getMessage();
+        }
       }
-      catch (IOException e)
+      if (listen == null)
       {
-        sendBroadcast(new Intent(BROADCAST_PROXY_FAILED).putExtra("msg", e.getMessage()));
-        Log.e(TAG, null, e);
+        sendBroadcast(new Intent(BROADCAST_PROXY_FAILED).putExtra("msg", msg));
         return;
       }
 
@@ -656,7 +655,6 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     if (transparent)
       msgId = R.string.notif_all;
 
-    Log.e(TAG, "V: " + nativeProxy + " " + proxyManualyConfigured + " " + transparent);
     NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
     if (hideIcon && msgId != R.string.notif_waiting)
     {
