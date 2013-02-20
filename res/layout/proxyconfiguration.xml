@@ -17,21 +17,20 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal"
-        android:paddingBottom="8dip"
-        android:paddingTop="8dip" >
+        android:paddingBottom="16dip">
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onHelp"
+            android:onClick="onGotit"
             android:paddingRight="8dip"
-            android:text="@string/help" />
+            android:text="@string/gotit" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onOk"
-            android:text="@string/gotit" />
+            android:onClick="onSettings"
+            android:text="@string/opensettings" />
     </LinearLayout>
 
 </LinearLayout>

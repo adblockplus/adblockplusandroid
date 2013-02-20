@@ -76,29 +76,12 @@ public class AboutDialog extends Dialog
     info.append(" ");
     info.append(versionCode);
     info.append("</p>");
-    appendRawTextFile(info, R.raw.info);
-    appendRawTextFile(info, R.raw.legal);
+    AdblockPlus.appendRawTextFile(context, info, R.raw.info);
+    AdblockPlus.appendRawTextFile(context, info, R.raw.legal);
 
     // Show text
     TextView tv = (TextView) findViewById(R.id.about_text);
     tv.setText(Html.fromHtml(info.toString()));
     tv.setMovementMethod(LinkMovementMethod.getInstance());
-  }
-
-  public static void appendRawTextFile(StringBuilder text, int id)
-  {
-    InputStream inputStream = context.getResources().openRawResource(id);
-    InputStreamReader in = new InputStreamReader(inputStream);
-    BufferedReader buf = new BufferedReader(in);
-    String line;
-    try
-    {
-      while ((line = buf.readLine()) != null)
-        text.append(line);
-    }
-    catch (IOException e)
-    {
-      e.printStackTrace();
-    }
   }
 }

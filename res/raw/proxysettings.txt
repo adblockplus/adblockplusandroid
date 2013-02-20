@@ -1,0 +1,10 @@
+<p>To configure proxy for Wi-Fi network follow these steps:</p>
+<p>
+&#8226; Run <i>Settings</i> application. Select <i>Wi-Fi</i>. The list of available Wi-Fi networks will open.<br/>
+&#8226; Connect to the desired network (access point) if not already. Long press on <i>connected</i> network, context menu will appear. Select <i>Modify network config</i>.<br/>
+&#8226; In opened dialog mark <i>Show advanced options</i> check box.<br/>
+&#8226; Scroll to proxy settings, select <i>Manual</i>, proxy options will appear.<br/>
+&#8226; Set <i>Proxy</i> to <b>localhost</b> and <i>Port</i> to <b>%d</b>.
+</p>
+
+<p>Visit site to see <a href="https://adblockplus.org/en/android-config#genericexample">illustrated</a> instructions.</p>
