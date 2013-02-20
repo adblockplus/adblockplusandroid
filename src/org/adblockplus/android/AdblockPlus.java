@@ -62,6 +62,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -69,6 +70,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -121,6 +123,32 @@ public class AdblockPlus extends Application
       Log.e(TAG, e.getMessage(), e);
     }
     return buildNumber;
+  }
+
+  /**
+   * Opens Android application settings
+   */
+  public static void showAppDetails(Context context)
+  {
+    String packageName = context.getPackageName();
+    Intent intent = new Intent();
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD)
+    {
+      // above 2.3
+      intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+      Uri uri = Uri.fromParts("package", packageName, null);
+      intent.setData(uri);
+    }
+    else
+    {
+      // below 2.3
+      final String appPkgName = (Build.VERSION.SDK_INT == Build.VERSION_CODES.FROYO ? "pkg" : "com.android.settings.ApplicationPkgName");
+      intent.setAction(Intent.ACTION_VIEW);
+      intent.setClassName("com.android.settings", "com.android.settings.InstalledAppDetails");
+      intent.putExtra(appPkgName, packageName);
+    }
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    context.startActivity(intent);
   }
 
   /**
@@ -225,7 +253,7 @@ public class AdblockPlus extends Application
 
   /**
    * Returns subscription information.
-   *
+   * 
    * @param url
    *          subscription url
    */
@@ -243,7 +271,7 @@ public class AdblockPlus extends Application
 
   /**
    * Adds provided subscription and removes previous subscriptions if any.
-   *
+   * 
    * @param subscription
    *          Subscription to add
    */
@@ -292,7 +320,7 @@ public class AdblockPlus extends Application
 
   /**
    * Selects which subscription to offer for the first time.
-   *
+   * 
    * @return offered subscription
    */
   public Subscription offerSubscription()
@@ -337,7 +365,7 @@ public class AdblockPlus extends Application
   /**
    * Verifies that subscriptions are loaded and returns flag of subscription
    * presence.
-   *
+   * 
    * @return true if at least one subscription is present and downloaded
    */
   public boolean verifySubscriptions()
@@ -370,7 +398,7 @@ public class AdblockPlus extends Application
 
   /**
    * Returns ElemHide selectors for domain.
-   *
+   * 
    * @return ready to use HTML element with CSS selectors
    */
   public String getSelectorsForDomain(final String domain)
@@ -428,7 +456,7 @@ public class AdblockPlus extends Application
 
   /**
    * Checks if filters match request parameters.
-   *
+   * 
    * @param url
    *          Request URL
    * @param query
@@ -476,7 +504,7 @@ public class AdblockPlus extends Application
     // by Android system
     if (js == null)
       return;
-    
+
     js.execute(new Runnable()
     {
       @Override
@@ -530,7 +558,7 @@ public class AdblockPlus extends Application
 
   /**
    * Stops JS engine.
-   *
+   * 
    * @param implicitly
    *          stop even in interactive mode
    */
@@ -555,7 +583,7 @@ public class AdblockPlus extends Application
    * Sets Alarm to call updater after specified number of minutes or after one
    * day if
    * minutes are set to 0.
-   *
+   * 
    * @param minutes
    *          number of minutes to wait
    */

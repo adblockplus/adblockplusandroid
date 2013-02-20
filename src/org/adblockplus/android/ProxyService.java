@@ -29,6 +29,7 @@ import java.util.concurrent.TimeoutException;
 
 import sunlabs.brazil.server.Server;
 import sunlabs.brazil.util.Base64;
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -49,6 +50,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -75,6 +77,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   private final static int NO_TRAFFIC_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
   final static int ONGOING_NOTIFICATION_ID = R.string.app_name;
+  private static final long POSITION_RIGHT = Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD ? Long.MIN_VALUE : Long.MAX_VALUE;
   private final static int NOTRAFFIC_NOTIFICATION_ID = R.string.app_name + 3;
 
   /**
@@ -89,9 +92,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   private final static String IPTABLES_RETURN = " -t nat -m owner --uid-owner {{UID}} -A OUTPUT -p tcp -j RETURN\n";
   private final static String IPTABLES_ADD_HTTP = " -t nat -A OUTPUT -p tcp --dport 80 -j REDIRECT --to {{PORT}}\n";
 
-  private Notification ongoingNotification;
-  private PendingIntent contentIntent;
-
+  boolean hideIcon;
   private Handler notrafficHandler;
 
   protected ProxyServer proxy = null;
@@ -263,14 +264,8 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     prefs.registerOnSharedPreferenceChangeListener(this);
 
     // Lock service
-    boolean hideIcon = prefs.getBoolean(getString(R.string.pref_hideicon), resources.getBoolean(R.bool.def_hideicon));
-    String msg = getString(transparent ? R.string.notif_all : nativeProxy ? R.string.notif_wifi : R.string.notif_waiting);
-    ongoingNotification = new Notification();
-    ongoingNotification.when = 0;
-    contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, Preferences.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK), 0);
-    ongoingNotification.icon = hideIcon ? R.drawable.transparent : R.drawable.ic_stat_blocking;
-    ongoingNotification.setLatestEventInfo(getApplicationContext(), getText(R.string.app_name), msg, contentIntent);
-    startForeground(ONGOING_NOTIFICATION_ID, ongoingNotification);
+    hideIcon = prefs.getBoolean(getString(R.string.pref_hideicon), resources.getBoolean(R.bool.def_hideicon));
+    startForeground(ONGOING_NOTIFICATION_ID, getNotification());
 
     // If automatic setting of proxy was blocked, check if user has set it manually
     boolean manual = isManual();
@@ -295,7 +290,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   {
     super.onDestroy();
 
-    stopNoTrafficCheck(false, false);
+    stopNoTrafficCheck();
 
     unregisterReceiver(matchesReceiver);
     unregisterReceiver(proxyReceiver);
@@ -618,57 +613,76 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   private void updateNoTrafficCheck(String[] userProxy)
   {
     boolean ourProxy = userProxy != null && isLocalHost(userProxy[0]) && Integer.valueOf(userProxy[1]) == port;
+    if (ourProxy != proxyManualyConfigured)
+    {
+      proxyManualyConfigured = ourProxy;
+      sendStateChangedBroadcast();
+    }
     if (ourProxy)
     {
-      stopNoTrafficCheck(true, true);
+      stopNoTrafficCheck();
     }
     else
     {
       // Initiate no traffic check
       notrafficHandler = new Handler();
       notrafficHandler.postDelayed(noTraffic, NO_TRAFFIC_TIMEOUT);
-      NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-      ongoingNotification.setLatestEventInfo(ProxyService.this, getText(R.string.app_name), getText(R.string.notif_waiting), contentIntent);
-      notificationManager.notify(ONGOING_NOTIFICATION_ID, ongoingNotification);
     }
-    if (ourProxy != proxyManualyConfigured)
-    {
-      proxyManualyConfigured = ourProxy;
-      sendStateChangedBroadcast();
-    }
+    NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+    notificationManager.notify(ONGOING_NOTIFICATION_ID, getNotification());
   }
 
   /**
-   * Stops no traffic check, optionally resetting notification message.
-   * 
-   * @param changeStatus
-   *          true if notification message should be set to normal operating
-   *          mode
-   * @param forceMessageReset
-   *          if true unconditionally reset main notification message
+   * Stops no traffic check and resets notification message.
    */
-  private void stopNoTrafficCheck(boolean changeStatus, boolean forceMessageReset)
+  private void stopNoTrafficCheck()
   {
     if (notrafficHandler != null)
     {
       notrafficHandler.removeCallbacks(noTraffic);
-      proxyManualyConfigured = true;
       sendStateChangedBroadcast();
-    }
-    if (changeStatus && (notrafficHandler != null || forceMessageReset))
-    {
       NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-      ongoingNotification.setLatestEventInfo(ProxyService.this, getText(R.string.app_name), getText(R.string.notif_wifi), contentIntent);
-      notificationManager.notify(ONGOING_NOTIFICATION_ID, ongoingNotification);
+      notificationManager.notify(ONGOING_NOTIFICATION_ID, getNotification());
     }
     notrafficHandler = null;
   }
 
-  public void setEmptyIcon(boolean empty)
+  @SuppressLint("NewApi")
+  private Notification getNotification()
   {
-    ongoingNotification.icon = empty ? R.drawable.transparent : R.drawable.ic_stat_blocking;
+    int msgId = R.string.notif_waiting;
+    if (nativeProxy || proxyManualyConfigured)
+      msgId = R.string.notif_wifi;
+    if (transparent)
+      msgId = R.string.notif_all;
+
+    Log.e(TAG, "V: " + nativeProxy + " " + proxyManualyConfigured + " " + transparent);
+    NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+    if (hideIcon && msgId != R.string.notif_waiting)
+    {
+      builder.setWhen(POSITION_RIGHT);
+      builder.setSmallIcon(R.drawable.transparent);
+      //builder.setContent(new RemoteViews(getPackageName(), R.layout.notif_hidden));
+    }
+    else
+    {
+      builder.setWhen(0);
+      builder.setSmallIcon(R.drawable.ic_stat_blocking);
+    }
+    PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, Preferences.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK), 0);
+    builder.setContentIntent(contentIntent);
+    builder.setContentTitle(getText(R.string.app_name));
+    builder.setContentText(getText(msgId));
+    
+    Notification notification = builder.getNotification();
+    return notification;
+  }
+
+  public void setEmptyIcon(boolean hide)
+  {
+    hideIcon = hide;
     NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-    notificationManager.notify(ONGOING_NOTIFICATION_ID, ongoingNotification);
+    notificationManager.notify(ONGOING_NOTIFICATION_ID, getNotification());
   }
 
   public void sendStateChangedBroadcast()
@@ -706,17 +720,19 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     public void run()
     {
       // Show warning notification
-      Notification notification = new Notification();
-      notification.icon = R.drawable.ic_stat_warning;
-      notification.when = System.currentTimeMillis();
-      notification.flags |= Notification.FLAG_AUTO_CANCEL;
-      notification.defaults |= Notification.DEFAULT_SOUND;
+      NotificationCompat.Builder builder = new NotificationCompat.Builder(ProxyService.this);
+      builder.setSmallIcon(R.drawable.ic_stat_warning);
+      builder.setWhen(System.currentTimeMillis());
+      builder.setAutoCancel(true);
+      builder.setDefaults(Notification.DEFAULT_SOUND);
       Intent intent = new Intent(ProxyService.this, ConfigurationActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
       intent.putExtra("port", port);
       PendingIntent contentIntent = PendingIntent.getActivity(ProxyService.this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-      notification.setLatestEventInfo(ProxyService.this, getText(R.string.app_name), getString(R.string.notif_notraffic), contentIntent);
+      builder.setContentIntent(contentIntent);
+      builder.setContentTitle(getText(R.string.app_name));
+      builder.setContentText(getText(R.string.notif_notraffic));
       NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-      notificationManager.notify(NOTRAFFIC_NOTIFICATION_ID, notification);
+      notificationManager.notify(NOTRAFFIC_NOTIFICATION_ID, builder.getNotification());
     }
   };
 
@@ -729,7 +745,10 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     public void onReceive(final Context context, Intent intent)
     {
       if (intent.getAction().equals(AdblockPlus.BROADCAST_FILTER_MATCHES))
-        stopNoTrafficCheck(true, false);
+      {
+        proxyManualyConfigured = true;
+        stopNoTrafficCheck();
+      }
     }
   };
 
