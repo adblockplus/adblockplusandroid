@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <integer name="def_port">26571</integer>
     <integer name="def_refresh">2</integer>
     <integer name="def_versioncode">0</integer>
 </resources>
