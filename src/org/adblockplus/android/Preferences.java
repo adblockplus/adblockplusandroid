@@ -39,6 +39,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.CheckBoxPreference;
@@ -349,14 +350,32 @@ public class Preferences extends SummarizedPreferences
         break;
       case HIDEICONWARNING_DIALOG:
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.warning).setMessage(R.string.msg_hideicon_warning).setIcon(android.R.drawable.ic_dialog_alert).setCancelable(false)
-            .setPositiveButton(R.string.gotit, new DialogInterface.OnClickListener()
+        builder.setTitle(R.string.warning);
+        builder.setIcon(android.R.drawable.ic_dialog_alert);
+        builder.setCancelable(false);
+        StringBuffer message = new StringBuffer();
+        message.append(getString(R.string.msg_hideicon_warning));
+        builder.setPositiveButton(R.string.gotit, new DialogInterface.OnClickListener()
             {
               public void onClick(DialogInterface dialog, int id)
               {
                 dialog.cancel();
               }
             });
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+        {
+          message.append("<br/><br/>");
+          message.append(getString(R.string.msg_hideicon_native));
+          builder.setNeutralButton(R.string.showme,  new DialogInterface.OnClickListener()
+            {
+              public void onClick(DialogInterface dialog, int id)
+              {
+                AdblockPlus.showAppDetails(getApplicationContext());
+                dialog.cancel();
+              }
+            });
+        }
+        builder.setMessage(Html.fromHtml(message.toString()));
         dialog = builder.create();
         break;
     }
