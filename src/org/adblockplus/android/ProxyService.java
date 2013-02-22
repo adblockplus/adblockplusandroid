@@ -62,7 +62,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   /**
    * Indicates that system supports native proxy configuration.
    */
-  public static boolean hasNativeProxy = Build.VERSION.SDK_INT >= 12; // Honeycomb 3.1
+  public static final boolean NATIVE_PROXY_SUPPORTED = Build.VERSION.SDK_INT >= 12; // Honeycomb 3.1
 
   static
   {
@@ -107,7 +107,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   /**
    * Indicates that service has autoconfigured Android proxy settings (version 3.1+).
    */
-  private boolean nativeProxy = false;
+  private boolean nativeProxyAutoConfigured = false;
   /**
    * Indicates that Android proxy settings are correctly configured (version 4.1.2+ 4.2.2+).
    */
@@ -131,7 +131,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     String proxyUser = null;
     String proxyPass = null;
 
-    if (hasNativeProxy)
+    if (NATIVE_PROXY_SUPPORTED)
     {
       // Read system settings
       proxyHost = System.getProperty("http.proxyHost");
@@ -195,9 +195,9 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     if (!transparent)
     {
       // Try to set native proxy
-      nativeProxy = ProxySettings.setConnectionProxy(getApplicationContext(), LOCALHOST, port, "");
+      nativeProxyAutoConfigured = ProxySettings.setConnectionProxy(getApplicationContext(), LOCALHOST, port, "");
 
-      if (hasNativeProxy)
+      if (NATIVE_PROXY_SUPPORTED)
       {
         registerReceiver(connectionReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         registerReceiver(connectionReceiver, new IntentFilter(Proxy.PROXY_CHANGE_ACTION));
@@ -268,7 +268,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 
     // If automatic setting of proxy was blocked, check if user has set it manually
     boolean manual = isManual();
-    if (manual && hasNativeProxy)
+    if (manual && NATIVE_PROXY_SUPPORTED)
     {
       ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
       updateNoTrafficCheck(connectivityManager);
@@ -314,11 +314,11 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       }.start();
     }
 
-    if (hasNativeProxy)
+    if (NATIVE_PROXY_SUPPORTED)
       unregisterReceiver(connectionReceiver);
 
     // Clear native proxy
-    if (nativeProxy)
+    if (nativeProxyAutoConfigured)
     {
       clearConnectionProxy();
     }
@@ -377,7 +377,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       config.remove("https.auth");
     }
 
-    if (nativeProxy)
+    if (nativeProxyAutoConfigured)
       passProxySettings(proxyHost, proxyPort, proxyExcl);
 
     // Check if there are any settings
@@ -401,7 +401,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     }
     if (p == 0 || isLocalHost(proxyHost) && (p == port || p == 8080))
     {
-      if (nativeProxy)
+      if (nativeProxyAutoConfigured)
         passProxySettings(null, null, null);
       return;
     }
@@ -444,7 +444,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   @Override
   public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
   {
-    if (hasNativeProxy)
+    if (NATIVE_PROXY_SUPPORTED)
     {
       String ketHost = getString(R.string.pref_proxyhost);
       String keyPort = getString(R.string.pref_proxyport);
@@ -470,9 +470,9 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     return transparent;
   }
 
-  public boolean isNativeProxy()
+  public boolean isNativeProxyAutoConfigured()
   {
-    return nativeProxy;
+    return nativeProxyAutoConfigured;
   }
 
   /**
@@ -480,7 +480,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
    */
   public boolean isManual()
   {
-    return !transparent && !nativeProxy;
+    return !transparent && !nativeProxyAutoConfigured;
   }
   
   /**
@@ -650,7 +650,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   private Notification getNotification()
   {
     int msgId = R.string.notif_waiting;
-    if (nativeProxy || proxyManualyConfigured)
+    if (nativeProxyAutoConfigured || proxyManualyConfigured)
       msgId = R.string.notif_wifi;
     if (transparent)
       msgId = R.string.notif_all;
@@ -793,7 +793,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
         Log.i(TAG, "Network Type: " + typeName + ", subtype: " + subtypeName + ", available: " + available);
         if (info.getType() == ConnectivityManager.TYPE_WIFI)
         {
-          if (nativeProxy)
+          if (nativeProxyAutoConfigured)
           {
             ProxySettings.setConnectionProxy(getApplicationContext(), LOCALHOST, port, "");
           }
@@ -810,7 +810,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
         try
         {
           String[] userProxy = ProxySettings.getUserProxy(pp);
-          if (nativeProxy)
+          if (nativeProxyAutoConfigured)
           {
             if (userProxy != null && Integer.valueOf(userProxy[1]) != port)
             {

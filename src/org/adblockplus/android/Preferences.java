@@ -418,7 +418,7 @@ public class Preferences extends SummarizedPreferences
     TextView msg = (TextView) findViewById(R.id.txt_configuration);
     msg.setText(Html.fromHtml(message));
     View btn = findViewById(R.id.btn_configuration);
-    btn.setVisibility(ProxyService.hasNativeProxy ? View.VISIBLE : View.GONE);
+    btn.setVisibility(ProxyService.NATIVE_PROXY_SUPPORTED ? View.VISIBLE : View.GONE);
     grp.setVisibility(View.VISIBLE);
   }
 
