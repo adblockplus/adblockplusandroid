@@ -63,7 +63,7 @@ public class AdvancedPreferences extends SummarizedPreferences
     addPreferencesFromResource(R.xml.preferences_advanced);
 
     PreferenceScreen screen = getPreferenceScreen();
-    if (ProxyService.hasNativeProxy)
+    if (ProxyService.NATIVE_PROXY_SUPPORTED)
     {
       screen.removePreference(findPreference(getString(R.string.pref_proxy)));
     }
@@ -164,11 +164,11 @@ public class AdvancedPreferences extends SummarizedPreferences
               }
             }
           }
-          if (proxyService.isNativeProxy())
+          if (proxyService.isNativeProxyAutoConfigured())
           {
-            items.add("Uses native proxy");
+            items.add("Has native proxy auto configured");
           }
-          if (ProxyService.hasNativeProxy)
+          if (ProxyService.NATIVE_PROXY_SUPPORTED)
           {
             String[] px = ProxySettings.getUserProxy(getApplicationContext());
             if (px != null)
