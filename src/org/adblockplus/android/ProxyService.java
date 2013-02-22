@@ -717,6 +717,9 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   {
     public void run()
     {
+      // It's weird but notrafficHandler.removeCallbacks(noTraffic) does not remove this callback
+      if (notrafficHandler == null)
+        return;
       // Show warning notification
       NotificationCompat.Builder builder = new NotificationCompat.Builder(ProxyService.this);
       builder.setSmallIcon(R.drawable.ic_stat_warning);
