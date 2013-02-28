@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" xmlns:switchpref="http://schemas.android.com/apk/res-auto">
 
-    <CheckBoxPreference
+    <org.jraf.android.backport.switchwidget.SwitchPreference
         android:key="@string/pref_enabled"
-        android:summaryOff="@string/pref_enabled_summary_off"
-        android:summaryOn="@string/pref_enabled_summary_on"
+        switchpref:summaryOff="@string/pref_enabled_summary_off"
+        switchpref:summaryOn="@string/pref_enabled_summary_on"
         android:title="@string/pref_enabled_title" />
 
     <org.adblockplus.android.RefreshableListPreference

@@ -178,8 +178,8 @@ public class ProxySettings
     {
       ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
       Object lp = method.invoke(connectivityManager);
-      if (lp == null) // There is no active link now, but device has native
-                      // proxy support
+      // There is no active link now, but device has native proxy support
+      if (lp == null)
         return true;
 
       String className = "android.net.ProxyProperties";

@@ -50,9 +50,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.Application;
 import android.app.PendingIntent;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -81,6 +83,10 @@ public class AdblockPlus extends Application
   private final static int MSG_TOAST = 1;
 
   /**
+   * Broadcasted when filtering is enabled or disabled.
+   */
+  public static final String BROADCAST_FILTERING_CHANGE = "org.adblockplus.android.filtering.status";
+  /**
    * Broadcasted when subscription status changes.
    */
   public final static String BROADCAST_SUBSCRIPTION_STATUS = "org.adblockplus.android.subscription.status";
@@ -99,6 +105,11 @@ public class AdblockPlus extends Application
    */
   private boolean interactive = false;
 
+  /**
+   * Indicates whether filtering is enabled or not.
+   */
+  private boolean filteringEnabled = false;
+  
   private static AdblockPlus instance;
 
   /**
@@ -204,6 +215,23 @@ public class AdblockPlus extends Application
       networkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
     }
     return networkInfo == null ? false : networkInfo.isConnected();
+  }
+  
+  /**
+   * Checks if ProxyService is running.
+   * 
+   * @return true if service is running
+   */
+  public boolean isServiceRunning()
+  {
+    ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+    // Actually it returns not only running services, so extra check is required
+    for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
+    {
+      if ("org.adblockplus.android.ProxyService".equals(service.service.getClassName()) && service.pid > 0)
+        return true;
+    }
+    return false;
   }
 
   /**
@@ -403,6 +431,9 @@ public class AdblockPlus extends Application
    */
   public String getSelectorsForDomain(final String domain)
   {
+    if (!filteringEnabled)
+      return null;
+
     Future<String> future = js.submit(new Callable<String>()
     {
       @Override
@@ -472,6 +503,9 @@ public class AdblockPlus extends Application
    */
   public boolean matches(String url, String query, String reqHost, String refHost, String accept) throws Exception
   {
+    if (!filteringEnabled)
+      return false;
+
     Callable<Boolean> callable = new MatchesCallable(url, query, reqHost, refHost, accept);
     Future<Boolean> future = js.submit(callable);
     boolean matches = future.get().booleanValue();
@@ -479,6 +513,23 @@ public class AdblockPlus extends Application
     return matches;
   }
 
+  /**
+   * Checks if filtering is enabled.
+   */
+  public boolean isFilteringEnabled()
+  {
+    return filteringEnabled;
+  }
+
+  /**
+   * Enables or disables filtering.
+   */
+  public void setFilteringEnabled(boolean enable)
+  {
+    filteringEnabled = enable;
+    sendBroadcast(new Intent(BROADCAST_FILTERING_CHANGE).putExtra("enabled", filteringEnabled));
+  }
+  
   /**
    * Notifies JS code that application entered interactive mode.
    */
@@ -566,6 +617,7 @@ public class AdblockPlus extends Application
   {
     if ((implicitly || !interactive) && js != null)
     {
+      Log.i(TAG, "stopEngine");
       js.stopEngine();
       try
       {
@@ -575,6 +627,7 @@ public class AdblockPlus extends Application
       {
         Log.e(TAG, e.getMessage(), e);
       }
+      Log.i(TAG, "Engine stopped");
       js = null;
     }
   }
@@ -864,6 +917,7 @@ public class AdblockPlus extends Application
       {
         queue.notify();
       }
+      System.gc();
     }
 
     public void execute(Runnable r)
