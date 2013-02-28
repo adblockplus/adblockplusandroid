@@ -5,12 +5,12 @@
     <string name="crash_report_url">https://crashes.adblockplus.org/submitCrash?version=1</string>
     
     <string name="pref_enabled">enabled</string>
+    <string name="pref_proxyenabled">proxyenabled</string>
     <string name="pref_startatboot">startatboot</string>
     <string name="pref_subscription">subscription</string>
     <string name="pref_hideicon">hideicon</string>
     <string name="pref_refresh">refresh</string>
     <string name="pref_wifirefresh">wifirefresh</string>
-    <string name="pref_port">port</string>
     <string name="pref_advanced">advanced</string>
     <string name="pref_proxy">proxy</string>
     <string name="pref_proxyhost">proxyhost</string>
@@ -22,5 +22,6 @@
     <string name="pref_checkupdate">checkupdate</string>
     <string name="pref_configuration">configuration</string>
     <string name="pref_version">versioncode</string>
+    <string name="pref_proxyautoconfigured">proxy_autoconfigured</string>
 
 </resources>

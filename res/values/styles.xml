@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <style name="AppTheme" parent="@style/Theme.Sherlock">
+        <item name="switchStyle">@style/Widget.Holo.CompoundButton.Switch</item>
+        <item name="switchPreferenceStyle">@style/Preference.SwitchPreference</item>
+    </style>
+
     <style name="MessageText">
         <item name="android:background">#88888888</item>
         <item name="android:textColor">?attr/textColorPrimary</item>

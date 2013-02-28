@@ -2,11 +2,12 @@
 <resources>
 
   <string name="app_name">Adblock Plus</string>
-  <string name="crash_name">Crash occured</string>
+  <string name="crash_name">Crash occurred</string>
   <string name="configuration_name">Configuration information</string>
   <string name="proxysettings_name">Proxy settings</string>
   
   <string name="notif_wifi">Ads are blocked on WiFi connection</string>
+  <string name="notif_wifi_nofiltering">Passing-through on WiFi connection</string>
   <string name="notif_all">Ads are blocked on all connections</string>
   <string name="notif_waiting">Waiting for traffic</string>
   <string name="notif_notraffic">You probably need to adjust configuration</string>
@@ -52,9 +53,12 @@
   <string name="synchronize_last_at">last update</string>
   <string name="synchronize_never">not loaded</string>
 
-  <string name="pref_enabled_title">Enable filtering</string>
+  <string name="pref_enabled_title">Filtering</string>
   <string name="pref_enabled_summary_on">Adblock filtering is enabled</string>
   <string name="pref_enabled_summary_off">Adblock filtering is disabled</string>
+  <string name="pref_proxyenabled_title">Proxy</string>
+  <string name="pref_proxyenabled_summary_on">Adblock proxy is enabled</string>
+  <string name="pref_proxyenabled_summary_off">Adblock proxy is disabled</string>
   <string name="pref_startatboot_title">Start at boot</string>
   <string name="pref_startatboot_summary_on">Adblock Plus will start in background automatically if it is enabled</string>
   <string name="pref_startatboot_summary_off">Adblock Plus needs to be started manually after boot</string>

@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:switchpref="http://schemas.android.com/apk/res-auto"
     android:title="@string/pref_advanced_title" >
+
+    <org.jraf.android.backport.switchwidget.SwitchPreference
+        android:defaultValue="true"
+        android:key="@string/pref_proxyenabled"
+        android:title="@string/pref_proxyenabled_title"
+        switchpref:summaryOff="@string/pref_proxyenabled_summary_off"
+        switchpref:summaryOn="@string/pref_proxyenabled_summary_on" />
 
     <CheckBoxPreference
         android:defaultValue="@bool/def_startatboot"

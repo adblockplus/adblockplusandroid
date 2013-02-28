@@ -62,10 +62,16 @@ public class AdvancedPreferences extends SummarizedPreferences
 
     addPreferencesFromResource(R.xml.preferences_advanced);
 
+    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
     PreferenceScreen screen = getPreferenceScreen();
     if (ProxyService.NATIVE_PROXY_SUPPORTED)
     {
       screen.removePreference(findPreference(getString(R.string.pref_proxy)));
+      if (prefs.getBoolean(getString(R.string.pref_proxyautoconfigured), false))
+      {
+        screen.removePreference(findPreference(getString(R.string.pref_proxyenabled)));
+      }
     }
     if (getResources().getBoolean(R.bool.def_release))
     {
@@ -116,6 +122,27 @@ public class AdvancedPreferences extends SummarizedPreferences
   @Override
   public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
   {
+    if (getString(R.string.pref_proxyenabled).equals(key))
+    {
+      AdblockPlus application = AdblockPlus.getApplication();
+      boolean enabled = sharedPreferences.getBoolean(key, false);
+      boolean serviceRunning = application.isServiceRunning();
+      if (enabled && !serviceRunning)
+      {
+        startService(new Intent(this, ProxyService.class));
+      }
+      else
+      {
+        if (serviceRunning)
+          stopService(new Intent(this, ProxyService.class));
+        // If disabled, disable filtering as well
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(getString(R.string.pref_enabled), enabled);
+        editor.commit();
+        application.setFilteringEnabled(false);
+        application.stopEngine(false);
+      }
+    }
     if (getString(R.string.pref_refresh).equals(key))
     {
       int refresh = Integer.valueOf(sharedPreferences.getString(key, "0"));

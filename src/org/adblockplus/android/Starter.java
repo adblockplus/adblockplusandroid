@@ -32,16 +32,26 @@ public class Starter extends BroadcastReceiver
     String action = intent.getAction();
     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
     boolean enabled = prefs.getBoolean(context.getString(R.string.pref_enabled), false);
+    boolean proxyenabled = prefs.getBoolean(context.getString(R.string.pref_proxyenabled), false);
     if (Intent.ACTION_PACKAGE_REPLACED.equals(action))
     {
-      enabled &= "org.adblockplus.android".equals(intent.getData().getSchemeSpecificPart());
+      boolean us = "org.adblockplus.android".equals(intent.getData().getSchemeSpecificPart());
+      enabled &= us;
+      proxyenabled &= us;
     }
     if (Intent.ACTION_BOOT_COMPLETED.equals(action))
     {
       boolean startAtBoot = prefs.getBoolean(context.getString(R.string.pref_startatboot), context.getResources().getBoolean(R.bool.def_startatboot));
       enabled &= startAtBoot;
+      proxyenabled &= startAtBoot;
     }
     if (enabled)
+    {
+      AdblockPlus application = AdblockPlus.getApplication();
+      application.setFilteringEnabled(true);
+      application.startEngine();
+    }
+    if (proxyenabled)
       context.startService(new Intent(context, ProxyService.class));
   }
 
