@@ -164,8 +164,6 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
         int uid = getPackageManager().getPackageInfo(getPackageName(), 0).applicationInfo.uid;
         cmd.append(iptables);
         cmd.append(IPTABLES_RETURN.replace("{{UID}}", String.valueOf(uid)));
-        cmd.append(iptables);
-        cmd.append(IPTABLES_ADD_HTTP.replace("{{PORT}}", String.valueOf(port)));
         String rules = cmd.toString();
         RootTools.sendShell(rules, DEFAULT_TIMEOUT);
         transparent = true;
@@ -258,6 +256,35 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       proxy.logLevel = Server.LOG_DIAGNOSTIC;
       proxy.setup(listen, proxyConfiguration.getProperty("handler"), proxyConfiguration);
       proxy.start();
+    }
+    
+    if (transparent)
+    {
+      // Redirect traffic via iptables
+      try
+      {
+        StringBuffer cmd = new StringBuffer();
+        cmd.append(iptables);
+        cmd.append(IPTABLES_ADD_HTTP.replace("{{PORT}}", String.valueOf(port)));
+        String rules = cmd.toString();
+        RootTools.sendShell(rules, DEFAULT_TIMEOUT);
+      }
+      catch (FileNotFoundException e)
+      {
+        // ignore - this is "normal" case
+      }
+      catch (IOException e)
+      {
+        Log.e(TAG, "Failed to initialize iptables", e);
+      }
+      catch (RootToolsException e)
+      {
+        Log.e(TAG, "Failed to initialize iptables", e);
+      }
+      catch (TimeoutException e)
+      {
+        Log.e(TAG, "Failed to initialize iptables", e);
+      }
     }
 
     prefs.registerOnSharedPreferenceChangeListener(this);
