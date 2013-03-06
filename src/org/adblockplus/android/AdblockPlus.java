@@ -439,11 +439,11 @@ public class AdblockPlus extends Application
 
     MatchesCallable(String url, String query, String reqHost, String refHost, String accept)
     {
-      this.url = url;
-      this.query = query;
-      this.reqHost = reqHost != null ? reqHost : "";
-      this.refHost = refHost != null ? refHost : "";
-      this.accept = accept != null ? accept : "";
+      this.url = StringEscapeUtils.escapeJavaScript(url);
+      this.query = StringEscapeUtils.escapeJavaScript(query);
+      this.reqHost = reqHost != null ? StringEscapeUtils.escapeJavaScript(reqHost) : "";
+      this.refHost = refHost != null ? StringEscapeUtils.escapeJavaScript(refHost) : "";
+      this.accept = accept != null ? StringEscapeUtils.escapeJavaScript(accept) : "";
     }
 
     @Override
