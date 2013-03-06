@@ -27,6 +27,8 @@ import java.io.OutputStream;
  */
 public class ChunkedOutputStream extends FilterOutputStream
 {
+  private static final int MAX_CHUNK_SIZE = 2048;
+  
   private static final byte[] CRLF = {'\r', '\n'};
   private static final byte[] FINAL_CHUNK = new byte[] {'0', '\r', '\n', '\r', '\n'};
   private boolean wroteFinalChunk = false;
@@ -53,7 +55,17 @@ public class ChunkedOutputStream extends FilterOutputStream
   @Override
   public void write(byte[] buffer) throws IOException
   {
-    writeChunk(buffer, 0, buffer.length);
+    int offset = 0;
+    int remain = buffer.length;
+    while (remain > 0)
+    {
+      int size = MAX_CHUNK_SIZE;
+      if (size > remain)
+        size = remain;
+      writeChunk(buffer, offset, size);
+      offset += size;
+      remain -= size;
+    }
   }
 
   @Override
