@@ -49,6 +49,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -115,10 +116,19 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 
   private String iptables = null;
 
+  @SuppressLint("NewApi")
   @Override
   public void onCreate()
   {
     super.onCreate();
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD)
+    {
+      // Proxy is running in separate thread, it's just some resolution request during initialization.
+      // Not worth spawning a separate thread for this.
+      StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitNetwork().build();
+      StrictMode.setThreadPolicy(policy);
+    }
 
     // Get port for local proxy
     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
