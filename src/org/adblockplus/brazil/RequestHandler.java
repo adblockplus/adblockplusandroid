@@ -211,6 +211,8 @@ public class RequestHandler extends BaseRequestHandler
       if (type != null && type.toLowerCase().startsWith("text/html"))
       {
         selectors = application.getSelectorsForDomain(reqHost);
+        if (selectors != null)
+          selectors = selectors.replace(",", ",\r\n");
       }
       // If no filters are applicable just pass through the response
       if (selectors == null || target.getResponseCode() != 200)
