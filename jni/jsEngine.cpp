@@ -164,18 +164,9 @@ JNIEXPORT jobject JNICALL Java_org_adblockplus_android_JSEngine_nativeExecute
   const std::string script = getString(pEnv, pScript);
 
   v8::Handle<v8::String> source = v8::String::New(script.c_str(), script.size());
-  v8::Handle<v8::Script> compiledScript;
   {
     v8::TryCatch try_catch;
-    compiledScript = v8::Script::Compile(source);
-    if (try_catch.HasCaught())
-    {
-      reportException(&try_catch);
-      return NULL;
-    }
-  }
-  {
-    v8::TryCatch try_catch;
+    v8::Handle<v8::Script> compiledScript = v8::Script::Compile(source);
     v8::Handle<v8::Value> result = compiledScript->Run();
     if (try_catch.HasCaught())
     {
