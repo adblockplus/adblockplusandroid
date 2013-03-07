@@ -885,6 +885,11 @@ public class AdblockPlus extends Application
     @Override
     public final void run()
     {
+      if (Thread.currentThread().getName().startsWith("Thread-"))
+      {
+        Thread.currentThread().setName("javascript");
+      }
+
       jsEngine = new JSEngine(this);
 
       jsEngine.put("_locale", Locale.getDefault().toString());
