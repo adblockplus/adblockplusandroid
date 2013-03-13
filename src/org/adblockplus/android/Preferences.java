@@ -24,6 +24,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.jraf.android.backport.switchwidget.SwitchPreference;
+
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.app.AlertDialog;
@@ -42,7 +44,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.PreferenceManager;
 import android.text.Html;
@@ -77,8 +78,8 @@ public class Preferences extends SummarizedPreferences
   {
     super.onCreate(savedInstanceState);
 
-    PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-    PreferenceManager.setDefaultValues(this, R.xml.preferences_advanced, false);
+    PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
+    PreferenceManager.setDefaultValues(this, R.xml.preferences_advanced, true);
     setContentView(R.layout.preferences);
     addPreferencesFromResource(R.xml.preferences);
 
@@ -194,18 +195,13 @@ public class Preferences extends SummarizedPreferences
       }
     }).start();
 
-    // Check if service is running and update UI accordingly
+    // Update service and UI state according to user settings
     boolean enabled = prefs.getBoolean(getString(R.string.pref_enabled), false);
-    if (enabled && !isServiceRunning())
-    {
-      setEnabled(false);
-    }
-    // Run service if this is first application run
-    else if (!enabled && firstRun)
-    {
-      startService(new Intent(this, ProxyService.class));
-      setEnabled(true);
-    }
+    boolean proxyenabled = prefs.getBoolean(getString(R.string.pref_proxyenabled), false);
+    if (enabled || firstRun)
+      setFilteringEnabled(true);
+    if (enabled || firstRun || proxyenabled)
+      setProxyEnabled(true);
 
     bindService(new Intent(this, ProxyService.class), proxyServiceConnection, 0);
   }
@@ -233,11 +229,9 @@ public class Preferences extends SummarizedPreferences
   protected void onStop()
   {
     super.onStop();
-    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-    boolean enabled = prefs.getBoolean(getString(R.string.pref_enabled), false);
     AdblockPlus application = AdblockPlus.getApplication();
     application.stopInteractive();
-    if (!enabled)
+    if (!application.isFilteringEnabled())
       application.stopEngine(true);
   }
 
@@ -270,29 +264,24 @@ public class Preferences extends SummarizedPreferences
     }
   }
 
-  private void setEnabled(boolean enabled)
+  private void setFilteringEnabled(boolean enabled)
   {
     SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
     editor.putBoolean(getString(R.string.pref_enabled), enabled);
     editor.commit();
-    ((CheckBoxPreference) findPreference(getString(R.string.pref_enabled))).setChecked(enabled);
+    ((SwitchPreference) findPreference(getString(R.string.pref_enabled))).setChecked(enabled);
+    AdblockPlus application = AdblockPlus.getApplication();
+    application.setFilteringEnabled(enabled);
   }
 
-  /**
-   * Checks if ProxyService is running.
-   * 
-   * @return true if service is running
-   */
-  private boolean isServiceRunning()
+  private void setProxyEnabled(boolean enabled)
   {
-    ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-    // Actually it returns not only running services, so extra check is required
-    for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
-    {
-      if ("org.adblockplus.android.ProxyService".equals(service.service.getClassName()) && service.pid > 0)
-        return true;
-    }
-    return false;
+    SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+    editor.putBoolean(getString(R.string.pref_proxyenabled), enabled);
+    editor.commit();
+    AdblockPlus application = AdblockPlus.getApplication();
+    if (enabled && !application.isServiceRunning())
+      startService(new Intent(this, ProxyService.class));
   }
 
   /**
@@ -385,19 +374,27 @@ public class Preferences extends SummarizedPreferences
   @Override
   public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
   {
+    AdblockPlus application = AdblockPlus.getApplication();
     if (getString(R.string.pref_enabled).equals(key))
     {
       boolean enabled = sharedPreferences.getBoolean(key, false);
-      boolean serviceRunning = isServiceRunning();
-      if (enabled && !serviceRunning)
-        startService(new Intent(this, ProxyService.class));
-      else if (!enabled && serviceRunning)
+      boolean autoconfigured = sharedPreferences.getBoolean(getString(R.string.pref_proxyautoconfigured), false);
+      boolean serviceRunning = application.isServiceRunning();
+      application.setFilteringEnabled(enabled);
+      if (enabled)
+      {
+        // If user has enabled filtering, enable proxy as well
+        setProxyEnabled(true);
+      }
+      else if (serviceRunning && autoconfigured)
+      {
+        // If user disabled filtering disable proxy only if it was autoconfigured
         stopService(new Intent(this, ProxyService.class));
+      }
     }
     else if (getString(R.string.pref_subscription).equals(key))
     {
       String current = sharedPreferences.getString(key, null);
-      AdblockPlus application = AdblockPlus.getApplication();
       Subscription subscription = application.getSubscription(current);
       application.setSubscription(subscription);
     }
@@ -417,8 +414,6 @@ public class Preferences extends SummarizedPreferences
     ViewGroup grp = (ViewGroup) findViewById(R.id.grp_configuration);
     TextView msg = (TextView) findViewById(R.id.txt_configuration);
     msg.setText(Html.fromHtml(message));
-    View btn = findViewById(R.id.btn_configuration);
-    btn.setVisibility(ProxyService.NATIVE_PROXY_SUPPORTED ? View.VISIBLE : View.GONE);
     grp.setVisibility(View.VISIBLE);
   }
 
@@ -446,12 +441,12 @@ public class Preferences extends SummarizedPreferences
             if (extra.getBoolean("configured"))
               hideConfigurationMsg();
             else
-              showConfigurationMsg(getString(R.string.msg_configuration, extra.getInt("port")));
+              showConfigurationMsg(getString(R.string.msg_configuration));
           }
         }
         else
         {
-          setEnabled(false);
+          setFilteringEnabled(false);
           hideConfigurationMsg();
         }
       }
@@ -459,7 +454,7 @@ public class Preferences extends SummarizedPreferences
       {
         String msg = extra.getString("msg");
         new AlertDialog.Builder(Preferences.this).setTitle(R.string.error).setMessage(msg).setIcon(android.R.drawable.ic_dialog_alert).setPositiveButton(R.string.ok, null).create().show();
-        setEnabled(false);
+        setFilteringEnabled(false);
       }
       if (action.equals(AdblockPlus.BROADCAST_SUBSCRIPTION_STATUS))
       {
@@ -539,7 +534,7 @@ public class Preferences extends SummarizedPreferences
       Log.d(TAG, "Proxy service connected");
 
       if (proxyService.isManual() && proxyService.noTraffic())
-        showConfigurationMsg(getString(R.string.msg_configuration, proxyService.port));
+        showConfigurationMsg(getString(R.string.msg_configuration));
     }
 
     public void onServiceDisconnected(ComponentName className)

@@ -39,7 +39,7 @@ public class ConfigurationActivity extends Activity
     setContentView(R.layout.configuration);
     port = getIntent().getIntExtra("port", 0);
     String msg1 = getString(R.string.msg_notraffic);
-    String msg2 = getString(R.string.msg_configuration, port);
+    String msg2 = getString(R.string.msg_configuration);
     ((TextView) findViewById(R.id.message_text)).setText(Html.fromHtml(msg1 + " " + msg2));
   }
 
