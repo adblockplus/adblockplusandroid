@@ -23,5 +23,6 @@
     <string name="pref_configuration">configuration</string>
     <string name="pref_version">versioncode</string>
     <string name="pref_proxyautoconfigured">proxy_autoconfigured</string>
+    <string name="pref_lastport">lastport</string>
 
 </resources>
