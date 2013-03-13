@@ -71,7 +71,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   }
 
   private static final String TAG = "ProxyService";
-  private static final boolean logRequests = true;
+  private static final boolean logRequests = false;
 
   // Do not use 8080 because it is a "dirty" port, Android uses it if something goes wrong
   // First element is reserved for previously used port
