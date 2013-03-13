@@ -414,8 +414,6 @@ public class Preferences extends SummarizedPreferences
     ViewGroup grp = (ViewGroup) findViewById(R.id.grp_configuration);
     TextView msg = (TextView) findViewById(R.id.txt_configuration);
     msg.setText(Html.fromHtml(message));
-    View btn = findViewById(R.id.btn_configuration);
-    btn.setVisibility(ProxyService.NATIVE_PROXY_SUPPORTED ? View.VISIBLE : View.GONE);
     grp.setVisibility(View.VISIBLE);
   }
 
@@ -443,7 +441,7 @@ public class Preferences extends SummarizedPreferences
             if (extra.getBoolean("configured"))
               hideConfigurationMsg();
             else
-              showConfigurationMsg(getString(R.string.msg_configuration, extra.getInt("port")));
+              showConfigurationMsg(getString(R.string.msg_configuration));
           }
         }
         else
@@ -536,7 +534,7 @@ public class Preferences extends SummarizedPreferences
       Log.d(TAG, "Proxy service connected");
 
       if (proxyService.isManual() && proxyService.noTraffic())
-        showConfigurationMsg(getString(R.string.msg_configuration, proxyService.port));
+        showConfigurationMsg(getString(R.string.msg_configuration));
     }
 
     public void onServiceDisconnected(ComponentName className)

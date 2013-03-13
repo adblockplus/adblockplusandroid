@@ -20,6 +20,7 @@
         android:paddingBottom="16dip">
 
         <Button
+            android:id="@+id/gotit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onGotit"
@@ -27,6 +28,7 @@
             android:text="@string/gotit" />
 
         <Button
+            android:id="@+id/opensettings"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onSettings"

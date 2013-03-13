@@ -4,7 +4,7 @@
   <string name="app_name">Adblock Plus</string>
   <string name="crash_name">Crash occurred</string>
   <string name="configuration_name">Configuration information</string>
-  <string name="proxysettings_name">Proxy settings</string>
+  <string name="proxysettings_name">Proxy configuration</string>
   
   <string name="notif_wifi">Ads are blocked on WiFi connection</string>
   <string name="notif_wifi_nofiltering">Passing-through on WiFi connection</string>
@@ -18,7 +18,7 @@
   <string name="msg_crash_submission_failure">Failed to submit crash report, will try again later.</string>
   <string name="msg_subscription_offer">We have selected a suitable subscription for you: \'%s\'. You can change it at any time in application settings.</string>
   <string name="msg_notraffic">It seems that no traffic is passing through application.</string>
-  <string name="msg_configuration">Please make sure that proxy server &lt;b&gt;localhost&lt;/b&gt; and proxy port &lt;b&gt;%d&lt;/b&gt; are configured in your phone network settings.</string>
+  <string name="msg_configuration">Adblock Plus can not change the proxy settings on your device, please configure it manually.</string>
   <string name="msg_badport">Bad port value</string>
   <string name="msg_clipboard">Text has been copied to clipboard</string>
   <string name="msg_update_available">New update available</string>
@@ -43,7 +43,8 @@
   <string name="build">build#</string>
   <string name="gotit">Got it</string>
   <string name="showme">Show me</string>
-  <string name="opensettings">Open settings</string>
+  <string name="configure">Configure</string>
+  <string name="opensettings">Open wireless settings</string>
 
   <string name="synchronize_in_progress">downloading&#8230;</string>
   <string name="synchronize_invalid_url">invalid url</string>
