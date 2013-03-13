@@ -679,7 +679,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, Preferences.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK), 0);
     builder.setContentIntent(contentIntent);
     builder.setContentTitle(getText(R.string.app_name));
-    builder.setContentText(getText(msgId));
+    builder.setContentText(getString(msgId, port));
     builder.setOngoing(true);
     
     Notification notification = builder.getNotification();
