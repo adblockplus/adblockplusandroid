@@ -73,7 +73,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   private static final boolean logRequests = true;
 
   // Do not use 8080 because it is a "dirty" port, Android uses it if something goes wrong
-  private static final int[] portVariants = new int[] {8888, 1111, 2222, 3333, 4444, 5555, 6666, 7777, 9999, 26571, 0};
+  private static final int[] portVariants = new int[] {2020, 3030, 4040, 5050, 6060, 7070, 9090, 1234, 12345, 4321, 0};
 
   private final static int DEFAULT_TIMEOUT = 3000;
   private final static int NO_TRAFFIC_TIMEOUT = 5 * 60 * 1000; // 5 minutes
