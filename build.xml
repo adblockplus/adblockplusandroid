@@ -48,6 +48,16 @@
         unless="ndk.dir"
     />
 
+    <target name="-check-env">
+        <checkenv />
+        <exec executable="${sdk.dir}/tools/android" failonerror="true">
+            <arg line="update lib-project --target android-14 --path submodules/actionbarsherlock/library"/>
+        </exec>
+        <exec executable="${sdk.dir}/tools/android" failonerror="true">
+            <arg line="update lib-project --target android-7 --path submodules/android-switch-backport"/>
+        </exec>
+    </target>
+
     <target name="jni" description="Compiles and builds NDK libraries.">
         <exec executable="${ndk.dir}/ndk-build" failonerror="true" />
     </target>
