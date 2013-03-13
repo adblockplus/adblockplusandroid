@@ -35,7 +35,8 @@ public class Starter extends BroadcastReceiver
     boolean proxyenabled = prefs.getBoolean(context.getString(R.string.pref_proxyenabled), false);
     if (Intent.ACTION_PACKAGE_REPLACED.equals(action))
     {
-      boolean us = "org.adblockplus.android".equals(intent.getData().getSchemeSpecificPart());
+      String pkg = context.getApplicationInfo().packageName;
+      boolean us = pkg.equals(intent.getData().getSchemeSpecificPart());
       enabled &= us;
       proxyenabled &= us;
     }

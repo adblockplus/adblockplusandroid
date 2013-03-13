@@ -228,7 +228,7 @@ public class AdblockPlus extends Application
     // Actually it returns not only running services, so extra check is required
     for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
     {
-      if ("org.adblockplus.android.ProxyService".equals(service.service.getClassName()) && service.pid > 0)
+      if (ProxyService.class.getCanonicalName().equals(service.service.getClassName()) && service.pid > 0)
         return true;
     }
     return false;
@@ -917,7 +917,6 @@ public class AdblockPlus extends Application
       {
         queue.notify();
       }
-      System.gc();
     }
 
     public void execute(Runnable r)
