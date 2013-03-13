@@ -71,9 +71,10 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   }
 
   private static final String TAG = "ProxyService";
-  private static final boolean logRequests = false;
+  private static final boolean logRequests = true;
 
-  private static final int[] portVariants = new int[] {8080, 8888, 1111, 2222, 3333, 4444, 5555, 6666, 7777, 9999, 26571, 0};
+  // Do not use 8080 because it is a "dirty" port, Android uses it if something goes wrong
+  private static final int[] portVariants = new int[] {2020, 3030, 4040, 5050, 6060, 7070, 9090, 1234, 12345, 4321, 0};
 
   private final static int DEFAULT_TIMEOUT = 3000;
   private final static int NO_TRAFFIC_TIMEOUT = 5 * 60 * 1000; // 5 minutes
@@ -211,12 +212,16 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
         registerReceiver(connectionReceiver, new IntentFilter(Proxy.PROXY_CHANGE_ACTION));
       }
     }
-
-    // Start engine
-    AdblockPlus.getApplication().startEngine();
+    
+    // Save current native proxy situation. The service is always started on the first run so
+    // we will always have a correct value from the box
+    SharedPreferences.Editor editor = prefs.edit();
+    editor.putBoolean(getString(R.string.pref_proxyautoconfigured), transparent || nativeProxyAutoConfigured);
+    editor.commit();
 
     registerReceiver(proxyReceiver, new IntentFilter(ProxyService.BROADCAST_PROXY_FAILED));
-    registerReceiver(matchesReceiver, new IntentFilter(AdblockPlus.BROADCAST_FILTER_MATCHES));
+    registerReceiver(filterReceiver, new IntentFilter(AdblockPlus.BROADCAST_FILTERING_CHANGE));
+    registerReceiver(filterReceiver, new IntentFilter(AdblockPlus.BROADCAST_FILTER_MATCHES));
 
     // Start proxy
     if (proxy == null)
@@ -328,7 +333,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 
     stopNoTrafficCheck();
 
-    unregisterReceiver(matchesReceiver);
+    unregisterReceiver(filterReceiver);
     unregisterReceiver(proxyReceiver);
 
     // Stop IP redirecting
@@ -366,6 +371,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     if (proxy != null)
       proxy.close();
 
+    // TODO Do we have to check current state?
     // Stop engine if not in interactive mode
     AdblockPlus.getApplication().stopEngine(false);
 
@@ -679,6 +685,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       sendStateChangedBroadcast();
       NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
       notificationManager.notify(ONGOING_NOTIFICATION_ID, getNotification());
+      notificationManager.cancel(NOTRAFFIC_NOTIFICATION_ID);
     }
     notrafficHandler = null;
   }
@@ -686,9 +693,11 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   @SuppressLint("NewApi")
   private Notification getNotification()
   {
+    boolean filtering = AdblockPlus.getApplication().isFilteringEnabled();
+
     int msgId = R.string.notif_waiting;
     if (nativeProxyAutoConfigured || proxyManualyConfigured)
-      msgId = R.string.notif_wifi;
+      msgId = filtering ? R.string.notif_wifi : R.string.notif_wifi_nofiltering;
     if (transparent)
       msgId = R.string.notif_all;
 
@@ -707,7 +716,8 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, Preferences.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK), 0);
     builder.setContentIntent(contentIntent);
     builder.setContentTitle(getText(R.string.app_name));
-    builder.setContentText(getText(msgId));
+    builder.setContentText(getString(msgId, port));
+    builder.setOngoing(true);
     
     Notification notification = builder.getNotification();
     return notification;
@@ -777,11 +787,16 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   /**
    * Stops no traffic check if traffic is detected by proxy service.
    */
-  private BroadcastReceiver matchesReceiver = new BroadcastReceiver()
+  private BroadcastReceiver filterReceiver = new BroadcastReceiver()
   {
     @Override
     public void onReceive(final Context context, Intent intent)
     {
+      if (intent.getAction().equals(AdblockPlus.BROADCAST_FILTERING_CHANGE))
+      {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(ONGOING_NOTIFICATION_ID, getNotification());
+      }
       if (intent.getAction().equals(AdblockPlus.BROADCAST_FILTER_MATCHES))
       {
         proxyManualyConfigured = true;
