@@ -74,7 +74,8 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   private static final boolean logRequests = true;
 
   // Do not use 8080 because it is a "dirty" port, Android uses it if something goes wrong
-  private static final int[] portVariants = new int[] {2020, 3030, 4040, 5050, 6060, 7070, 9090, 1234, 12345, 4321, 0};
+  // First element is reserved for previously used port
+  private static final int[] portVariants = new int[] {-1, 2020, 3030, 4040, 5050, 6060, 7070, 9090, 1234, 12345, 4321, 0};
 
   private final static int DEFAULT_TIMEOUT = 3000;
   private final static int NO_TRAFFIC_TIMEOUT = 5 * 60 * 1000; // 5 minutes
@@ -212,7 +213,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
         registerReceiver(connectionReceiver, new IntentFilter(Proxy.PROXY_CHANGE_ACTION));
       }
     }
-    
+
     // Save current native proxy situation. The service is always started on the first run so
     // we will always have a correct value from the box
     SharedPreferences.Editor editor = prefs.edit();
@@ -226,10 +227,14 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     // Start proxy
     if (proxy == null)
     {
+      // Select available port and bind to it, use previously selected port by default
+      portVariants[0] = prefs.getInt(getString(R.string.pref_lastport), -1);
       ServerSocket listen = null;
       String msg = null;
       for (int p : portVariants)
       {
+        if (p < 0)
+          continue;
         try
         {
           listen = new ServerSocket(p, 1024);
@@ -248,6 +253,11 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
         return;
       }
 
+      // Save selected port
+      editor.putInt(getString(R.string.pref_lastport), port);
+      editor.commit();
+
+      // Initialize proxy
       proxyConfiguration.put("handler", "main");
       proxyConfiguration.put("main.prefix", "");
       proxyConfiguration.put("main.class", "sunlabs.brazil.server.ChainHandler");
@@ -272,7 +282,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       proxy.setup(listen, proxyConfiguration.getProperty("handler"), proxyConfiguration);
       proxy.start();
     }
-    
+
     if (transparent)
     {
       // Redirect traffic via iptables
@@ -525,7 +535,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   {
     return !transparent && !nativeProxyAutoConfigured;
   }
-  
+
   /**
    * Checks whether traffic check is pending
    */
@@ -718,7 +728,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     builder.setContentTitle(getText(R.string.app_name));
     builder.setContentText(getString(msgId, port));
     builder.setOngoing(true);
-    
+
     Notification notification = builder.getNotification();
     return notification;
   }
