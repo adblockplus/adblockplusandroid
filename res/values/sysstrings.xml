@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="update_url">https://adblockplus.org/devbuilds/adblockplusandroid/updates.xml?api=%1$d&amp;build=%2$d&amp;locale=%3$s&amp;device=%4$s</string>
+    <string name="update_url">https://adblockplus.org/androidupdates.xml?api=%1$d&amp;build=%2$d&amp;locale=%3$s&amp;device=%4$s</string>
+    <string name="devbuild_update_url">https://adblockplus.org/devbuilds/adblockplusandroid/updates.xml?api=%1$d&amp;build=%2$d&amp;locale=%3$s&amp;device=%4$s</string>
     <string name="crash_report_url">https://crashes.adblockplus.org/submitCrash?version=1</string>
     
     <string name="pref_enabled">enabled</string>
