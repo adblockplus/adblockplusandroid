@@ -709,11 +709,8 @@ public class AdblockPlus extends Application
     // Set crash handler
     Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(this));
 
-    if (!getResources().getBoolean(R.bool.def_release))
-    {
-      // Initiate update check
-      scheduleUpdater(0);
-    }
+    // Initiate update check
+    scheduleUpdater(0);
   }
 
   /**

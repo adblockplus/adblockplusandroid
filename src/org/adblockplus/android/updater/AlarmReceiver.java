@@ -107,7 +107,9 @@ public class AlarmReceiver extends BroadcastReceiver
 
             String locale = Locale.getDefault().toString().toLowerCase();
             String device = AdblockPlus.getDeviceName();
-            URL updateUrl = new URL(String.format(context.getString(R.string.update_url), Build.VERSION.SDK_INT, AdblockPlus.getApplication().getBuildNumber(), locale, device));
+            boolean releaseBuild = context.getResources().getBoolean(R.bool.def_release);
+            String updateUrlTemplate = context.getString(releaseBuild ? R.string.update_url : R.string.devbuild_update_url);
+            URL updateUrl = new URL(String.format(updateUrlTemplate, Build.VERSION.SDK_INT, AdblockPlus.getApplication().getBuildNumber(), locale, device));
             // The following line correctly url-encodes query string parameters
             URI uri = new URI(updateUrl.getProtocol(), updateUrl.getUserInfo(), updateUrl.getHost(), updateUrl.getPort(), updateUrl.getPath(), updateUrl.getQuery(), updateUrl.getRef());
             HttpGet httpGet = new HttpGet(uri);
