@@ -4,6 +4,7 @@ ant.properties
 local.properties
 build.xml
 proguard.cfg
+crowdin.yaml
 bin
 libs/armeabi
 obj
