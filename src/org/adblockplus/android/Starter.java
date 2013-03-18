@@ -32,7 +32,8 @@ public class Starter extends BroadcastReceiver
     String action = intent.getAction();
     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
     boolean enabled = prefs.getBoolean(context.getString(R.string.pref_enabled), false);
-    boolean proxyenabled = prefs.getBoolean(context.getString(R.string.pref_proxyenabled), false);
+    boolean proxyenabled = prefs.getBoolean(context.getString(R.string.pref_proxyenabled), true);
+    boolean autoconfigured = prefs.getBoolean(context.getString(R.string.pref_proxyautoconfigured), false);
     if (Intent.ACTION_PACKAGE_REPLACED.equals(action))
     {
       String pkg = context.getApplicationInfo().packageName;
@@ -52,7 +53,7 @@ public class Starter extends BroadcastReceiver
       application.setFilteringEnabled(true);
       application.startEngine();
     }
-    if (proxyenabled)
+    if (enabled || (proxyenabled && !autoconfigured))
       context.startService(new Intent(context, ProxyService.class));
   }
 
