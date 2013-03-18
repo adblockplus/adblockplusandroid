@@ -804,8 +804,15 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     {
       if (intent.getAction().equals(AdblockPlus.BROADCAST_FILTERING_CHANGE))
       {
-        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.notify(ONGOING_NOTIFICATION_ID, getNotification());
+        // It's rather a hack but things are happening simultaneously and we
+        // receive this broadcast despite the fact we have unsubscribed from
+        // it and notification is not removed because it is changed to new one
+        // during removal.
+        if (!ProxyService.this.isNativeProxyAutoConfigured())
+        {
+          NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+          notificationManager.notify(ONGOING_NOTIFICATION_ID, getNotification());
+        }
       }
       if (intent.getAction().equals(AdblockPlus.BROADCAST_FILTER_MATCHES))
       {

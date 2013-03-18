@@ -26,8 +26,6 @@ import java.util.List;
 
 import org.jraf.android.backport.switchwidget.SwitchPreference;
 
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningServiceInfo;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -197,10 +195,11 @@ public class Preferences extends SummarizedPreferences
 
     // Update service and UI state according to user settings
     boolean enabled = prefs.getBoolean(getString(R.string.pref_enabled), false);
-    boolean proxyenabled = prefs.getBoolean(getString(R.string.pref_proxyenabled), false);
+    boolean proxyenabled = prefs.getBoolean(getString(R.string.pref_proxyenabled), true);
+    boolean autoconfigured = prefs.getBoolean(getString(R.string.pref_proxyautoconfigured), false);
     if (enabled || firstRun)
       setFilteringEnabled(true);
-    if (enabled || firstRun || proxyenabled)
+    if (enabled || firstRun || (proxyenabled && !autoconfigured))
       setProxyEnabled(true);
 
     bindService(new Intent(this, ProxyService.class), proxyServiceConnection, 0);
@@ -325,7 +324,7 @@ public class Preferences extends SummarizedPreferences
 
   public void showProxySettings(View v)
   {
-    this.startActivity(new Intent(this, ProxyConfigurationActivity.class).putExtra("port", proxyService.port));
+    startActivity(new Intent(this, ProxyConfigurationActivity.class).putExtra("port", proxyService.port));
   }
 
   @Override
