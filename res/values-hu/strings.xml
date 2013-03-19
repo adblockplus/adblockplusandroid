@@ -10,10 +10,10 @@
   <string name="notif_all">Hirdetések blokkolva minden kapcsolaton</string>
   <string name="notif_waiting">Várakozás forgalomra a %d porton</string>
   <string name="notif_notraffic">Valószínűleg módosítanod kell a beállításokat</string>
-  <string name="crash_dialog_text">Úgy tűnik, hogy az alkalmazás az előző indítás során hibát észlelt és leállt. Segíthetsz nekünk a probléma megoldásában, ha elküldöd a jelentést az 'OK' gombra való kattintással.</string>
+  <string name="crash_dialog_text">Úgy tűnik, hogy az alkalmazás az előző indítás során hibát észlelt és leállt. Segíthetsz nekünk a probléma megoldásában, ha elküldöd a jelentést az \'OK\' gombra való kattintással.</string>
   <string name="crash_dialog_comment_prompt">Ha szeretnél megjegyzést fűzni a problémához, akkor alább megteheted:</string>
   <string name="msg_crash_submission_failure">A jelentés elküldése nem sikerült, később megpróbálom újra.</string>
-  <string name="msg_subscription_offer">Kiválasztottunk egy számodra megfelelő listát: '%s'. Ezt a beállítások közt bármikor megváltoztathatod.</string>
+  <string name="msg_subscription_offer">Kiválasztottunk egy számodra megfelelő listát: \'%s\'. Ezt a beállítások közt bármikor megváltoztathatod.</string>
   <string name="msg_notraffic">Úgy tűnik, hogy nem halad át forgalom az alkalmazáson.</string>
   <string name="msg_configuration">Az Adblock Plus nem tudta megváltoztatni a proxy beállításokat az eszközödön, kérlek konfiguráld manuálisan.</string>
   <string name="msg_badport">Rossz port érték</string>

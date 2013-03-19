@@ -10,10 +10,10 @@
   <string name="notif_all">Advertenties zijn geblokkeerd op alle verbindingen</string>
   <string name="notif_waiting">Wachten voor verkeer op poort %d</string>
   <string name="notif_notraffic">Waarschijnlijk moet u de configuratie aanpassen</string>
-  <string name="crash_dialog_text">Het lijkt erop dat de er een probleem was met de applicatie die automatisch afsloot bij de vorige sessie. U kunt ons helpen dit te verhelpen door het foutenrapport naar ons te verzenden door op 'OK' te klikken.</string>
+  <string name="crash_dialog_text">Het lijkt erop dat de er een probleem was met de applicatie die automatisch afsloot bij de vorige sessie. U kunt ons helpen dit te verhelpen door het foutenrapport naar ons te verzenden door op \'OK\' te klikken.</string>
   <string name="crash_dialog_comment_prompt">U kunt eventuele opmerkingen over het probleem hieronder toevoegen:</string>
   <string name="msg_crash_submission_failure">Verzenden van het crash rapport is mislukt, zal later opnieuw proberen.</string>
-  <string name="msg_subscription_offer">Wij hebben een geschikt abonnement voor u geselecteerd: '%s'. U kunt het op elk gewenst moment in toepassingsinstellingen aanpassen.</string>
+  <string name="msg_subscription_offer">Wij hebben een geschikt abonnement voor u geselecteerd: \'%s\'. U kunt het op elk gewenst moment in toepassingsinstellingen aanpassen.</string>
   <string name="msg_notraffic">Het lijkt erop dat er geen verkeer door de applicatie passeert.</string>
   <string name="msg_configuration">Adblock Plus kan de proxy-instellingen op uw apparaat niet automatisch veranderen, u kunt dit handmatig configureren.</string>
   <string name="msg_badport">Slechte poort waarde</string>
