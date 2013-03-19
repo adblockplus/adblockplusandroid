@@ -17,11 +17,6 @@
 
 package org.adblockplus.android;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
 import android.app.Dialog;
 import android.content.Context;
 import android.content.pm.PackageInfo;
