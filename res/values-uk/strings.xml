@@ -5,15 +5,15 @@
   <string name="crash_name">Трапився збій</string>
   <string name="configuration_name">Дані конфігурації</string>
   <string name="proxysettings_name">Конфігурація проксі</string>
-  <string name="notif_wifi">Реклама блокується при Wi-Fi з'єднанні</string>
-  <string name="notif_wifi_nofiltering">Дозволяється реклама при Wi-Fi з'єднаннях</string>
-  <string name="notif_all">Реклама блокується при всіх з'єднаннях</string>
+  <string name="notif_wifi">Реклама блокується при Wi-Fi з\'єднанні</string>
+  <string name="notif_wifi_nofiltering">Дозволяється реклама при Wi-Fi з\'єднаннях</string>
+  <string name="notif_all">Реклама блокується при всіх з\'єднаннях</string>
   <string name="notif_waiting">Очікування трафіку на порту %d</string>
   <string name="notif_notraffic">Ви, ймовірно, потрібно змінити конфігурацію</string>
   <string name="crash_dialog_text">Здається, програма зіткнулася з проблемою і було примусово зупинена під час попереднього запуску. Ви можете допомогти нам вирішити цю проблему, якщо відправите звіт про помилку, натиснувши „Гаразд“.</string>
   <string name="crash_dialog_comment_prompt">Ви можете додати коментар по даній проблемі нижче:</string>
   <string name="msg_crash_submission_failure">Не вдалося відправити звіт про помилку, пізніше спроба буде повторена.</string>
-  <string name="msg_subscription_offer">Ми вибрали відповідну підписку для вас: '%s'. Ви можете змінити її в будь-який час у налаштуваннях програми.</string>
+  <string name="msg_subscription_offer">Ми вибрали відповідну підписку для вас: \'%s\'. Ви можете змінити її в будь-який час у налаштуваннях програми.</string>
   <string name="msg_notraffic">Здається немає трафіку, який проходить через програму.</string>
   <string name="msg_configuration">Adblock Plus не може змінити параметри проксі-сервера на вашому пристрої, задайте їх вручну.</string>
   <string name="msg_badport">Погане значення порту</string>
@@ -24,7 +24,7 @@
   <string name="msg_update_downloading">Завантаження оновлення: %d%%</string>
   <string name="msg_update_ready">Оновлення готове до встановлення</string>
   <string name="msg_update_fail">Не вдалося перевірити оновлення, будь ласка, спробуйте пізніше</string>
-  <string name="msg_hideicon_warning">&lt;b&gt;Зауважте&lt;/b&gt;: найкраще, що ми можемо - це зробити піктограму повідомлення невидимою. Якщо ми вилучимо іконку, Android може зупинити Adblock Plus в будь-який час, що призведе до втрати з'єднання з мережею.</string>
+  <string name="msg_hideicon_warning">&lt;b&gt;Зауважте&lt;/b&gt;: найкраще, що ми можемо - це зробити піктограму повідомлення невидимою. Якщо ми вилучимо іконку, Android може зупинити Adblock Plus в будь-який час, що призведе до втрати з\'єднання з мережею.</string>
   <string name="msg_hideicon_native">Ви можете &lt;b&gt; повністю вимкнути &lt;/b&gt; піктограму сповіщення через параметри Android. Для цього зніміть &lt;i&gt; прапорець &lt;/i&gt; Показувати сповіщення &lt;i&gt; у Інформації про програму &lt;/i&gt;. Натисніть &lt;i&gt; Показати мені &lt;/i&gt;, щоб відкрити їх зараз.</string>
   <string name="configuring_url">https://adblockplus.org/en/android-config</string>
   <string name="configuring_proxy_url">https://adblockplus.org/en/android-config#proxy</string>
@@ -60,7 +60,7 @@
   <string name="pref_refresh_title">Оновлення підписки</string>
   <string name="pref_wifirefresh_title">Оновити через WiFi тільки</string>
   <string name="pref_wifirefresh_summary_on">Автоматичне оновлення буде виконано лише через Wi-Fi підключення</string>
-  <string name="pref_wifirefresh_summary_off">Автоматичне оновлення буде виконано при будь-якому зв'язку</string>
+  <string name="pref_wifirefresh_summary_off">Автоматичне оновлення буде виконано при будь-якому зв\'язку</string>
   <string name="pref_hideicon_title">Приховати піктограму</string>
   <string name="pref_hideicon_summary_on">Використовується прозора піктограма сповіщення для зменшення роздратування</string>
   <string name="pref_hideicon_summary_off">Викоривується звичайна піктограма сповіщення</string>

@@ -10,12 +10,12 @@
   <string name="notif_all">Werbung wird auf allen Verbindungen blockiert</string>
   <string name="notif_waiting">Warte auf Datenverkehr</string>
   <string name="notif_notraffic">Bitte überprüfen Sie die Konfiguration</string>
-  <string name="crash_dialog_text">Adblock Plus hat offenbar ein Problem festgestellt und wurde unsanft beendet. Sie können uns helfen dieses Problem zu beheben indem Sie uns einen Fehlerbericht schicken, klicken Sie hierfür auf 'OK'.</string>
+  <string name="crash_dialog_text">Adblock Plus hat offenbar ein Problem festgestellt und wurde unsanft beendet. Sie können uns helfen dieses Problem zu beheben indem Sie uns einen Fehlerbericht schicken, klicken Sie hierfür auf \'OK\'.</string>
   <string name="crash_dialog_comment_prompt">Hier können Sie zusätzliche Anmerkungen erfassen:</string>
   <string name="msg_crash_submission_failure">Fehlerbericht konnte nicht versendet werden, wird später erneut versucht.</string>
-  <string name="msg_subscription_offer">Wir haben die folgende Filterliste für Sie ausgewählt: '%s'. Sie können in den Einstellungen jederzeit eine andere auswählen.</string>
+  <string name="msg_subscription_offer">Wir haben die folgende Filterliste für Sie ausgewählt: \'%s\'. Sie können in den Einstellungen jederzeit eine andere auswählen.</string>
   <string name="msg_notraffic">Scheinbar wird kein Datenverkehr durch Adblock Plus geleitet.</string>
-  <string name="msg_configuration">Bitte stellen Sie sicher dass in den Netzwerkeinstellungen 'localhost' als Proxy-Server und '%d' als Proxy-Port konfiguriert sind.</string>
+  <string name="msg_configuration">Bitte stellen Sie sicher dass in den Netzwerkeinstellungen \'localhost\' als Proxy-Server und \'%d\' als Proxy-Port konfiguriert sind.</string>
   <string name="msg_badport">Ungültiger Port</string>
   <string name="msg_clipboard">Text wurde in die Zwischenablage kopiert</string>
   <string name="msg_update_available">Neue Version verfügbar</string>
