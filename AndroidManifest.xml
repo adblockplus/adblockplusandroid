@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.adblockplus.android"
     android:versionCode="238"
-    android:versionName="1.1" >
+    android:versionName="1.1.1a" >
 
     <uses-sdk
         android:minSdkVersion="7"
