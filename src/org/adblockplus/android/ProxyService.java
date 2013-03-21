@@ -366,7 +366,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       }.start();
     }
 
-    if (NATIVE_PROXY_SUPPORTED)
+    if (!transparent && NATIVE_PROXY_SUPPORTED)
       unregisterReceiver(connectionReceiver);
 
     // Clear native proxy
