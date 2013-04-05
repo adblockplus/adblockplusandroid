@@ -497,7 +497,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   @Override
   public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
   {
-    if (NATIVE_PROXY_SUPPORTED)
+    if (!NATIVE_PROXY_SUPPORTED)
     {
       String ketHost = getString(R.string.pref_proxyhost);
       String keyPort = getString(R.string.pref_proxyport);
