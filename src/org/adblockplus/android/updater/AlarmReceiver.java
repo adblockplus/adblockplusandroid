@@ -168,8 +168,6 @@ public class AlarmReceiver extends BroadcastReceiver
               notificationManager.notify(NOTIFICATION_ID, notification);
             }
             success = true;
-            // Schedule next check
-            application.scheduleUpdater(0);
           }
           catch (IOException e)
           {
@@ -201,9 +199,9 @@ public class AlarmReceiver extends BroadcastReceiver
                 notification.setLatestEventInfo(context, context.getText(R.string.app_name), context.getString(R.string.msg_update_fail), emptyIntent);
                 notificationManager.notify(NOTIFICATION_ID, notification);
               }
-              // Schedule retry in 1 hour - this is most probably problem on server
-              application.scheduleUpdater(60);
             }
+            // Schedule next check
+            application.scheduleUpdater(0);
           }
         }
       });
