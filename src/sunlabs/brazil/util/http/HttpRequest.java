@@ -26,6 +26,9 @@
  *
  * Version Histories:
  *
+ * 13/04/09-12:44:12 (andrey@adblockplus.org)
+ *   implemented proxying chunked request body
+ *
  * 2.7 07/03/26-13:53:18 (suhler)
  *   doc updates
  *
@@ -479,6 +482,7 @@ public class HttpRequest
 
     HttpInputStream in;
     InputStream under;
+    HttpInputStream cs;
 
     /**
      * The status line from the HTTP response.  This field is not valid until
@@ -668,6 +672,12 @@ public class HttpRequest
 	    postData = new ByteArrayOutputStream();
 	}
 	return postData;
+    }
+
+    public void
+    setHttpInputStream(HttpInputStream cs)
+    {
+	this.cs = cs;
     }
 
     /**
@@ -869,7 +879,82 @@ public class HttpRequest
 	    postData.writeTo(p);
 	    postData = null;			// Release memory.
 	}
+	
+	// Pass any data left in client stream (in case of chunked request content)
+	String encoding = requestHeaders.get("Transfer-Encoding", "");
+	if ("chunked".equals(encoding) && cs != null)
+	{
+		byte[] buf = new byte[4096];
+		int bytesLeft = -1;
+		while (true)
+		{
+			// Read chunk size
+			if (bytesLeft <= 0)
+			{
+				bytesLeft = getChunkSize(cs);
+				// Output chunk size
+				p.print(Integer.toHexString(bytesLeft) + "\r\n");
+			}
+			if (bytesLeft == 0)
+				break;
+			// Pass chunk data
+			int count = cs.read(buf, 0, Math.min(bytesLeft, buf.length));
+			if (count < 0)
+			{
+				// This shouldn't occur - no final zero chunk
+				bytesLeft = -1;
+				break;
+			}
+        		p.write(buf, 0, count);
+			bytesLeft -= count;
+			if (bytesLeft == 0)
+				p.print("\r\n");
+		}
+		// Pass the trailer
+		if (bytesLeft == 0)
+		{
+			while (true)
+			{
+				String line = cs.readLine(LINE_LIMIT);
+				if (line == null)
+					break;
+				p.print(line + "\r\n");
+				if (line.length() == 0)
+					break;
+			}
+		}
+	}
+	
 	p.flush();
+    }
+
+    /*
+     * Copied (with some amendmends) from UnchunkingInputStream / andrey@adblockplus.org
+     */
+    private int
+    getChunkSize(HttpInputStream is)
+	throws IOException
+    {
+	/*
+	* Although HTTP/1.1 chunking spec says that there is one "\r\n"
+	* between chunks, some servers (for example, maps.yahoo.com) 
+	* send more than one blank line between chunks.  So, read and skip
+	* all the blank lines seen between chunks.
+	*/
+
+	int bytesLeft = 0;
+	String line;
+	do {
+		// Sanity check: limit chars when expecting a chunk size.
+		line = is.readLine(HttpRequest.LINE_LIMIT);
+	} while ((line != null) && (line.length() == 0));
+
+	try {
+		bytesLeft = Integer.parseInt(line.trim(), 16);
+	} catch (Exception e) {
+		throw new IOException("malformed chunk");
+	}
+	return bytesLeft;
     }
 
     void
