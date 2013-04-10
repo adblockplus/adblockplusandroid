@@ -468,7 +468,7 @@ public class Request
      * need to be modified.
      */
     public Socket sock;
-    protected HttpInputStream in;
+    public HttpInputStream in;
 
     /**
      * A set of properties local to this request.  The property is wrapped

@@ -184,7 +184,10 @@ public class RequestHandler extends BaseRequestHandler
         out.write(request.postData);
         out.close();
       }
-
+      else
+      {
+        target.setHttpInputStream(request.in);
+      }
       target.connect();
 
       if (shouldLogHeaders)
