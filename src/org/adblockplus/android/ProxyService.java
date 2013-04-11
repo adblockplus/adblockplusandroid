@@ -852,6 +852,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action))
       {
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        // TODO Should we use ConnectivityManagerCompat.getNetworkInfoFromBroadcast() instead?
         NetworkInfo info = connectivityManager.getActiveNetworkInfo();
         if (info == null)
           return;
