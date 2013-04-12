@@ -424,7 +424,7 @@ function ElemHidePatch()
         result.push(filter.selector);
     }
     if (result.length)
-      return "<style type=\"text/css\">" + result.join() + " { display: none !important }</style>";
+      return "<style type=\"text/css\">" + result.join(',\r\n') + " { display: none !important }</style>";
     else
       return null;
   };
