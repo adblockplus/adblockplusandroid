@@ -51,10 +51,10 @@ import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
 import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.app.AlarmManager;
 import android.app.Application;
 import android.app.PendingIntent;
-import android.app.ActivityManager.RunningServiceInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -653,7 +653,7 @@ public class AdblockPlus extends Application
       // ...next day
       updateTime.add(Calendar.HOUR_OF_DAY, 24);
       // Spread out the “mass downloading” for 6 hours
-      updateTime.add(Calendar.MINUTE, (int) Math.random() * 60 * 6);
+      updateTime.add(Calendar.MINUTE, (int) (Math.random() * 60 * 6));
     }
     else
     {
