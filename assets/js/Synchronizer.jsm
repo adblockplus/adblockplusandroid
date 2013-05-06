@@ -348,7 +348,7 @@
     _loopIndex4 < lines.length; ++ _loopIndex4) {
       var line = lines[_loopIndex4];
       var filter = Filter.fromText(Filter.normalize(line));
-      if (filter)
+      if (filter && !(filter instanceof ElemHideFilter))
         result.push(filter);
     }
     return result;
