@@ -96,4 +96,10 @@
                 homepage="http://wiltteri.net/"
                 prefixes="fi"
                 author="None"/>
+  <subscription title="ABP Japanese filters"
+                specialization="Japanese"
+                url="https://adblock-plus-japanese-filter.googlecode.com/hg/abp_jp.txt"
+                homepage="https://adblock-plus-japanese-filter.googlecode.com/"
+                prefixes="ja"
+                author="None"/>
   </subscriptions>
