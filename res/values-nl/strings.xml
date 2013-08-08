@@ -24,8 +24,8 @@
   <string name="msg_update_downloading">Downloaden update: %d%%</string>
   <string name="msg_update_ready">Klaar om de update te installeren</string>
   <string name="msg_update_fail">Checken voor updates is mislukt, probeer later nog eens</string>
-  <string name="msg_hideicon_warning">&lt;b&gt; Let op&lt;/b&gt;: het beste wat we kunnen doen is het icoontje onzichtbaar maken. Als we het pictogram verwijderen, kan Android Adblock Plus ieder moment stopzetten, wat zal resulteren in het verlies van de connectiviteit.</string>
-  <string name="msg_hideicon_native">U kunt &lt;b&gt;volledig uitschakelen&lt;/b&gt; notificatie icoontje door de Android instellingen. Voor dit vink uit &lt;i&gt;Toon meldingen&lt;/i&gt; vink selectievakje aan in&lt;i&gt;Applicatie info&lt;/i&gt;. Druk op &lt;i&gt;Toon mij &lt;/i&gt; om nu te openen.</string>
+  <string name="msg_hideicon_warning">&lt;b&gt;Let op&lt;/b&gt;: Het beste wat we kunnen doen is het icoontje onzichtbaar maken. Als we het pictogram verwijderen, kan Android Adblock Plus ieder moment stopzetten, wat zal resulteren in het verlies van de connectiviteit.</string>
+  <string name="msg_hideicon_native">U kunt &lt;b&gt;volledig uitschakelen&lt;/b&gt; notificatie icoontje door de Android instellingen. Voor dit vink uit &lt;i&gt;Toon meldingen&lt;/i&gt; Selecteer  &lt;i&gt;Applicatie info&lt;/i&gt;. Selecteer &lt;i&gt;Laat zien&lt;/i&gt; om nu te openen.</string>
   <string name="configuring_url">https://adblockplus.org/en/android-config</string>
   <string name="configuring_proxy_url">https://adblockplus.org/en/android-config#proxy</string>
   <string name="ok">OK</string>
@@ -40,7 +40,7 @@
   <string name="showme">Laat zien</string>
   <string name="configure">Configureren</string>
   <string name="opensettings">Open draadloze instellingen</string>
-  <string name="synchronize_in_progress">downloaden...</string>
+  <string name="synchronize_in_progress">downloaden</string>
   <string name="synchronize_invalid_url">Ongeldige url</string>
   <string name="synchronize_connection_error">verbindingsfout</string>
   <string name="synchronize_invalid_data">ongeldige gegevens</string>

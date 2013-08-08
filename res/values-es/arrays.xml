@@ -3,7 +3,7 @@
 <resources>
   <string-array name="refresh_names">
     <item>Manualmente</item>
-    <item>Al iniciar</item>
+    <item>Al Iniciar</item>
     <item>Periódicamente</item>
   </string-array>
 </resources>

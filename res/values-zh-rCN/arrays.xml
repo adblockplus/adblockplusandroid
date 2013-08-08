@@ -3,7 +3,7 @@
 <resources>
   <string-array name="refresh_names">
     <item>手动</item>
-    <item>在启动</item>
+    <item>启动时</item>
     <item>定期</item>
   </string-array>
 </resources>
