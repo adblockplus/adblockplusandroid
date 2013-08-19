@@ -782,7 +782,6 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       builder.setSmallIcon(R.drawable.ic_stat_warning);
       builder.setWhen(System.currentTimeMillis());
       builder.setAutoCancel(true);
-      builder.setDefaults(Notification.DEFAULT_SOUND);
       Intent intent = new Intent(ProxyService.this, ConfigurationActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
       intent.putExtra("port", port);
       PendingIntent contentIntent = PendingIntent.getActivity(ProxyService.this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);

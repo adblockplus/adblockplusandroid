@@ -24,8 +24,8 @@
   <string name="msg_update_downloading">Pobieranie aktualizacji: %d%%</string>
   <string name="msg_update_ready">Gotowy do zainstalowania aktualizacji</string>
   <string name="msg_update_fail">Nie udało się sprawdzić dostępności aktualizacji. Spróbuj ponownie później</string>
-  <string name="msg_hideicon_warning">&lt;b&gt;Uwaga&lt;/b&gt;: najlepsze co możemy zrobić to wyświetlenie ikony. Jeśli ją usuniemy, system Android mógłby zatrzymać Adblock Plus w dowolnym momencie, powodując utratę połączenia.</string>
-  <string name="msg_hideicon_native">Możesz &lt;b&gt;całkowicie wyłączyć&lt;/b&gt; ikonę powiadomień za pomocą ustawień systemu Android. Żeby to zrobić, odznacz opcję &lt;i&gt;Wyświetlaj powiadomienia&lt;/i&gt; w &lt;i&gt;Informacjach o aplikacji&lt;/i&gt;. Wciśnij &lt;i&gt;Pokaż mi&lt;/i&gt;, aby je teraz otworzyć.</string>
+  <string name="msg_hideicon_warning">&lt;b&gt;Uwagalt&lt;/b&gt;: najlepsze co możemy zrobić to wyświetlenie ikony. Jeśli ją usuniemy, system Android mógłby zatrzymać Adblock Plus w dowolnym momencie, powodując utratę połączenia.</string>
+  <string name="msg_hideicon_native">Możesz &lt;b&gt;całkowicie wyłączyć&lt;b&gt; ikonę powiadomień za pomocą ustawień systemu Android. Żeby to zrobić, odznacz opcję &lt;b&gt;Wyświetlaj powiadomienia&lt;/i&gt;  w &lt;i&gt;Informacjach o aplikacji&lt;/i&gt;. Wciśnij &lt;i&gt;Pokaż mi&lt;/i&gt;, aby je teraz otworzyć.</string>
   <string name="configuring_url">https://adblockplus.org/en/android-config</string>
   <string name="configuring_proxy_url">https://adblockplus.org/en/android-config#proxy</string>
   <string name="ok">OK</string>
@@ -41,7 +41,7 @@
   <string name="configure">Konfiguruj</string>
   <string name="opensettings">Otwórz ustawienia sieci bezprzewodowej</string>
   <string name="synchronize_in_progress">pobieranie…</string>
-  <string name="synchronize_invalid_url">Nieprawidłowy adres url</string>
+  <string name="synchronize_invalid_url">nieprawidłowy adres url</string>
   <string name="synchronize_connection_error">błąd połączenia</string>
   <string name="synchronize_invalid_data">nieprawidłowe dane</string>
   <string name="synchronize_checksum_mismatch">niezgodność sumy kontrolnej</string>
