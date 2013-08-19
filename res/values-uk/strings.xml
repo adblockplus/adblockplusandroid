@@ -9,7 +9,7 @@
   <string name="notif_wifi_nofiltering">Дозволяється реклама при Wi-Fi з\'єднаннях</string>
   <string name="notif_all">Реклама блокується при всіх з\'єднаннях</string>
   <string name="notif_waiting">Очікування трафіку на порту %d</string>
-  <string name="notif_notraffic">Ви, ймовірно, потрібно змінити конфігурацію</string>
+  <string name="notif_notraffic">Вам, ймовірно, потрібно змінити конфігурацію</string>
   <string name="crash_dialog_text">Здається, програма зіткнулася з проблемою і було примусово зупинена під час попереднього запуску. Ви можете допомогти нам вирішити цю проблему, якщо відправите звіт про помилку, натиснувши „Гаразд“.</string>
   <string name="crash_dialog_comment_prompt">Ви можете додати коментар по даній проблемі нижче:</string>
   <string name="msg_crash_submission_failure">Не вдалося відправити звіт про помилку, пізніше спроба буде повторена.</string>
@@ -39,7 +39,7 @@
   <string name="gotit">Зрозуміло</string>
   <string name="showme">Показати мені</string>
   <string name="configure">Настроювання</string>
-  <string name="opensettings">Відкрийте параметри Wi-Fi</string>
+  <string name="opensettings">Відкрити параметри Wi-Fi</string>
   <string name="synchronize_in_progress">завантаження...</string>
   <string name="synchronize_invalid_url">Неприпустима URL-адреса</string>
   <string name="synchronize_connection_error">Помилка підключення</string>
