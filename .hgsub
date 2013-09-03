@@ -1,3 +1,4 @@
 jni/libadblockplus-binaries = ../libadblockplus-binaries
 submodules/actionbarsherlock = ../actionbarsherlock
 submodules/android-switch-backport = ../android-switch-backport
+buildtools = ../buildtools
