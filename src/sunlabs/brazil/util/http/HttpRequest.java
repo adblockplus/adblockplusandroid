@@ -840,6 +840,11 @@ public class HttpRequest
 	    pool.close(hs, keepAlive);
 	    killer.interrupt();
 	}
+
+	public void abort() {
+		pool.close(hs, false);
+		this.interrupt();
+	}
     }
 
     static class Killer extends Thread
@@ -855,7 +860,7 @@ public class HttpRequest
 	{
 	    try {
 		Thread.sleep(b.timeout);
-		b.interrupt();
+		b.abort();
 	    } catch (Exception e) {}
 	}
     }
