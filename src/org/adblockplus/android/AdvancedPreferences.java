@@ -84,8 +84,8 @@ public class AdvancedPreferences extends SummarizedPreferences
       {
         public boolean onPreferenceClick(Preference preference)
         {
-          Intent updater = new Intent(getApplicationContext(), AlarmReceiver.class).putExtra("notifynoupdate", true);
-          sendBroadcast(updater);
+          AdblockPlus application = AdblockPlus.getApplication();
+          application.checkUpdates();
           return true;
         }
       });
@@ -127,9 +127,10 @@ public class AdvancedPreferences extends SummarizedPreferences
       AdblockPlus application = AdblockPlus.getApplication();
       boolean enabled = sharedPreferences.getBoolean(key, false);
       boolean serviceRunning = application.isServiceRunning();
-      if (enabled && !serviceRunning)
+      if (enabled)
       {
-        startService(new Intent(this, ProxyService.class));
+        if (!serviceRunning)
+          startService(new Intent(this, ProxyService.class));
       }
       else
       {
@@ -137,10 +138,9 @@ public class AdvancedPreferences extends SummarizedPreferences
           stopService(new Intent(this, ProxyService.class));
         // If disabled, disable filtering as well
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(getString(R.string.pref_enabled), enabled);
+        editor.putBoolean(getString(R.string.pref_enabled), false);
         editor.commit();
         application.setFilteringEnabled(false);
-        application.stopEngine(false);
       }
     }
     if (getString(R.string.pref_refresh).equals(key))
