@@ -121,8 +121,8 @@ void FilterChangedCallback(const std::string& action, const AdblockPlus::JsValue
 
   if (action == "subscription.lastDownload" || action == "subscription.downloadStatus")
   {
-	  AdblockPlus::SubscriptionPtr subscription = AdblockPlus::SubscriptionPtr(new AdblockPlus::Subscription(item));
-	  UpdateSubscriptionStatus(subscription);
+    AdblockPlus::SubscriptionPtr subscription = AdblockPlus::SubscriptionPtr(new AdblockPlus::Subscription(item));
+    UpdateSubscriptionStatus(subscription);
   }
 }
 
