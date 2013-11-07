@@ -364,29 +364,8 @@ public class AdblockPlus extends Application
     if (abpEngine == null)
     {
       File basePath = getFilesDir();
-//      jsEngine.put("_locale", Locale.getDefault().toString());
-//      jsEngine.put("_datapath", getFilesDir().getAbsolutePath());
-//      jsEngine.put("_separator", File.separator);
-//      jsEngine.put("_version", getVersion());
       abpEngine = new ABPEngine(this, basePath.getAbsolutePath());
     }
-    /*
-    if (js == null)
-    {
-      Log.i(TAG, "startEngine");
-      js = new JSThread(this);
-      js.start();
-
-      final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-      final int refresh = Integer.valueOf(prefs.getString(getString(R.string.pref_refresh), Integer.toString(getResources().getInteger(R.integer.def_refresh))));
-      final boolean wifionly = prefs.getBoolean(getString(R.string.pref_wifirefresh), getResources().getBoolean(R.bool.def_wifirefresh));
-      // Refresh if user selected refresh on each start
-      if (refresh == 1 && (!wifionly || isWiFiConnected(this)))
-      {
-        refreshSubscriptions();
-      }
-    }
-    */
   }
 
   /**
