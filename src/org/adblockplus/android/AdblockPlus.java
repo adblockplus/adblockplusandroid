@@ -68,6 +68,9 @@ public class AdblockPlus extends Application
    */
   public final static String BROADCAST_FILTER_MATCHES = "org.adblockplus.android.filter.matches";
 
+  /**
+   * Cached list of recommended subscriptions.
+   */
   private Subscription[] subscriptions;
 
   /**
