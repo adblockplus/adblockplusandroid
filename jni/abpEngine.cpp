@@ -202,7 +202,7 @@ JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_initialize(JNIEnv 
   const std::string path = GetString(pEnv, basepath);
 
   AdblockPlus::AppInfo appInfo;
-  // FIXME Should be taken from Manifest
+  // TODO Should be extracted from the manifest
   appInfo.version = "1.1.2";
   appInfo.name = "adblockplusandroid";
   appInfo.application = "android";
