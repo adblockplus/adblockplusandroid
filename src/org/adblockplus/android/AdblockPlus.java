@@ -277,8 +277,9 @@ public class AdblockPlus extends Application
 
   /**
    * Returns ElemHide selectors for domain.
-   * 
-   * @return ready to use HTML element with CSS selectors
+   *
+   * @param domain The domain
+   * @return A list of CSS selectors
    */
   public String[] getSelectorsForDomain(final String domain)
   {
