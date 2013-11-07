@@ -40,12 +40,12 @@ void AndroidLogSystem::operator()(AdblockPlus::LogSystem::LogLevel logLevel,
       lvl = ANDROID_LOG_ERROR;
       break;
   }
-  __android_log_print(lvl, "JS", message.c_str());
+  __android_log_print(lvl, "JS", "%s", message.c_str());
   if (source.size())
   {
 	__android_log_print(lvl, "JS", "\n");
 	__android_log_print(lvl, "JS", " at ");
-	__android_log_print(lvl, "JS", source.c_str());
+	__android_log_print(lvl, "JS", "%s", source.c_str());
   }
   __android_log_print(lvl, "JS", "\n");
 }
