@@ -15,8 +15,8 @@
  * along with Adblock Plus.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ADBLOCKPLUS_WEB_REQUEST_ANDROID_H
-#define ADBLOCKPLUS_WEB_REQUEST_ANDROID_H
+#ifndef ADBLOCK_PLUS_WEB_REQUEST_ANDROID_H
+#define ADBLOCK_PLUS_WEB_REQUEST_ANDROID_H
 
 #include <jni.h>
 #include <AdblockPlus/WebRequest.h>
