@@ -205,7 +205,7 @@ JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_initialize(JNIEnv 
   // FIXME Should be taken from Manifest
   appInfo.version = "1.1.2";
   appInfo.name = "adblockplusandroid";
-  appInfo.platform = "android";
+  appInfo.application = "android";
 
   AdblockPlus::JsEnginePtr jsEngine(AdblockPlus::JsEngine::New(appInfo));
 
