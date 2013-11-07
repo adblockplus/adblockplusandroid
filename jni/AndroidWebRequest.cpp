@@ -242,7 +242,7 @@ AdblockPlus::ServerResponse AndroidWebRequest::GET(
       if (jniEnv->ExceptionCheck())
         throw JavaException(jniEnv->ExceptionOccurred());
 
-      if (jHeaderValue == NULL)
+      if (!jHeaderValue)
         break;
 
       std::string headerName = GetString(jniEnv, jHeaderName);
