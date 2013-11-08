@@ -66,6 +66,8 @@ public class Preferences extends SummarizedPreferences
 
   private static ProxyService proxyService = null;
 
+  private static boolean firstRunActionsPending = true;
+
   private RefreshableListPreference subscriptionList;
 
   private String subscriptionSummary;
@@ -139,16 +141,15 @@ public class Preferences extends SummarizedPreferences
       current = subscriptions[0];
     }
 
-    boolean firstRun = false;
-    if (application.isFirstRun())
+    boolean firstRun = firstRunActionsPending && application.isFirstRun();
+    firstRunActionsPending = false;
+
+    if (firstRun && current != null)
     {
-      firstRun = true;
-      
-      if (current != null)
-      {
-        new AlertDialog.Builder(this).setTitle(R.string.app_name).setMessage(String.format(getString(R.string.msg_subscription_offer, current.title))).setIcon(android.R.drawable.ic_dialog_info)
-            .setPositiveButton(R.string.ok, null).create().show();
-      }
+      new AlertDialog.Builder(this).setTitle(R.string.app_name)
+          .setMessage(String.format(getString(R.string.msg_subscription_offer, current.title)))
+          .setIcon(android.R.drawable.ic_dialog_info)
+          .setPositiveButton(R.string.ok, null).create().show();
     }
 
     // Enable manual subscription refresh
