@@ -29,7 +29,9 @@ bool manualUpdate = false;
 
 extern "C"
 {
-  JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_initialize(JNIEnv *pEnv, jobject, jstring basepath);
+  JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_initialize(
+    JNIEnv *pEnv, jobject object, jstring basePath, jstring version,
+    jstring sdkVersion, jstring locale, jboolean developmentBuild);
   JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_release(JNIEnv *pEnv, jobject);
   JNIEXPORT jboolean JNICALL Java_org_adblockplus_android_ABPEngine_isFirstRun(JNIEnv *pEnv, jobject);
   JNIEXPORT jobjectArray JNICALL Java_org_adblockplus_android_ABPEngine_getListedSubscriptions(JNIEnv *pEnv, jobject);
@@ -192,20 +194,27 @@ void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved)
 {
 }
 
-JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_initialize(JNIEnv *pEnv, jobject pObject, jstring basepath)
+JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_initialize(
+  JNIEnv *pEnv, jobject pObject, jstring basePath, jstring version,
+  jstring sdkVersion, jstring locale, jboolean developmentBuild)
 {
   D(D_WARN, "nativeInitialize()");
   int status = pEnv->GetJavaVM(&globalJvm);
 
   jniObject = pEnv->NewGlobalRef(pObject);
 
-  const std::string path = GetString(pEnv, basepath);
-
   AdblockPlus::AppInfo appInfo;
-  // TODO Should be extracted from the manifest
-  appInfo.version = "1.1.2";
   appInfo.name = "adblockplusandroid";
+  appInfo.version = GetString(pEnv, version);
   appInfo.application = "android";
+  appInfo.applicationVersion = GetString(pEnv, sdkVersion);
+  appInfo.locale = GetString(pEnv, locale);
+  appInfo.developmentBuild = developmentBuild;
+
+  D(D_INFO, "AppInfo: name=%s, version=%s, application=%s, applicationVersion=%s, locale=%s, developmentBuild=%s",
+    appInfo.name.c_str(), appInfo.version.c_str(), appInfo.application.c_str(),
+    appInfo.applicationVersion.c_str(), appInfo.locale.c_str(),
+    appInfo.developmentBuild ? "true" : "false");
 
   AdblockPlus::JsEnginePtr jsEngine(AdblockPlus::JsEngine::New(appInfo));
 
@@ -213,7 +222,7 @@ JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_initialize(JNIEnv 
   AndroidLogSystem* androidLogSystem = new AndroidLogSystem();
   AndroidWebRequest* androidWebRequest = new AndroidWebRequest(globalJvm);
 
-  defaultFileSystem->SetBasePath(path);
+  defaultFileSystem->SetBasePath(GetString(pEnv, basePath));
   jsEngine->SetLogSystem(AdblockPlus::LogSystemPtr(androidLogSystem));
   jsEngine->SetFileSystem(AdblockPlus::FileSystemPtr(defaultFileSystem));
   jsEngine->SetWebRequest(AdblockPlus::WebRequestPtr(androidWebRequest));
