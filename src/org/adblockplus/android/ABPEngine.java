@@ -24,7 +24,11 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Build.VERSION;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 public class ABPEngine
 {
@@ -36,7 +40,20 @@ public class ABPEngine
   public ABPEngine(Context context, String basePath)
   {
     this.context = context;
-    initialize(basePath);
+    String version;
+    try
+    {
+      final PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+      version = info.versionName + "." + info.versionCode;
+    } catch (NameNotFoundException e)
+    {
+      Log.e(TAG, "Failed to get the application version number", e);
+      version = "0";
+    }
+    final String sdkVersion = String.valueOf(VERSION.SDK_INT);
+    final String locale = context.getResources().getConfiguration().locale.toString();
+    final boolean developmentBuild = !context.getResources().getBoolean(R.bool.def_release);
+    initialize(basePath, version, sdkVersion, locale, developmentBuild);
   }
 
   public void onFilterChanged(String url, String status, long time)
@@ -55,7 +72,7 @@ public class ABPEngine
     notificationManager.notify(NOTIFICATION_ID, notification);
   }
   
-  private native void initialize(String basePath);
+  private native void initialize(String basePath, String version, String sdkVersion, String locale, boolean developmentBuild);
 
   public native void release();
   
