@@ -27,7 +27,9 @@ import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
@@ -275,12 +277,31 @@ public class RequestHandler extends BaseRequestHandler
           size = Integer.MAX_VALUE;
         }
 
+        String charsetName = "utf-8";
+        final String contentType = request.responseHeaders.get("Content-Type");
+        if (contentType != null)
+        {
+          final Matcher matcher = Pattern.compile("charset=([^;]*)").matcher(contentType);
+          if (matcher.matches())
+          {
+            try
+            {
+              final String extractedCharsetName = matcher.group(0);
+              Charset.forName(extractedCharsetName);
+              charsetName = extractedCharsetName;
+            }
+            catch (IllegalArgumentException e)
+            {
+              Log.e(prefix, "Unsupported site charset, falling back to " + charsetName, e);
+            }
+          }
+        }
+
         request.sendHeaders(-1, null, -1);
 
         byte[] buf = new byte[Math.min(4096, size)];
 
         boolean sent = selectors == null;
-        // TODO Do we need to set encoding here?
         BoyerMoore matcher = new BoyerMoore("<html".getBytes());
 
         while (size > 0)
@@ -305,8 +326,7 @@ public class RequestHandler extends BaseRequestHandler
                 int m = matches.get(0);
                 out.write(buf, 0, m);
                 out.write("<style type=\"text/css\">\n".getBytes());
-                // TODO Do we need to set encoding here?
-                out.write(StringUtils.join(selectors, ",\r\n").getBytes());
+                out.write(StringUtils.join(selectors, ",\r\n").getBytes(charsetName));
                 out.write("{ display: none !important }</style>\n".getBytes());
                 out.write(buf, m, count - m);
                 sent = true;
