@@ -252,7 +252,6 @@ AdblockPlus::ServerResponse AndroidWebRequest::GET(
       headerValue = TrimString(headerValue);
 
       std::transform(headerName.begin(), headerName.end(), headerName.begin(), ::tolower);
-      std::transform(headerValue.begin(), headerValue.end(), headerValue.begin(), ::tolower);
 
       result.responseHeaders.push_back(std::pair<std::string, std::string>(headerName, headerValue));
 
