@@ -5,6 +5,8 @@
   <string name="crash_name">Crash occurred</string>
   <string name="configuration_name">Configuration information</string>
   <string name="proxysettings_name">Proxy configuration</string>
+  <string name="install_name">Adblock Plus has been installed</string>
+  <string name="acceptableads_name">Acceptable Ads in Adblock Plus</string>
   
   <string name="notif_wifi">Ads are blocked on WiFi connection</string>
   <string name="notif_wifi_nofiltering">Allowing ads on WiFi connection</string>
@@ -16,7 +18,8 @@
   <string name="crash_dialog_comment_prompt">You might add your comments about the problem below:</string>
 
   <string name="msg_crash_submission_failure">Failed to submit crash report, will try again later.</string>
-  <string name="msg_subscription_offer">We have selected a suitable subscription for you: \'%s\'. You can change it at any time in application settings.</string>
+  <string name="msg_subscription_offer">A subscription has been selected based on your language: \'%s\'. &lt;a&gt;Acceptable Ads&lt;/a&gt; have been enabled. You can change this in the settings.</string>
+  <string name="msg_acceptable_ads">Adblock Plus now supports &lt;a&gt;Acceptable Ads&lt;/a&gt;, and has automatically enabled them. You can disable them in the settings.</string>
   <string name="msg_notraffic">It seems that no traffic is passing through application.</string>
   <string name="msg_configuration">Adblock Plus can not change the proxy settings on your device, please configure it manually.</string>
   <string name="msg_badport">Bad port value</string>
@@ -60,6 +63,9 @@
   <string name="pref_proxyenabled_title">Proxy</string>
   <string name="pref_proxyenabled_summary_on">Adblock proxy is enabled</string>
   <string name="pref_proxyenabled_summary_off">Adblock proxy is disabled</string>
+  <string name="pref_acceptableads_title">Acceptable Ads</string>
+  <string name="pref_acceptableads_summary_on">Allow some non-intrusive advertising</string>
+  <string name="pref_acceptableads_summary_off">Block all advertising</string>
   <string name="pref_startatboot_title">Start at boot</string>
   <string name="pref_startatboot_summary_on">Adblock Plus will start in background automatically if it is enabled</string>
   <string name="pref_startatboot_summary_off">Adblock Plus needs to be started manually after boot</string>
