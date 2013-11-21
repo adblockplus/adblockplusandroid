@@ -101,6 +101,11 @@ public class Preferences extends SummarizedPreferences
     {
       copyAssets();
     }
+    
+    // Set Acceptable Ads FAQ link
+    HelpfulCheckBoxPreference acceptableAdsCheckBox = (HelpfulCheckBoxPreference) findPreference(getString(R.string.pref_acceptableads));
+    // TODO Set proper url
+    acceptableAdsCheckBox.setHelpUrl("https://adblockplus.org/en/acceptable-ads");
   }
 
   @Override
@@ -378,6 +383,11 @@ public class Preferences extends SummarizedPreferences
         // If user disabled filtering disable proxy only if it was autoconfigured
         stopService(new Intent(this, ProxyService.class));
       }
+    }
+    else if (getString(R.string.pref_acceptableads).equals(key))
+    {
+      boolean enabled = sharedPreferences.getBoolean(key, false);
+      application.setAcceptableAdsEnabled(enabled);
     }
     else if (getString(R.string.pref_subscription).equals(key))
     {
