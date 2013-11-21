@@ -275,6 +275,16 @@ public class AdblockPlus extends Application
     abpEngine.actualizeSubscriptionStatus(url);
   }
 
+
+  /**
+   * Enables or disables Acceptable Ads
+   */
+  public void setAcceptableAdsEnabled(boolean enabled)
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
   /**
    * Returns ElemHide selectors for domain.
    *
