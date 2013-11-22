@@ -381,10 +381,6 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     if (proxy != null)
       proxy.close();
 
-    // TODO Do we have to check current state?
-    // Stop engine if not in interactive mode
-    AdblockPlus.getApplication().stopEngine(false);
-
     // Release service lock
     stopForeground(true);
 
