@@ -20,19 +20,60 @@
 #include "Utils.h"
 #include "debug.h"
 
-struct JavaException : public std::exception
+namespace
 {
-  jthrowable ex;
-
-  JavaException(jthrowable e) : ex(e)
+  std::string ExtractExceptionMessage(JNIEnv* env, jthrowable throwable)
   {
+    jclass throwableClass = env->FindClass("java/lang/Throwable");
+    jmethodID throwableToStringMethodId = env->GetMethodID(throwableClass, "toString", "()Ljava/lang/String;");
+    jstring javaMessage = static_cast<jstring>(env->CallObjectMethod(throwable, throwableToStringMethodId));
+    return "Java exception: " + GetString(env, javaMessage);
   }
 
-  const char* what() const throw()
+  class JavaException : public std::exception
   {
-    return "Java Exception";
+  public:
+    JavaException(JNIEnv* env)
+      : env(env), throwable(env->ExceptionOccurred())
+    {
+      env->ExceptionClear();
+      message = ExtractExceptionMessage(env, throwable);
+    }
+
+    virtual ~JavaException() throw()
+    {
+    }
+
+    const char* what() const throw()
+    {
+      return message.c_str();
+    }
+
+    bool IsInstanceOf(const std::string& className) const
+    {
+      jclass clazz = env->FindClass(className.c_str());
+      if (!clazz)
+        return false;
+      bool isInstance = env->IsInstanceOf(throwable, clazz);
+      env->DeleteLocalRef(clazz);
+      return isInstance;
+    }
+
+  private:
+    JNIEnv* env;
+    jthrowable throwable;
+    std::string message;
+  };
+
+  int64_t ExceptionToStatus(const JavaException& exception)
+  {
+    if (exception.IsInstanceOf("java/net/MalformedURLException"))
+      return AdblockPlus::WebRequest::NS_ERROR_MALFORMED_URI;
+    if (exception.IsInstanceOf("java/net/SocketTimeoutException"))
+      return AdblockPlus::WebRequest::NS_ERROR_NET_TIMEOUT;
+    return AdblockPlus::WebRequest::NS_ERROR_FAILURE;
   }
-};
+}
 
 AndroidWebRequest::AndroidWebRequest(JavaVM*& gJvm) : globalJvm(gJvm)
 {
@@ -104,9 +145,6 @@ AdblockPlus::ServerResponse AndroidWebRequest::GET(
   }
 
   AdblockPlus::ServerResponse result;
-  result.status = NS_ERROR_FAILURE;
-  result.responseStatus = 0;
-
   try
   {
     // URL jUrl = new URL(url)
@@ -114,19 +152,19 @@ AdblockPlus::ServerResponse AndroidWebRequest::GET(
 
     jobject jUrl = jniEnv->NewObject(jUrlClass, jUrlConstructorID, jUrlStr);
     if (jniEnv->ExceptionCheck())
-      throw JavaException(jniEnv->ExceptionOccurred());
+      throw JavaException(jniEnv);
     jniEnv->DeleteLocalRef(jUrlStr);
 
     // HttpURLConnection connection = (HttpURLConnection) jUrl.openConnection();
     jobject jConnection = jniEnv->CallObjectMethod(jUrl, jUrlOpenConnectionID);
     if (jniEnv->ExceptionCheck())
-      throw JavaException(jniEnv->ExceptionOccurred());
+      throw JavaException(jniEnv);
 
     // connection.setRequestMethod("GET");
     jstring jMethod = jniEnv->NewStringUTF("GET");
     jniEnv->CallVoidMethod(jConnection, jConnectionSetMethodID, jMethod);
     if (jniEnv->ExceptionCheck())
-      throw JavaException(jniEnv->ExceptionOccurred());
+      throw JavaException(jniEnv);
     jniEnv->DeleteLocalRef(jMethod);
 
     for (int i = 0; i < requestHeaders.size(); i++)
@@ -136,7 +174,7 @@ AdblockPlus::ServerResponse AndroidWebRequest::GET(
       jstring jValue = jniEnv->NewStringUTF(requestHeaders[i].second.c_str());
       jniEnv->CallVoidMethod(jConnection, jConnectionSetRequestPropertyID, jHeader, jValue);
       if (jniEnv->ExceptionCheck())
-        throw JavaException(jniEnv->ExceptionOccurred());
+        throw JavaException(jniEnv);
       jniEnv->DeleteLocalRef(jHeader);
       jniEnv->DeleteLocalRef(jValue);
     }
@@ -144,26 +182,26 @@ AdblockPlus::ServerResponse AndroidWebRequest::GET(
     // connection.connect();
     jniEnv->CallVoidMethod(jConnection, jConnectionConnectID);
     if (jniEnv->ExceptionCheck())
-      throw JavaException(jniEnv->ExceptionOccurred());
+      throw JavaException(jniEnv);
 
     // int lenghtOfFile = connection.getContentLength();
     jint lenghtOfFile = jniEnv->CallIntMethod(jConnection, jConnectionGetContentLengthID);
     if (jniEnv->ExceptionCheck())
-      throw JavaException(jniEnv->ExceptionOccurred());
+      throw JavaException(jniEnv);
 
     D(D_WARN, "Size: %d", lenghtOfFile);
 
     // result.responseStatus = connection.getResponseCode();
     result.responseStatus = jniEnv->CallIntMethod(jConnection, jConnectionGetResponseCodeID);
     if (jniEnv->ExceptionCheck())
-      throw JavaException(jniEnv->ExceptionOccurred());
+      throw JavaException(jniEnv);
 
     /* Read response data */
 
     // String jEncoding = connection.getContentEncoding();
     jstring jEncoding = (jstring) jniEnv->CallObjectMethod(jConnection, jConnectionGetContentEncodingID);
     if (jniEnv->ExceptionCheck())
-      throw JavaException(jniEnv->ExceptionOccurred());
+      throw JavaException(jniEnv);
 
     if (jEncoding == NULL)
       jEncoding = jniEnv->NewStringUTF("utf-8");
@@ -171,19 +209,19 @@ AdblockPlus::ServerResponse AndroidWebRequest::GET(
     // InputStream jis = connection.getInputStream();
     jobject jis = jniEnv->CallObjectMethod(jConnection, jConnectionGetInputStreamID);
     if (jniEnv->ExceptionCheck())
-      throw JavaException(jniEnv->ExceptionOccurred());
+      throw JavaException(jniEnv);
 
     // InputStreamReader jisr = new InputStreamReader(jis, jEncoding);
     jobject jisr = jniEnv->NewObject(jInputStreamReaderClass, jInputStreamReaderConstructorID, jis, jEncoding);
     if (jniEnv->ExceptionCheck())
-      throw JavaException(jniEnv->ExceptionOccurred());
+      throw JavaException(jniEnv);
 
     jniEnv->DeleteLocalRef(jEncoding);
 
     // BufferedReader jin = new BufferedReader(jisr);
     jobject jin = jniEnv->NewObject(jBufferedReaderClass, jBufferedReaderConstructorID, jisr);
     if (jniEnv->ExceptionCheck())
-      throw JavaException(jniEnv->ExceptionOccurred());
+      throw JavaException(jniEnv);
 
     // char[] jBuffer = new char[0x10000];
     jcharArray jBuffer = jniEnv->NewCharArray(0x10000);
@@ -191,7 +229,7 @@ AdblockPlus::ServerResponse AndroidWebRequest::GET(
     // StringBuilder jout = new StringBuilder();
     jobject jout = jniEnv->NewObject(jStringBuilderClass, jStringBuilderConstructorID);
     if (jniEnv->ExceptionCheck())
-      throw JavaException(jniEnv->ExceptionOccurred());
+      throw JavaException(jniEnv);
 
     jlong total = 0;
     jint read;
@@ -203,14 +241,14 @@ AdblockPlus::ServerResponse AndroidWebRequest::GET(
       // read = jin.read(buffer, 0, buffer.length);
       read = jniEnv->CallIntMethod(jin, jBufferedReaderReadID, jBuffer, 0, jBufferLength);
       if (jniEnv->ExceptionCheck())
-        throw JavaException(jniEnv->ExceptionOccurred());
+        throw JavaException(jniEnv);
 
       if (read > 0)
       {
         // jout.append(buffer, 0, read);
         jniEnv->CallObjectMethod(jout, jStringBuilderAppendID, jBuffer, 0, jBufferLength);
         if (jniEnv->ExceptionCheck())
-          throw JavaException(jniEnv->ExceptionOccurred());
+          throw JavaException(jniEnv);
 
         total += read;
       }
@@ -220,14 +258,14 @@ AdblockPlus::ServerResponse AndroidWebRequest::GET(
     // String jData = out.toString();
     jstring jData = (jstring) jniEnv->CallObjectMethod(jout, jStringBuilderToStringID);
     if (jniEnv->ExceptionCheck())
-      throw JavaException(jniEnv->ExceptionOccurred());
+      throw JavaException(jniEnv);
 
     result.responseText = GetString(jniEnv, jData);
 
     // jin.close();
     jniEnv->CallVoidMethod(jin, jBufferedReaderCloseID);
     if (jniEnv->ExceptionCheck())
-      throw JavaException(jniEnv->ExceptionOccurred());
+      throw JavaException(jniEnv);
 
     jint i = 0;
     while (true)
@@ -235,12 +273,12 @@ AdblockPlus::ServerResponse AndroidWebRequest::GET(
       // String jHeaderName = connection.getHeaderFieldKey(i)
       jstring jHeaderName = (jstring) jniEnv->CallObjectMethod(jConnection, jConnectionGetHeaderFieldKeyID, i);
       if (jniEnv->ExceptionCheck())
-        throw JavaException(jniEnv->ExceptionOccurred());
+        throw JavaException(jniEnv);
 
       // String jHeaderValue = connection.getHeaderField(i)
       jstring jHeaderValue = (jstring) jniEnv->CallObjectMethod(jConnection, jConnectionGetHeaderFieldID, i);
       if (jniEnv->ExceptionCheck())
-        throw JavaException(jniEnv->ExceptionOccurred());
+        throw JavaException(jniEnv);
 
       if (!jHeaderValue)
         break;
@@ -259,19 +297,13 @@ AdblockPlus::ServerResponse AndroidWebRequest::GET(
     }
     D(D_WARN, "Finished downloading");
 
-    result.status = AdblockPlus::DefaultWebRequest::NS_OK;
+    result.status = NS_OK;
   }
   catch(JavaException& e)
   {
-    jniEnv->ExceptionClear();
-    jclass jThrowableClass = jniEnv->FindClass("java/lang/Throwable");
-    jmethodID jThrowableToStringID = jniEnv->GetMethodID(jThrowableClass, "toString", "()Ljava/lang/String;");
-    jstring jMsg = (jstring) jniEnv->CallObjectMethod(e.ex, jThrowableToStringID);
-    const char* msg = jniEnv->GetStringUTFChars(jMsg, 0);
-    D(D_ERROR, "Java Exception: %s", msg);
-    jniEnv->ReleaseStringUTFChars(jMsg, msg);
-    jniEnv->DeleteLocalRef(jMsg);
-    result.status = AdblockPlus::DefaultWebRequest::NS_ERROR_FAILURE;
+    result.responseStatus = 0;
+    result.status = ExceptionToStatus(e);
+    D(D_ERROR, "%s", e.what());
   }
   catch (const std::exception& e)
   {
