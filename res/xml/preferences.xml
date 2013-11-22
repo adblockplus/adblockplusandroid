@@ -11,6 +11,12 @@
         android:key="@string/pref_subscription"
         android:title="@string/pref_subscription_title" />
 
+    <org.adblockplus.android.HelpfulCheckBoxPreference
+        android:key="@string/pref_acceptableads"
+        android:summaryOff="@string/pref_acceptableads_summary_off"
+        android:summaryOn="@string/pref_acceptableads_summary_on"
+        android:title="@string/pref_acceptableads_title" />
+
     <CheckBoxPreference
         android:key="@string/pref_hideicon"
         android:summaryOff="@string/pref_hideicon_summary_off"

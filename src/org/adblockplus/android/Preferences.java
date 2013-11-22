@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import org.jraf.android.backport.switchwidget.SwitchPreference;
 
@@ -67,6 +66,8 @@ public class Preferences extends SummarizedPreferences
 
   private static ProxyService proxyService = null;
 
+  private static boolean firstRunActionsPending = true;
+
   private RefreshableListPreference subscriptionList;
 
   private String subscriptionSummary;
@@ -100,14 +101,25 @@ public class Preferences extends SummarizedPreferences
     {
       copyAssets();
     }
+    
+    // Set Acceptable Ads FAQ link
+    HelpfulCheckBoxPreference acceptableAdsCheckBox = (HelpfulCheckBoxPreference) findPreference(getString(R.string.pref_acceptableads));
+    // TODO Set proper url
+    acceptableAdsCheckBox.setHelpUrl("https://adblockplus.org/en/acceptable-ads");
+  }
 
+  @Override
+  protected void onStart()
+  {
+    super.onStart();
     AdblockPlus application = AdblockPlus.getApplication();
+    application.startEngine();
 
     // Initialize subscription list
     subscriptionList = (RefreshableListPreference) findPreference(getString(R.string.pref_subscription));
-    List<Subscription> subscriptions = application.getSubscriptions();
-    String[] entries = new String[subscriptions.size()];
-    String[] entryValues = new String[subscriptions.size()];
+    Subscription[] subscriptions = application.getRecommendedSubscriptions();
+    String[] entries = new String[subscriptions.length];
+    String[] entryValues = new String[subscriptions.length];
     int i = 0;
     for (Subscription subscription : subscriptions)
     {
@@ -120,15 +132,6 @@ public class Preferences extends SummarizedPreferences
   }
 
   @Override
-  protected void onStart()
-  {
-    super.onStart();
-    AdblockPlus application = AdblockPlus.getApplication();
-    application.startEngine();
-    application.startInteractive();
-  }
-
-  @Override
   public void onResume()
   {
     super.onResume();
@@ -136,24 +139,22 @@ public class Preferences extends SummarizedPreferences
 
     final AdblockPlus application = AdblockPlus.getApplication();
 
-    boolean firstRun = false;
-
-    // Get current subscription
-    String current = prefs.getString(getString(R.string.pref_subscription), (String) null);
-
-    // If there is no current subscription autoselect one
-    if (current == null)
+    Subscription current = null;
+    Subscription[] subscriptions = application.getListedSubscriptions();
+    if (subscriptions.length > 0)
     {
-      firstRun = true;
-      Subscription offer = application.offerSubscription();
-      current = offer.url;
-      if (offer != null)
-      {
-        subscriptionList.setValue(offer.url);
-        application.setSubscription(offer);
-        new AlertDialog.Builder(this).setTitle(R.string.app_name).setMessage(String.format(getString(R.string.msg_subscription_offer, offer.title))).setIcon(android.R.drawable.ic_dialog_info)
-            .setPositiveButton(R.string.ok, null).create().show();
-      }
+      current = subscriptions[0];
+    }
+
+    boolean firstRun = firstRunActionsPending && application.isFirstRun();
+    firstRunActionsPending = false;
+
+    if (firstRun && current != null)
+    {
+      new AlertDialog.Builder(this).setTitle(R.string.app_name)
+          .setMessage(String.format(getString(R.string.msg_subscription_offer, current.title)))
+          .setIcon(android.R.drawable.ic_dialog_info)
+          .setPositiveButton(R.string.ok, null).create().show();
     }
 
     // Enable manual subscription refresh
@@ -162,7 +163,7 @@ public class Preferences extends SummarizedPreferences
       @Override
       public void onClick(View v)
       {
-        application.refreshSubscription();
+        application.refreshSubscriptions();
       }
     });
 
@@ -177,26 +178,19 @@ public class Preferences extends SummarizedPreferences
     registerReceiver(receiver, new IntentFilter(ProxyService.BROADCAST_STATE_CHANGED));
     registerReceiver(receiver, new IntentFilter(ProxyService.BROADCAST_PROXY_FAILED));
 
-    final String url = current;
-
-    // Initialize subscription verification
-    (new Thread()
-    {
-      @Override
-      public void run()
-      {
-        if (!application.verifySubscriptions())
-        {
-          Subscription subscription = application.getSubscription(url);
-          application.setSubscription(subscription);
-        }
-      }
-    }).start();
-
     // Update service and UI state according to user settings
+    if (current != null)
+    {
+      subscriptionList.setValue(current.url);
+      application.actualizeSubscriptionStatus(current.url);
+    }
     boolean enabled = prefs.getBoolean(getString(R.string.pref_enabled), false);
     boolean proxyenabled = prefs.getBoolean(getString(R.string.pref_proxyenabled), true);
     boolean autoconfigured = prefs.getBoolean(getString(R.string.pref_proxyautoconfigured), false);
+
+    // This is weird but UI does not update on back button (when returning from advanced preferences)
+    ((SwitchPreference) findPreference(getString(R.string.pref_enabled))).setChecked(enabled);
+
     if (enabled || firstRun)
       setFilteringEnabled(true);
     if (enabled || firstRun || (proxyenabled && !autoconfigured))
@@ -229,9 +223,8 @@ public class Preferences extends SummarizedPreferences
   {
     super.onStop();
     AdblockPlus application = AdblockPlus.getApplication();
-    application.stopInteractive();
     if (!application.isFilteringEnabled())
-      application.stopEngine(true);
+      application.stopEngine();
   }
 
   @Override
@@ -391,11 +384,16 @@ public class Preferences extends SummarizedPreferences
         stopService(new Intent(this, ProxyService.class));
       }
     }
+    else if (getString(R.string.pref_acceptableads).equals(key))
+    {
+      boolean enabled = sharedPreferences.getBoolean(key, false);
+      application.setAcceptableAdsEnabled(enabled);
+    }
     else if (getString(R.string.pref_subscription).equals(key))
     {
-      String current = sharedPreferences.getString(key, null);
-      Subscription subscription = application.getSubscription(current);
-      application.setSubscription(subscription);
+      String url = sharedPreferences.getString(key, null);
+      if (url != null)
+        application.setSubscription(url);
     }
     else if (getString(R.string.pref_hideicon).equals(key))
     {
@@ -457,7 +455,8 @@ public class Preferences extends SummarizedPreferences
       }
       if (action.equals(AdblockPlus.BROADCAST_SUBSCRIPTION_STATUS))
       {
-        final String text = extra.getString("text");
+        //TODO Should check if url matches active subscription
+        final String text = extra.getString("status");
         final long time = extra.getLong("time");
         runOnUiThread(new Runnable()
         {

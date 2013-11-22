@@ -27,13 +27,16 @@ import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
 
 import org.adblockplus.ChunkedOutputStream;
 import org.adblockplus.android.AdblockPlus;
+import org.apache.commons.lang.StringUtils;
 import org.literateprograms.BoyerMoore;
 
 import sunlabs.brazil.server.Request;
@@ -98,32 +101,17 @@ public class RequestHandler extends BaseRequestHandler
   public boolean respond(Request request) throws IOException
   {
     boolean block = false;
-    String reqHost = null;
-    String refHost = null;
-
-    String referrer = request.getRequestHeader("referer");
 
     try
     {
-      reqHost = (new URL(request.url)).getHost();
-      if (referrer != null)
-        refHost = (new URL(referrer)).getHost();
-    }
-    catch (MalformedURLException e)
-    {
-      // We are transparent, it's not our deal if it's malformed.
-    }
-
-    try
-    {
-      block = application.matches(request.url, request.query, reqHost, refHost, request.getRequestHeader("accept"));
+      block = application.matches(request.url, request.query, request.getRequestHeader("referer"), request.getRequestHeader("accept"));
     }
     catch (Exception e)
     {
       Log.e(prefix, "Filter error", e);
     }
 
-    request.log(Server.LOG_LOG, prefix, block + ": " + request.url + " ("+ refHost +")");
+    request.log(Server.LOG_LOG, prefix, block + ": " + request.url);
 
     int count = request.server.requestCount;
     if (shouldLogHeaders)
@@ -210,9 +198,20 @@ public class RequestHandler extends BaseRequestHandler
       // Detect if we need to add ElemHide filters
       String type = request.responseHeaders.get("Content-Type");
 
-      String selectors = null;
+      String[] selectors = null;
       if (type != null && type.toLowerCase().startsWith("text/html"))
       {
+        String reqHost = "";
+
+        try
+        {
+          reqHost = (new URL(request.url)).getHost();
+        }
+        catch (MalformedURLException e)
+        {
+          // We are transparent, it's not our deal if it's malformed.
+        }
+
         selectors = application.getSelectorsForDomain(reqHost);
       }
       // If no filters are applicable just pass through the response
@@ -278,12 +277,31 @@ public class RequestHandler extends BaseRequestHandler
           size = Integer.MAX_VALUE;
         }
 
+        String charsetName = "utf-8";
+        final String contentType = request.responseHeaders.get("Content-Type");
+        if (contentType != null)
+        {
+          final Matcher matcher = Pattern.compile("charset=([^;]*)").matcher(contentType);
+          if (matcher.matches())
+          {
+            try
+            {
+              final String extractedCharsetName = matcher.group(0);
+              Charset.forName(extractedCharsetName);
+              charsetName = extractedCharsetName;
+            }
+            catch (IllegalArgumentException e)
+            {
+              Log.e(prefix, "Unsupported site charset, falling back to " + charsetName, e);
+            }
+          }
+        }
+
         request.sendHeaders(-1, null, -1);
 
         byte[] buf = new byte[Math.min(4096, size)];
 
         boolean sent = selectors == null;
-        // TODO Do we need to set encoding here?
         BoyerMoore matcher = new BoyerMoore("<html".getBytes());
 
         while (size > 0)
@@ -304,12 +322,12 @@ public class RequestHandler extends BaseRequestHandler
               List<Integer> matches = matcher.match(buf, 0, count);
               if (!matches.isEmpty())
               {
-                // TODO Do we need to set encoding here?
-                byte[] addon = selectors.getBytes();
                 // Add filters right before match
                 int m = matches.get(0);
                 out.write(buf, 0, m);
-                out.write(addon);
+                out.write("<style type=\"text/css\">\n".getBytes());
+                out.write(StringUtils.join(selectors, ",\r\n").getBytes(charsetName));
+                out.write("{ display: none !important }</style>\n".getBytes());
                 out.write(buf, m, count - m);
                 sent = true;
                 continue;
