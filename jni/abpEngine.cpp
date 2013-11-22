@@ -185,6 +185,22 @@ void UpdaterCallback(const std::string& error)
     globalJvm->DetachCurrentThread();
 }
 
+void ThrowJavaException(JNIEnv* env, const std::string& message)
+{
+  jclass exceptionClass = env->FindClass("java/lang/Exception");
+  env->ThrowNew(exceptionClass, message.c_str());
+}
+
+void ThrowJavaException(JNIEnv* env, const std::exception& e)
+{
+  ThrowJavaException(env, std::string("Exception from libadblockplus: ") + e.what());
+}
+
+void ThrowJavaException(JNIEnv* env)
+{
+  ThrowJavaException(env, "Unknown exception from libadblockplus");
+}
+
 jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
 {
   return JNI_VERSION_1_6;
@@ -199,61 +215,107 @@ JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_initialize(
   jstring sdkVersion, jstring locale, jboolean developmentBuild)
 {
   D(D_WARN, "nativeInitialize()");
-  int status = pEnv->GetJavaVM(&globalJvm);
+  try
+  {
+    int status = pEnv->GetJavaVM(&globalJvm);
 
-  jniObject = pEnv->NewGlobalRef(pObject);
+    jniObject = pEnv->NewGlobalRef(pObject);
 
-  AdblockPlus::AppInfo appInfo;
-  appInfo.name = "adblockplusandroid";
-  appInfo.version = GetString(pEnv, version);
-  appInfo.application = "android";
-  appInfo.applicationVersion = GetString(pEnv, sdkVersion);
-  appInfo.locale = GetString(pEnv, locale);
-  appInfo.developmentBuild = developmentBuild;
+    AdblockPlus::AppInfo appInfo;
+    appInfo.name = "adblockplusandroid";
+    appInfo.version = GetString(pEnv, version);
+    appInfo.application = "android";
+    appInfo.applicationVersion = GetString(pEnv, sdkVersion);
+    appInfo.locale = GetString(pEnv, locale);
+    appInfo.developmentBuild = developmentBuild;
 
-  D(D_INFO, "AppInfo: name=%s, version=%s, application=%s, applicationVersion=%s, locale=%s, developmentBuild=%s",
-    appInfo.name.c_str(), appInfo.version.c_str(), appInfo.application.c_str(),
-    appInfo.applicationVersion.c_str(), appInfo.locale.c_str(),
-    appInfo.developmentBuild ? "true" : "false");
+    D(D_INFO, "AppInfo: name=%s, version=%s, application=%s, applicationVersion=%s , locale=%s, developmentBuild=%s",
+      appInfo.name.c_str(), appInfo.version.c_str(), appInfo.application.c_str(),
+      appInfo.applicationVersion.c_str(), appInfo.locale.c_str(),
+      appInfo.developmentBuild ? "true" : "false");
 
-  AdblockPlus::JsEnginePtr jsEngine(AdblockPlus::JsEngine::New(appInfo));
+    AdblockPlus::JsEnginePtr jsEngine(AdblockPlus::JsEngine::New(appInfo));
 
-  AdblockPlus::DefaultFileSystem* defaultFileSystem = new AdblockPlus::DefaultFileSystem();
-  AndroidLogSystem* androidLogSystem = new AndroidLogSystem();
-  AndroidWebRequest* androidWebRequest = new AndroidWebRequest(globalJvm);
+    AdblockPlus::DefaultFileSystem* defaultFileSystem = new AdblockPlus::DefaultFileSystem();
+    AndroidLogSystem* androidLogSystem = new AndroidLogSystem();
+    AndroidWebRequest* androidWebRequest = new AndroidWebRequest(globalJvm);
 
-  defaultFileSystem->SetBasePath(GetString(pEnv, basePath));
-  jsEngine->SetLogSystem(AdblockPlus::LogSystemPtr(androidLogSystem));
-  jsEngine->SetFileSystem(AdblockPlus::FileSystemPtr(defaultFileSystem));
-  jsEngine->SetWebRequest(AdblockPlus::WebRequestPtr(androidWebRequest));
-  jsEngine->SetEventCallback("updateAvailable", std::tr1::bind(&UpdateAvailableCallback, std::tr1::placeholders::_1));
+    defaultFileSystem->SetBasePath(GetString(pEnv, basePath));
+    jsEngine->SetLogSystem(AdblockPlus::LogSystemPtr(androidLogSystem));
+    jsEngine->SetFileSystem(AdblockPlus::FileSystemPtr(defaultFileSystem));
+    jsEngine->SetWebRequest(AdblockPlus::WebRequestPtr(androidWebRequest));
+    jsEngine->SetEventCallback("updateAvailable", std::tr1::bind(&UpdateAvailableCallback, std::tr1::placeholders::_1));
 
-  filterEngine = new AdblockPlus::FilterEngine(jsEngine);
-  filterEngine->SetFilterChangeCallback(&FilterChangedCallback);
+    filterEngine = new AdblockPlus::FilterEngine(jsEngine);
+    filterEngine->SetFilterChangeCallback(&FilterChangedCallback);
+  }
+  catch (const std::exception& e)
+  {
+    ThrowJavaException(pEnv, e);
+  }
+  catch (...)
+  {
+    ThrowJavaException(pEnv);
+  }
 }
 
 JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_release(JNIEnv *pEnv, jobject)
 {
   D(D_WARN, "nativeRelease()");
-  AdblockPlus::JsEnginePtr jsEngine = filterEngine->GetJsEngine();
-  jsEngine->RemoveEventCallback("updateAvailable");
-  filterEngine->RemoveFilterChangeCallback();
-  delete filterEngine;
-  pEnv->DeleteGlobalRef(jniObject);
-  jniObject = NULL;
-  globalJvm = NULL;
+  try
+  {
+    AdblockPlus::JsEnginePtr jsEngine = filterEngine->GetJsEngine();
+    jsEngine->RemoveEventCallback("updateAvailable");
+    filterEngine->RemoveFilterChangeCallback();
+    delete filterEngine;
+    pEnv->DeleteGlobalRef(jniObject);
+    jniObject = NULL;
+    globalJvm = NULL;
+  }
+  catch (const std::exception& e)
+  {
+    ThrowJavaException(pEnv, e);
+  }
+  catch (...)
+  {
+    ThrowJavaException(pEnv);
+  }
 }
 
 JNIEXPORT jboolean JNICALL Java_org_adblockplus_android_ABPEngine_isFirstRun(JNIEnv *pEnv, jobject)
 {
-  return filterEngine->IsFirstRun() ? JNI_TRUE : JNI_FALSE;
+  try
+  {
+    return filterEngine->IsFirstRun() ? JNI_TRUE : JNI_FALSE;
+  }
+  catch (const std::exception& e)
+  {
+    ThrowJavaException(pEnv, e);
+  }
+  catch (...)
+  {
+    ThrowJavaException(pEnv);
+  }
+  return JNI_FALSE;
 }
 
 JNIEXPORT jobjectArray JNICALL Java_org_adblockplus_android_ABPEngine_getListedSubscriptions(JNIEnv *pEnv, jobject)
 {
   D(D_WARN, "getListedSubscriptions()");
-  const std::vector<AdblockPlus::SubscriptionPtr> subscriptions = filterEngine->GetListedSubscriptions();
-  return subscriptionsAsJavaArray(pEnv, subscriptions);
+  try
+  {
+    const std::vector<AdblockPlus::SubscriptionPtr> subscriptions = filterEngine->GetListedSubscriptions();
+    return subscriptionsAsJavaArray(pEnv, subscriptions);
+  }
+  catch (const std::exception& e)
+  {
+    ThrowJavaException(pEnv, e);
+  }
+  catch (...)
+  {
+    ThrowJavaException(pEnv);
+  }
+  return 0;
 }
 
 JNIEXPORT jobjectArray JNICALL Java_org_adblockplus_android_ABPEngine_getRecommendedSubscriptions(JNIEnv *pEnv, jobject)
@@ -266,95 +328,174 @@ JNIEXPORT jobjectArray JNICALL Java_org_adblockplus_android_ABPEngine_getRecomme
   }
   catch (const std::exception& e)
   {
-    D(D_ERROR, "Exception: %s", e.what());
+    ThrowJavaException(pEnv, e);
   }
   catch (...)
   {
-    D(D_ERROR, "Unknown exception");
+    ThrowJavaException(pEnv);
   }
-  return NULL;
+  return 0;
 }
 
 JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_addSubscription(JNIEnv *pEnv, jobject, jstring url)
 {
   D(D_WARN, "addSubscription()");
-  const std::string surl = GetString(pEnv, url);
-  AdblockPlus::SubscriptionPtr subscription = filterEngine->GetSubscription(surl);
-  subscription->AddToList();
+  try
+  {
+    const std::string surl = GetString(pEnv, url);
+    AdblockPlus::SubscriptionPtr subscription = filterEngine->GetSubscription(surl);
+    subscription->AddToList();
+  }
+  catch (const std::exception& e)
+  {
+    ThrowJavaException(pEnv, e);
+  }
+  catch (...)
+  {
+    ThrowJavaException(pEnv);
+  }
 }
 
 JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_removeSubscription(JNIEnv *pEnv, jobject, jstring url)
 {
   D(D_WARN, "removeSubscription()");
-  const std::string surl = GetString(pEnv, url);
-  AdblockPlus::SubscriptionPtr subscription = filterEngine->GetSubscription(surl);
-  if (subscription->IsListed())
+  try
   {
-    subscription->RemoveFromList();
+    const std::string surl = GetString(pEnv, url);
+    AdblockPlus::SubscriptionPtr subscription = filterEngine->GetSubscription(surl);
+    if (subscription->IsListed())
+    {
+      subscription->RemoveFromList();
+    }
+  }
+  catch (const std::exception& e)
+  {
+    ThrowJavaException(pEnv, e);
+  }
+  catch (...)
+  {
+    ThrowJavaException(pEnv);
   }
 }
 
 JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_refreshSubscription(JNIEnv *pEnv, jobject, jstring url)
 {
   D(D_WARN, "refreshSubscription()");
-  const std::string surl = GetString(pEnv, url);
-  AdblockPlus::SubscriptionPtr subscription = filterEngine->GetSubscription(surl);
-  subscription->UpdateFilters();
+  try
+  {
+    const std::string surl = GetString(pEnv, url);
+    AdblockPlus::SubscriptionPtr subscription = filterEngine->GetSubscription(surl);
+    subscription->UpdateFilters();
+  }
+  catch (const std::exception& e)
+  {
+    ThrowJavaException(pEnv, e);
+  }
+  catch (...)
+  {
+    ThrowJavaException(pEnv);
+  }
 }
 
 JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_actualizeSubscriptionStatus(JNIEnv *pEnv, jobject, jstring url)
 {
   D(D_WARN, "actualizeSubscriptionStatus()");
-  const std::string surl = GetString(pEnv, url);
-  AdblockPlus::SubscriptionPtr subscription = filterEngine->GetSubscription(surl);
-  UpdateSubscriptionStatus(subscription);
+  try
+  {
+    const std::string surl = GetString(pEnv, url);
+    AdblockPlus::SubscriptionPtr subscription = filterEngine->GetSubscription(surl);
+    UpdateSubscriptionStatus(subscription);
+  }
+  catch (const std::exception& e)
+  {
+    ThrowJavaException(pEnv, e);
+  }
+  catch (...)
+  {
+    ThrowJavaException(pEnv);
+  }
 }
 
 JNIEXPORT jboolean JNICALL Java_org_adblockplus_android_ABPEngine_matches(JNIEnv *pEnv, jobject, jstring url, jstring contentType, jstring documentUrl)
 {
-  const std::string surl = GetString(pEnv, url);
-  const std::string stype = GetString(pEnv, contentType);
-  const std::string sdoc = GetString(pEnv, documentUrl);
+  try
+  {
+    const std::string surl = GetString(pEnv, url);
+    const std::string stype = GetString(pEnv, contentType);
+    const std::string sdoc = GetString(pEnv, documentUrl);
 
-  AdblockPlus::FilterPtr filter = filterEngine->Matches(surl, stype, sdoc);
+    AdblockPlus::FilterPtr filter = filterEngine->Matches(surl, stype, sdoc);
 
-  if (! filter)
-    return JNI_FALSE;
+    if (! filter)
+      return JNI_FALSE;
 
-  // hack: if there is no referrer block only if filter is domain-specific
-  // (to re-enable in-app ads blocking, proposed on 12.11.2012 Monday meeting)
-  // documentUrl contains the referrer (Android application special case)
-  if (sdoc.empty() && (filter->GetProperty("text")->AsString()).find("||") != std::string::npos)
-    return JNI_FALSE;
+    // hack: if there is no referrer block only if filter is domain-specific
+    // (to re-enable in-app ads blocking, proposed on 12.11.2012 Monday meeting)
+    // documentUrl contains the referrer (Android application special case)
+    if (sdoc.empty() && (filter->GetProperty("text")->AsString()).find("||") != std::string::npos)
+      return JNI_FALSE;
 
-  return filter->GetType() == AdblockPlus::Filter::TYPE_EXCEPTION ? JNI_FALSE : JNI_TRUE;
+    return filter->GetType() == AdblockPlus::Filter::TYPE_EXCEPTION ? JNI_FALSE : JNI_TRUE;
+  }
+  catch (const std::exception& e)
+  {
+    ThrowJavaException(pEnv, e);
+  }
+  catch (...)
+  {
+    ThrowJavaException(pEnv);
+  }
+  return JNI_FALSE;
 }
 
 JNIEXPORT jobjectArray JNICALL Java_org_adblockplus_android_ABPEngine_getSelectorsForDomain(JNIEnv *pEnv, jobject, jstring domain)
 {
-  const std::string sdomain = GetString(pEnv, domain);
-  const std::vector<std::string> selectors = filterEngine->GetElementHidingSelectors(sdomain);
-
-  static jclass cls = reinterpret_cast<jclass>(pEnv->NewGlobalRef(pEnv->FindClass("java/lang/String")));
-
-  D(D_WARN, "Selectors: %d", selectors.size());
-  const jobjectArray ret = (jobjectArray) pEnv->NewObjectArray(selectors.size(), cls, NULL);
-
-  int i = 0;
-  for (std::vector<std::string>::const_iterator it = selectors.begin();
-       it != selectors.end(); it++)
+  try
   {
-    jstring selector = pEnv->NewStringUTF((*it).c_str());
-    pEnv->SetObjectArrayElement(ret, i, selector);
-    pEnv->DeleteLocalRef(selector);
-    i++;
-  }
+    const std::string sdomain = GetString(pEnv, domain);
+    const std::vector<std::string> selectors = filterEngine->GetElementHidingSelectors(sdomain);
 
-  return ret;
+    static jclass cls = reinterpret_cast<jclass>(pEnv->NewGlobalRef(pEnv->FindClass("java/lang/String")));
+
+    D(D_WARN, "Selectors: %d", selectors.size());
+    const jobjectArray ret = (jobjectArray) pEnv->NewObjectArray(selectors.size(), cls, NULL);
+
+    int i = 0;
+    for (std::vector<std::string>::const_iterator it = selectors.begin();
+         it != selectors.end(); it++)
+    {
+      jstring selector = pEnv->NewStringUTF((*it).c_str());
+      pEnv->SetObjectArrayElement(ret, i, selector);
+      pEnv->DeleteLocalRef(selector);
+      i++;
+    }
+
+    return ret;
+  }
+  catch (const std::exception& e)
+  {
+    ThrowJavaException(pEnv, e);
+  }
+  catch (...)
+  {
+    ThrowJavaException(pEnv);
+  }
+  return 0;
 }
 
 JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_checkUpdates(JNIEnv *pEnv, jobject)
 {
-  manualUpdate = true;
-  filterEngine->ForceUpdateCheck(UpdaterCallback);
+  try
+  {
+    manualUpdate = true;
+    filterEngine->ForceUpdateCheck(UpdaterCallback);
+  }
+  catch (const std::exception& e)
+  {
+    ThrowJavaException(pEnv, e);
+  }
+  catch (...)
+  {
+    ThrowJavaException(pEnv);
+  }
 }
