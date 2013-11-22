@@ -40,6 +40,7 @@ extern "C"
   JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_removeSubscription(JNIEnv *pEnv, jobject, jstring url);
   JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_refreshSubscription(JNIEnv *pEnv, jobject, jstring url);
   JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_actualizeSubscriptionStatus(JNIEnv *pEnv, jobject, jstring url);
+  JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_setAcceptableAdsEnabled(JNIEnv *pEnv, jobject, jboolean enabled);
   JNIEXPORT jboolean JNICALL Java_org_adblockplus_android_ABPEngine_matches(JNIEnv *pEnv, jobject, jstring url, jstring contentType, jstring documentUrl);
   JNIEXPORT jobjectArray JNICALL Java_org_adblockplus_android_ABPEngine_getSelectorsForDomain(JNIEnv *pEnv, jobject, jstring domain);
   JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_checkUpdates(JNIEnv *pEnv, jobject);
@@ -53,13 +54,25 @@ jobjectArray subscriptionsAsJavaArray(JNIEnv *pEnv, std::vector<AdblockPlus::Sub
   static jfieldID ftitle = pEnv->GetFieldID(cls, "title", "Ljava/lang/String;");
   static jfieldID furl = pEnv->GetFieldID(cls, "url", "Ljava/lang/String;");
 
-  D(D_WARN, "Subscriptions: %d", subscriptions.size());
-  const jobjectArray ret = (jobjectArray) pEnv->NewObjectArray(subscriptions.size(), cls, NULL);
+  const std::string surl = filterEngine->GetPref("subscriptions_exceptionsurl")->AsString();
+  AdblockPlus::SubscriptionPtr acceptableAdsSubscription = filterEngine->GetSubscription(surl);
+
+  int size = subscriptions.size();
+  for (std::vector<AdblockPlus::SubscriptionPtr>::const_iterator it = subscriptions.begin();
+       it != subscriptions.end(); it++)
+  {
+    if (*acceptableAdsSubscription == **it)
+      size--;
+  }
+
+  const jobjectArray ret = (jobjectArray) pEnv->NewObjectArray(size, cls, NULL);
 
   int i = 0;
   for (std::vector<AdblockPlus::SubscriptionPtr>::const_iterator it = subscriptions.begin();
        it != subscriptions.end(); it++)
   {
+    if (*acceptableAdsSubscription == **it)
+      continue;
     jobject subscription = pEnv->NewObject(cls, cid);
     pEnv->SetObjectField(subscription, ftitle, pEnv->NewStringUTF((*it)->GetProperty("title")->AsString().c_str()));
     pEnv->SetObjectField(subscription, furl, pEnv->NewStringUTF((*it)->GetProperty("url")->AsString().c_str()));
@@ -405,6 +418,32 @@ JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_actualizeSubscript
     const std::string surl = GetString(pEnv, url);
     AdblockPlus::SubscriptionPtr subscription = filterEngine->GetSubscription(surl);
     UpdateSubscriptionStatus(subscription);
+  }
+  catch (const std::exception& e)
+  {
+    ThrowJavaException(pEnv, e);
+  }
+  catch (...)
+  {
+    ThrowJavaException(pEnv);
+  }
+}
+
+JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_setAcceptableAdsEnabled(JNIEnv *pEnv, jobject, jboolean enabled)
+{
+  D(D_WARN, "setAcceptableAdsEnabled()");
+  try
+  {
+    const std::string surl = filterEngine->GetPref("subscriptions_exceptionsurl")->AsString();
+    AdblockPlus::SubscriptionPtr subscription = filterEngine->GetSubscription(surl);
+    if (enabled == JNI_TRUE)
+    {
+      subscription->AddToList();
+    }
+    else if (subscription->IsListed())
+    {
+      subscription->RemoveFromList();
+    }
   }
   catch (const std::exception& e)
   {

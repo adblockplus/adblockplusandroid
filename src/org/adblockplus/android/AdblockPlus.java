@@ -281,8 +281,7 @@ public class AdblockPlus extends Application
    */
   public void setAcceptableAdsEnabled(boolean enabled)
   {
-    // TODO Auto-generated method stub
-    
+    abpEngine.setAcceptableAdsEnabled(enabled);
   }
 
   /**

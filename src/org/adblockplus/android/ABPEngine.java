@@ -89,6 +89,8 @@ public class ABPEngine
   public native void refreshSubscription(String url);
 
   public native void actualizeSubscriptionStatus(String url);
+  
+  public native void setAcceptableAdsEnabled(boolean enabled);
 
   public native boolean matches(String url, String contentType, String documentUrl);
 
