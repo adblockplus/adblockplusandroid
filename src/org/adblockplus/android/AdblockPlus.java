@@ -284,6 +284,13 @@ public class AdblockPlus extends Application
     abpEngine.setAcceptableAdsEnabled(enabled);
   }
 
+  public String getAcceptableAdsUrl()
+  {
+    final String documentationLink = abpEngine.getDocumentationLink();
+    final String locale = getResources().getConfiguration().locale.toString().replace("_", "-");
+    return documentationLink.replace("%LINK%", "acceptable_ads").replace("%LANG%", locale);
+  }
+
   /**
    * Returns ElemHide selectors for domain.
    *

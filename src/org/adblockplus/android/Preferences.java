@@ -44,7 +44,9 @@ import android.os.IBinder;
 import android.preference.ListPreference;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.text.TextUtils;
 import android.text.format.DateFormat;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -151,8 +153,17 @@ public class Preferences extends SummarizedPreferences
 
     if (firstRun && current != null)
     {
-      new AlertDialog.Builder(this).setTitle(R.string.app_name)
-          .setMessage(String.format(getString(R.string.msg_subscription_offer, current.title)))
+      final String url = TextUtils.htmlEncode(application.getAcceptableAdsUrl());
+      final String rawMessage = String.format(getString(R.string.msg_subscription_offer, current.title));
+      final String message = TextUtils.htmlEncode(rawMessage)
+          .replaceAll("&lt;a&gt;(.*?)&lt;/a&gt;", "<a href=\"" + url + "\">$1</a>");
+      final TextView messageView = new TextView(this);
+      messageView.setText(Html.fromHtml(message));
+      messageView.setMovementMethod(LinkMovementMethod.getInstance());
+      final int padding = 10;
+      messageView.setPadding(padding, padding, padding, padding);
+      new AlertDialog.Builder(this).setTitle(R.string.install_name)
+          .setView(messageView)
           .setIcon(android.R.drawable.ic_dialog_info)
           .setPositiveButton(R.string.ok, null).create().show();
     }
