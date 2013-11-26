@@ -153,19 +153,18 @@ public class Preferences extends SummarizedPreferences
 
     if (firstRun && current != null)
     {
-      final String url = TextUtils.htmlEncode(application.getAcceptableAdsUrl());
-      final String rawMessage = String.format(getString(R.string.msg_subscription_offer, current.title));
-      final String message = TextUtils.htmlEncode(rawMessage)
-          .replaceAll("&lt;a&gt;(.*?)&lt;/a&gt;", "<a href=\"" + url + "\">$1</a>");
-      final TextView messageView = new TextView(this);
-      messageView.setText(Html.fromHtml(message));
-      messageView.setMovementMethod(LinkMovementMethod.getInstance());
-      final int padding = 10;
-      messageView.setPadding(padding, padding, padding, padding);
-      new AlertDialog.Builder(this).setTitle(R.string.install_name)
-          .setView(messageView)
-          .setIcon(android.R.drawable.ic_dialog_info)
-          .setPositiveButton(R.string.ok, null).create().show();
+      showNotificationDialog(getString(R.string.install_name),
+          String.format(getString(R.string.msg_subscription_offer, current.title)),
+          application.getAcceptableAdsUrl());
+      application.setNotifiedAboutAcceptableAds(true);
+      application.setAcceptableAdsEnabled(true);
+    }
+    else if (!application.isNotifiedAboutAcceptableAds())
+    {
+      showNotificationDialog(getString(R.string.acceptableads_name),
+          getString(R.string.msg_acceptable_ads), application.getAcceptableAdsUrl());
+      application.setNotifiedAboutAcceptableAds(true);
+      application.setAcceptableAdsEnabled(true);
     }
 
     // Enable manual subscription refresh
@@ -208,6 +207,22 @@ public class Preferences extends SummarizedPreferences
       setProxyEnabled(true);
 
     bindService(new Intent(this, ProxyService.class), proxyServiceConnection, 0);
+  }
+
+  private void showNotificationDialog(String title, String message, String url)
+  {
+    url = TextUtils.htmlEncode(url);
+    message = TextUtils.htmlEncode(message)
+        .replaceAll("&lt;a&gt;(.*?)&lt;/a&gt;", "<a href=\"" + url + "\">$1</a>");
+    final TextView messageView = new TextView(this);
+    messageView.setText(Html.fromHtml(message));
+    messageView.setMovementMethod(LinkMovementMethod.getInstance());
+    final int padding = 10;
+    messageView.setPadding(padding, padding, padding, padding);
+    new AlertDialog.Builder(this).setTitle(title)
+        .setView(messageView)
+        .setIcon(android.R.drawable.ic_dialog_info)
+        .setPositiveButton(R.string.ok, null).create().show();
   }
 
   @Override
