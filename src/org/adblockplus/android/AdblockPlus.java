@@ -36,6 +36,8 @@ import android.app.Application;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -43,6 +45,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -289,6 +292,20 @@ public class AdblockPlus extends Application
     final String documentationLink = abpEngine.getDocumentationLink();
     final String locale = getResources().getConfiguration().locale.toString().replace("_", "-");
     return documentationLink.replace("%LINK%", "acceptable_ads").replace("%LANG%", locale);
+  }
+
+  public void setNotifiedAboutAcceptableAds(boolean notified)
+  {
+    final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+    final Editor editor = preferences.edit();
+    editor.putBoolean("notified_about_acceptable_ads", notified);
+    editor.commit();
+  }
+
+  public boolean isNotifiedAboutAcceptableAds()
+  {
+    final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+    return preferences.getBoolean("notified_about_acceptable_ads", false);
   }
 
   /**
