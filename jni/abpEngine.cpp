@@ -41,6 +41,8 @@ extern "C"
   JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_refreshSubscription(JNIEnv *pEnv, jobject, jstring url);
   JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_actualizeSubscriptionStatus(JNIEnv *pEnv, jobject, jstring url);
   JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_setAcceptableAdsEnabled(JNIEnv *pEnv, jobject, jboolean enabled);
+  JNIEXPORT jstring JNICALL Java_org_adblockplus_android_ABPEngine_getDocumentationLink(
+      JNIEnv *env, jobject object);
   JNIEXPORT jboolean JNICALL Java_org_adblockplus_android_ABPEngine_matches(JNIEnv *pEnv, jobject, jstring url, jstring contentType, jstring documentUrl);
   JNIEXPORT jobjectArray JNICALL Java_org_adblockplus_android_ABPEngine_getSelectorsForDomain(JNIEnv *pEnv, jobject, jstring domain);
   JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_checkUpdates(JNIEnv *pEnv, jobject);
@@ -453,6 +455,13 @@ JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_setAcceptableAdsEn
   {
     ThrowJavaException(pEnv);
   }
+}
+
+JNIEXPORT jstring JNICALL Java_org_adblockplus_android_ABPEngine_getDocumentationLink(
+    JNIEnv *env, jobject object)
+{
+  const std::string documentationLink = filterEngine->GetPref("documentation_link")->AsString();
+  return env->NewStringUTF(documentationLink.c_str());
 }
 
 JNIEXPORT jboolean JNICALL Java_org_adblockplus_android_ABPEngine_matches(JNIEnv *pEnv, jobject, jstring url, jstring contentType, jstring documentUrl)

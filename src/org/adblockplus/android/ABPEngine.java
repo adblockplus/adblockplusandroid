@@ -92,6 +92,8 @@ public class ABPEngine
   
   public native void setAcceptableAdsEnabled(boolean enabled);
 
+  public native String getDocumentationLink();
+
   public native boolean matches(String url, String contentType, String documentUrl);
 
   public native String[] getSelectorsForDomain(String domain);
