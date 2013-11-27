@@ -41,6 +41,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.PreferenceManager;
 import android.text.Html;
@@ -157,14 +158,14 @@ public class Preferences extends SummarizedPreferences
           String.format(getString(R.string.msg_subscription_offer, current.title)),
           application.getAcceptableAdsUrl());
       application.setNotifiedAboutAcceptableAds(true);
-      application.setAcceptableAdsEnabled(true);
+      setAcceptableAdsEnabled(true);
     }
     else if (!application.isNotifiedAboutAcceptableAds())
     {
       showNotificationDialog(getString(R.string.acceptableads_name),
           getString(R.string.msg_acceptable_ads), application.getAcceptableAdsUrl());
       application.setNotifiedAboutAcceptableAds(true);
-      application.setAcceptableAdsEnabled(true);
+      setAcceptableAdsEnabled(true);
     }
 
     // Enable manual subscription refresh
@@ -280,6 +281,15 @@ public class Preferences extends SummarizedPreferences
       default:
         return super.onOptionsItemSelected(item);
     }
+  }
+
+  private void setAcceptableAdsEnabled(boolean enabled)
+  {
+    CheckBoxPreference acceptableAdsPreference =
+        (CheckBoxPreference) findPreference(getString(R.string.pref_acceptableads));
+    acceptableAdsPreference.setChecked(enabled);
+    AdblockPlus application = AdblockPlus.getApplication();
+    application.setAcceptableAdsEnabled(enabled);
   }
 
   private void setFilteringEnabled(boolean enabled)
