@@ -43,7 +43,8 @@ extern "C"
   JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_setAcceptableAdsEnabled(JNIEnv *pEnv, jobject, jboolean enabled);
   JNIEXPORT jstring JNICALL Java_org_adblockplus_android_ABPEngine_getDocumentationLink(
       JNIEnv *env, jobject object);
-  JNIEXPORT jboolean JNICALL Java_org_adblockplus_android_ABPEngine_matches(JNIEnv *pEnv, jobject, jstring url, jstring contentType, jstring documentUrl);
+  JNIEXPORT jboolean JNICALL Java_org_adblockplus_android_ABPEngine_matches(
+      JNIEnv *pEnv, jobject, jstring url, jstring contentType, jobjectArray documentUrls);
   JNIEXPORT jobjectArray JNICALL Java_org_adblockplus_android_ABPEngine_getSelectorsForDomain(JNIEnv *pEnv, jobject, jstring domain);
   JNIEXPORT void JNICALL Java_org_adblockplus_android_ABPEngine_checkUpdates(JNIEnv *pEnv, jobject);
 };
@@ -464,23 +465,31 @@ JNIEXPORT jstring JNICALL Java_org_adblockplus_android_ABPEngine_getDocumentatio
   return env->NewStringUTF(documentationLink.c_str());
 }
 
-JNIEXPORT jboolean JNICALL Java_org_adblockplus_android_ABPEngine_matches(JNIEnv *pEnv, jobject, jstring url, jstring contentType, jstring documentUrl)
+JNIEXPORT jboolean JNICALL Java_org_adblockplus_android_ABPEngine_matches(
+  JNIEnv *pEnv, jobject, jstring url, jstring contentType, jobjectArray documentUrls)
 {
   try
   {
     const std::string surl = GetString(pEnv, url);
     const std::string stype = GetString(pEnv, contentType);
-    const std::string sdoc = GetString(pEnv, documentUrl);
+    const int documentUrlsLength = pEnv->GetArrayLength(documentUrls);
+    std::vector<std::string> sdocumentUrls;
+    for(int i = 0; i < documentUrlsLength; i++)
+    {
+       jstring documentUrl = static_cast<jstring>(pEnv->GetObjectArrayElement(documentUrls, i));
+       sdocumentUrls.push_back(GetString(pEnv, documentUrl));
+    }
 
-    AdblockPlus::FilterPtr filter = filterEngine->Matches(surl, stype, sdoc);
+    AdblockPlus::FilterPtr filter = filterEngine->Matches(surl, stype, sdocumentUrls);
 
     if (! filter)
       return JNI_FALSE;
 
-    // hack: if there is no referrer block only if filter is domain-specific
+    // hack: if there is no referrer, block only if filter is domain-specific
     // (to re-enable in-app ads blocking, proposed on 12.11.2012 Monday meeting)
-    // documentUrl contains the referrer (Android application special case)
-    if (sdoc.empty() && (filter->GetProperty("text")->AsString()).find("||") != std::string::npos)
+    // (documentUrls contains the referrers on Android)
+    if (!sdocumentUrls.size() &&
+        (filter->GetProperty("text")->AsString()).find("||") != std::string::npos)
       return JNI_FALSE;
 
     return filter->GetType() == AdblockPlus::Filter::TYPE_EXCEPTION ? JNI_FALSE : JNI_TRUE;
