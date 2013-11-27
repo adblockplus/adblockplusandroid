@@ -23,7 +23,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
@@ -84,6 +88,25 @@ public class AdblockPlus extends Application
   private ABPEngine abpEngine;
   
   private static AdblockPlus instance;
+  
+  private static class ReferrerMappingCache extends LinkedHashMap<String, String>
+  {
+    private static final long serialVersionUID = 1L;
+    private static final int MAX_SIZE = 5000;
+
+    public ReferrerMappingCache()
+    {
+      super(MAX_SIZE + 1, 0.75f, true);
+    }
+
+    @Override
+    protected boolean removeEldestEntry(Map.Entry<String, String> eldest)
+    {
+      return size() > MAX_SIZE;
+    }
+  };
+
+  private ReferrerMappingCache referrerMapping = new ReferrerMappingCache();
 
   /**
    * Returns pointer to itself (singleton pattern).
@@ -338,6 +361,9 @@ public class AdblockPlus extends Application
    */
   public boolean matches(String url, String query, String referrer, String accept)
   {
+    if (referrer != null)
+      referrerMapping.put(url, referrer);
+
     if (!filteringEnabled)
       return false;
     
@@ -368,7 +394,24 @@ public class AdblockPlus extends Application
     if (!"".equals(query))
       url = url + "?" + query;
 
-    return abpEngine.matches(url, contentType, referrer);
+    final List<String> referrerChain = buildReferrerChain(referrer);
+    Log.d("Referrer chain", url + ": " + referrerChain.toString());
+    String[] referrerChainArray = referrerChain.toArray(new String[referrerChain.size()]);
+    return abpEngine.matches(url, contentType, referrerChainArray);
+  }
+
+  private List<String> buildReferrerChain(String url)
+  {
+    final List<String> referrerChain = new ArrayList<String>();
+    // We need to limit the chain length to ensure we don't block indefinitely if there's
+    // a referrer loop.
+    final int maxChainLength = 10;
+    for (int i = 0; i < maxChainLength && url != null; i++)
+    {
+      referrerChain.add(url);
+      url = referrerMapping.get(url);
+    }
+    return referrerChain;
   }
 
   /**

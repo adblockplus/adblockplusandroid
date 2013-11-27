@@ -94,7 +94,7 @@ public class ABPEngine
 
   public native String getDocumentationLink();
 
-  public native boolean matches(String url, String contentType, String documentUrl);
+  public native boolean matches(String url, String contentType, String[] documentUrls);
 
   public native String[] getSelectorsForDomain(String domain);
 
