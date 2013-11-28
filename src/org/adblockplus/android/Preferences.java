@@ -104,11 +104,6 @@ public class Preferences extends SummarizedPreferences
     {
       copyAssets();
     }
-    
-    // Set Acceptable Ads FAQ link
-    HelpfulCheckBoxPreference acceptableAdsCheckBox = (HelpfulCheckBoxPreference) findPreference(getString(R.string.pref_acceptableads));
-    // TODO Set proper url
-    acceptableAdsCheckBox.setHelpUrl("https://adblockplus.org/en/acceptable-ads");
   }
 
   @Override
@@ -132,6 +127,11 @@ public class Preferences extends SummarizedPreferences
     }
     subscriptionList.setEntries(entries);
     subscriptionList.setEntryValues(entryValues);
+
+    // Set Acceptable Ads FAQ link
+    HelpfulCheckBoxPreference acceptableAdsCheckBox =
+        (HelpfulCheckBoxPreference) findPreference(getString(R.string.pref_acceptableads));
+    acceptableAdsCheckBox.setHelpUrl(AdblockPlus.getApplication().getAcceptableAdsUrl());
   }
 
   @Override
