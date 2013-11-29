@@ -61,6 +61,7 @@ public class AdblockPlus extends Application
   private final static Pattern RE_CSS = Pattern.compile(".*\\.css$", Pattern.CASE_INSENSITIVE);
   private final static Pattern RE_IMAGE = Pattern.compile(".*\\.(?:gif|png|jpe?g|bmp|ico)$", Pattern.CASE_INSENSITIVE);
   private final static Pattern RE_FONT = Pattern.compile(".*\\.(?:ttf|woff)$", Pattern.CASE_INSENSITIVE);
+  private final static Pattern RE_HTML = Pattern.compile(".*\\.html?$", Pattern.CASE_INSENSITIVE);
 
   /**
    * Broadcasted when filtering is enabled or disabled.
@@ -371,8 +372,9 @@ public class AdblockPlus extends Application
    */
   public boolean matches(String url, String query, String referrer, String accept)
   {
+    final String fullUrl = !"".equals(query) ? url + "?" + query : url;
     if (referrer != null)
-      referrerMapping.put(url, referrer);
+      referrerMapping.put(fullUrl, referrer);
 
     if (!filteringEnabled)
       return false;
@@ -385,6 +387,8 @@ public class AdblockPlus extends Application
         contentType = "STYLESHEET";
       else if (accept.contains("image/*"))
         contentType = "IMAGE";
+      else if (accept.contains("text/html"))
+        contentType = "SUBDOCUMENT";
     }
 
     if (contentType == null)
@@ -397,17 +401,16 @@ public class AdblockPlus extends Application
         contentType = "IMAGE";
       else if (RE_FONT.matcher(url).matches())
         contentType = "FONT";
+      else if (RE_HTML.matcher(url).matches())
+        contentType = "SUBDOCUMENT";
     }
     if (contentType == null)
       contentType = "OTHER";
 
-    if (!"".equals(query))
-      url = url + "?" + query;
-
     final List<String> referrerChain = buildReferrerChain(referrer);
-    Log.d("Referrer chain", url + ": " + referrerChain.toString());
+    Log.d("Referrer chain", fullUrl + ": " + referrerChain.toString());
     String[] referrerChainArray = referrerChain.toArray(new String[referrerChain.size()]);
-    return abpEngine.matches(url, contentType, referrerChainArray);
+    return abpEngine.matches(fullUrl, contentType, referrerChainArray);
   }
 
   private List<String> buildReferrerChain(String url)
@@ -418,7 +421,7 @@ public class AdblockPlus extends Application
     final int maxChainLength = 10;
     for (int i = 0; i < maxChainLength && url != null; i++)
     {
-      referrerChain.add(url);
+      referrerChain.add(0, url);
       url = referrerMapping.get(url);
     }
     return referrerChain;
