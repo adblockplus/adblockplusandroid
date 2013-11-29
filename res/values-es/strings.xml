@@ -5,6 +5,8 @@
   <string name="crash_name">Ocurrió un fallo</string>
   <string name="configuration_name">Información de configuración</string>
   <string name="proxysettings_name">Configuración del servidor proxy</string>
+  <string name="install_name">Se ha instalado Adblock Plus</string>
+  <string name="acceptableads_name">Anuncios aceptables en Adblock Plus</string>
   <string name="notif_wifi">La publicidad es bloqueada en la conexión WiFi</string>
   <string name="notif_wifi_nofiltering">Permitir publicidad en la conexión WiFi</string>
   <string name="notif_all">La publicidad es bloqueada en todas las conexiones</string>
@@ -13,7 +15,8 @@
   <string name="crash_dialog_text">Parece que la aplicación encontró un problema y fue detenida a la fuerza en el lanzamiento anterior. Puedes ayudarnos a solucionar esto si nos envías un informe de error haciendo clic en \"Aceptar\".</string>
   <string name="crash_dialog_comment_prompt">Puedes agregar tus comentarios sobre el problema a continuación:</string>
   <string name="msg_crash_submission_failure">Error al enviar el informe de fallo, se intentará de nuevo más tarde.</string>
-  <string name="msg_subscription_offer">Hemos seleccionado una suscripción adecuada para ti: \'%s\'. Puedes cambiarla en cualquier momento en los ajustes de la aplicación.</string>
+  <string name="msg_subscription_offer">Se ha seleccionado una suscripción con base en tu idioma: \'%s\'. Se han habilitado &lt;a&gt;Anuncios Aceptables&lt;/a&gt;. Puedes cambiar esto en los ajustes.</string>
+  <string name="msg_acceptable_ads">Adblock Plus ahora soporta &lt;a&gt;Anuncios Aceptables&lt;/a&gt;, y los ha habilitado automáticamente. Puedes deshabilitarlos en los ajustes.</string>
   <string name="msg_notraffic">Parece que no está pasando tráfico a través de la aplicación.</string>
   <string name="msg_configuration">Adblock Plus no puede cambiar los ajustes del proxy en tu dispositivo, por favor configúralo manualmente.</string>
   <string name="msg_badport">Valor incorrecto del puerto</string>
@@ -23,7 +26,7 @@
   <string name="msg_update_description">Una nueva actualización está disponible para descargar. ¿Procedemos?</string>
   <string name="msg_update_downloading">Descargando actualización: %d%%</string>
   <string name="msg_update_ready">Listo para instalar la actualización</string>
-  <string name="msg_update_fail">No se pudo comprobar las actualizaciones, por favor inténtalo más tarde</string>
+  <string name="msg_update_fail">No se pudieron comprobar las actualizaciones, se intentará de nuevo más tarde</string>
   <string name="msg_hideicon_warning">&lt;b&gt;Por favor, ten en cuenta&lt;/b&gt;: Lo mejor que podemos hacer es volver el ícono invisible. Si quitamos el ícono, Android podría detener Adblock Plus en cualquier momento, lo que resultaría en pérdida de conectividad.</string>
   <string name="msg_hideicon_native">Puedes &lt;b&gt;deshabilitar completamente&lt;/b&gt; el ícono de notificación a través de los ajustes de Android. Para ello desmarca la casilla de verificación &lt;i&gt;Mostrar notificaciones&lt;/i&gt; en &lt;i&gt;Información de la aplicación&lt;/i&gt;. Presiona &lt;i&gt;Muéstrame&lt;/i&gt; para abrirlo ahora mismo.</string>
   <string name="configuring_url">https://adblockplus.org/en/android-config</string>
@@ -53,6 +56,9 @@
   <string name="pref_proxyenabled_title">Proxy</string>
   <string name="pref_proxyenabled_summary_on">El proxy de Adblock está habilitado</string>
   <string name="pref_proxyenabled_summary_off">El proxy de Adblock está deshabilitado</string>
+  <string name="pref_acceptableads_title">Anuncios aceptables</string>
+  <string name="pref_acceptableads_summary_on">Permitir cierta publicidad no intrusiva</string>
+  <string name="pref_acceptableads_summary_off">Bloquear toda la publicidad</string>
   <string name="pref_startatboot_title">Iniciar al arranque</string>
   <string name="pref_startatboot_summary_on">Si esto se habilita, Adblock Plus iniciará en segundo plano automáticamente</string>
   <string name="pref_startatboot_summary_off">Adblock Plus debe iniciarse manualmente después del arranque</string>

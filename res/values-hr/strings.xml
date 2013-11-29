@@ -5,6 +5,8 @@
   <string name="crash_name">Dogodili se rušenje</string>
   <string name="configuration_name">Informacije podešavanja</string>
   <string name="proxysettings_name">Proxy podešavanje</string>
+  <string name="install_name">Adblock Plus has been installed</string>
+  <string name="acceptableads_name">Acceptable Ads in Adblock Plus</string>
   <string name="notif_wifi">Reklame su blokirane na WiFi mreži</string>
   <string name="notif_wifi_nofiltering">Dopuštanje reklama na WiFi mreži</string>
   <string name="notif_all">Reklame su blokirane na svim mrežama</string>
@@ -13,7 +15,8 @@
   <string name="crash_dialog_text">Čini se da je aplikacija naišla na problem i prisilno je zaustavljena pri posljednjem pokretanju. Možete nam pomoći da to popravimo ako nam pošaljete izvješće greške klikom na \'U redu\'.</string>
   <string name="crash_dialog_comment_prompt">Možete dodati vaš komentar o problemu ispod:</string>
   <string name="msg_crash_submission_failure">Neuspjelo podnošenje izvješća greške, pokušajte ponovno kasnije.</string>
-  <string name="msg_subscription_offer">Odabrali smo odgovarajuću pretplatu za vas: \'%s\'. Možete ju promijeniti u svako vrijeme u postavkama aplikacije.</string>
+  <string name="msg_subscription_offer">A subscription has been selected based on your language: \'%s\'. &lt;a&gt;Acceptable Ads&lt;/a&gt; have been enabled. You can change this in the settings.</string>
+  <string name="msg_acceptable_ads">Adblock Plus now supports &lt;a&gt;Acceptable Ads&lt;/a&gt;, and has automatically enabled them. You can disable them in the settings.</string>
   <string name="msg_notraffic">Izgleda da nema prometa kroz aplikaciju.</string>
   <string name="msg_configuration">Adblock Plus ne može promijeniti proxy postavke na vašem uređaju, podesite ih ručno.</string>
   <string name="msg_badport">Pogrešan ulaz</string>
@@ -23,7 +26,7 @@
   <string name="msg_update_description">Novo ažuriranje je dostupno za preuzimanje. Želite li nastaviti?</string>
   <string name="msg_update_downloading">Preuzimanje ažuriranja: %d%%</string>
   <string name="msg_update_ready">Spremna instalacija ažuriranja</string>
-  <string name="msg_update_fail">Neuspjela provjera ažuriranja, pokušajte ponovno kasnije</string>
+  <string name="msg_update_fail">Failed to check for updates, will try again later</string>
   <string name="msg_hideicon_warning">&lt;b&gt;Napomena&lt;/b&gt;: Najbolje što možemo učiniti je ikonu nevidljivom. Ako uklonimo ikonu, Android može zaustaviti Adblock Plus u bilo koje vrijeme, što može rezultirati gubitkom Internet veze.</string>
   <string name="msg_hideicon_native">Možete u &lt;b&gt;potpunosti onemogućiti&lt;/b&gt; ikonu obavijesti kroz Android postavke. Za onemogućavanje odznačite &lt;i&gt;Prikaži obavijesti&lt;/i&gt; provjerite okvir u &lt;i&gt;Informacije aplikacije&lt;/i&gt;. Pritisnite &lt;i&gt;Prikaži me&lt;/i&gt; za otvaranje.</string>
   <string name="configuring_url">https://adblockplus.org/en/android-config</string>
@@ -53,6 +56,9 @@
   <string name="pref_proxyenabled_title">Proxy</string>
   <string name="pref_proxyenabled_summary_on">Adblock proxy je omogućen</string>
   <string name="pref_proxyenabled_summary_off">Adblock proxy je onemogućen</string>
+  <string name="pref_acceptableads_title">Acceptable Ads</string>
+  <string name="pref_acceptableads_summary_on">Allow some non-intrusive advertising</string>
+  <string name="pref_acceptableads_summary_off">Block all advertising</string>
   <string name="pref_startatboot_title">Pokreni pri pokretanju</string>
   <string name="pref_startatboot_summary_on">Adblock Plus će se automatski pokrenuti u pozadini ako je onemogućeno</string>
   <string name="pref_startatboot_summary_off">Adblock Plus mora se pokrenuti ručno nakon pokretanja</string>

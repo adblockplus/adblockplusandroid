@@ -5,6 +5,8 @@
   <string name="crash_name">Ocorreu uma falha</string>
   <string name="configuration_name">Informações de configuração</string>
   <string name="proxysettings_name">Configuração de proxy</string>
+  <string name="install_name">Adblock Plus has been installed</string>
+  <string name="acceptableads_name">Acceptable Ads in Adblock Plus</string>
   <string name="notif_wifi">Os anúncios são bloqueados em conexão Wi-Fi</string>
   <string name="notif_wifi_nofiltering">Permitir anúncios em conexões Wi-Fi</string>
   <string name="notif_all">Os anúncios são bloqueados em todas as conexões</string>
@@ -13,7 +15,8 @@
   <string name="crash_dialog_text">Parece que o aplicativo encontrou um problema e foi forçado a parar no carregamento anterior. Você pode nos ajudar a corrigir isso, se você nos enviar o relatório de erros, clicando em \'OK\'.</string>
   <string name="crash_dialog_comment_prompt">Você pode adicionar seus comentários sobre o problema abaixo:</string>
   <string name="msg_crash_submission_failure">Falha ao enviar o relatório de travamento, tente novamente mais tarde.</string>
-  <string name="msg_subscription_offer">Nós selecionamos uma assinatura apropriada para você: \'%s\'. Você pode mudar a qualquer momento nas configurações do aplicativo.</string>
+  <string name="msg_subscription_offer">A subscription has been selected based on your language: \'%s\'. &lt;a&gt;Acceptable Ads&lt;/a&gt; have been enabled. You can change this in the settings.</string>
+  <string name="msg_acceptable_ads">Adblock Plus now supports &lt;a&gt;Acceptable Ads&lt;/a&gt;, and has automatically enabled them. You can disable them in the settings.</string>
   <string name="msg_notraffic">Parece que nenhum tráfego está passando através do aplicativo.</string>
   <string name="msg_configuration">O Adblock Plus não consegue alterar as definições de proxy do seu dispositivo. Por favor, configure-as manualmente.</string>
   <string name="msg_badport">Valor de porta inválida</string>
@@ -23,7 +26,7 @@
   <string name="msg_update_description">Nova atualização disponível para download. Prosseguir?</string>
   <string name="msg_update_downloading">Baixando a atualização: %d%%</string>
   <string name="msg_update_ready">Pronto para instalar a atualização</string>
-  <string name="msg_update_fail">Falha para verificar atualizações, por favor, tente novamente mais tarde</string>
+  <string name="msg_update_fail">Failed to check for updates, will try again later</string>
   <string name="msg_hideicon_warning">&lt;b&gt;Por favor, note&lt;/b&gt;: O melhor que podemos fazer é tornar o ícone invisível. Se remover o ícone, o Android pode parar o Adblock Plus a qualquer momento, o que irá resultar em perda de conectividade.</string>
   <string name="msg_hideicon_native">Você pode &lt;b&gt;desativar completamente&lt;/b&gt; o ícone de notificação nas configurações do Android. Para isto, desmarque &lt;i&gt;Mostrar notificações&lt;/i&gt; nas &lt;i&gt;Informações do aplicativo&lt;/i&gt;. Pressione &lt;i&gt;Mostre-me&lt;/i&gt; para abrir agora.</string>
   <string name="configuring_url">https://adblockplus.org/en/android-config</string>
@@ -53,6 +56,9 @@
   <string name="pref_proxyenabled_title">Proxy</string>
   <string name="pref_proxyenabled_summary_on">Proxy do Adblock está habilitado</string>
   <string name="pref_proxyenabled_summary_off">Proxy do Adblock está desativado</string>
+  <string name="pref_acceptableads_title">Acceptable Ads</string>
+  <string name="pref_acceptableads_summary_on">Allow some non-intrusive advertising</string>
+  <string name="pref_acceptableads_summary_off">Block all advertising</string>
   <string name="pref_startatboot_title">Iniciar no boot</string>
   <string name="pref_startatboot_summary_on">Adblock Plus iniciará em segundo plano se isto estiver ativado</string>
   <string name="pref_startatboot_summary_off">Adblock Plus precisa ser iniciado manualmente após o boot</string>

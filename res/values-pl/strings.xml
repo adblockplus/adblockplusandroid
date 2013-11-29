@@ -5,6 +5,8 @@
   <string name="crash_name">Wystąpił błąd</string>
   <string name="configuration_name">Informacja o konfiguracji</string>
   <string name="proxysettings_name">Konfiguracja serwera proxy</string>
+  <string name="install_name">Adblock Plus został zainstalowany</string>
+  <string name="acceptableads_name">Dopuszczalne reklamy w Adblock Plus</string>
   <string name="notif_wifi">Reklamy są blokowane na połączeniu WiFi</string>
   <string name="notif_wifi_nofiltering">Zezwalanie na reklamy na połączeniu WiFi</string>
   <string name="notif_all">Reklamy są blokowane na wszystkich połączeniach</string>
@@ -13,7 +15,8 @@
   <string name="crash_dialog_text">Wygląda na to, że wystąpił problem i aplikacja została przedwcześnie zakończona podczas poprzedniego uruchomienia. Pomożesz nam to naprawić, jeśli wyślesz nam raport klikając przycisk „OK”.</string>
   <string name="crash_dialog_comment_prompt">Poniżej możesz dodać swoje uwagi na temat usterki:</string>
   <string name="msg_crash_submission_failure">Nie udało się wysłać raportu o błędach. Spróbuję ponownie później.</string>
-  <string name="msg_subscription_offer">Wybraliśmy odpowiednią subskrypcję dla ciebie: „%s”. Możesz ją zmienić w dowolnej chwili w ustawieniach aplikacji.</string>
+  <string name="msg_subscription_offer">Wybrano subskrypcję na podstawie twoich ustawień językowych: \'%s\'. &lt;a&gt;Dopuszczalne reklamy&lt;/a&gt; zostały włączone. Możesz to zmienić w ustawieniach.</string>
+  <string name="msg_acceptable_ads">Adblock Plus wspiera teraz &lt;a&gt;Dopuszczalne reklamy&lt;/a&gt;, i automatycznie nie włączył. Możesz je wyłączyć w ustawieniach.</string>
   <string name="msg_notraffic">Wygląda na to, że żaden ruch sieciowy nie przechodzi przez aplikację.</string>
   <string name="msg_configuration">Adblock Plus nie może dokonać zmian w ustawieniach serwera proxy twojego urządzenia. Skonfiguruj je ręcznie.</string>
   <string name="msg_badport">Nieprawidłowa wartość portu</string>
@@ -23,7 +26,7 @@
   <string name="msg_update_description">Nowa aktualizacja jest dostępna do pobrania. Kontynuować?</string>
   <string name="msg_update_downloading">Pobieranie aktualizacji: %d%%</string>
   <string name="msg_update_ready">Gotowy do zainstalowania aktualizacji</string>
-  <string name="msg_update_fail">Nie udało się sprawdzić dostępności aktualizacji. Spróbuj ponownie później</string>
+  <string name="msg_update_fail">Nie udało się sprawdzić dostępności aktualizacji. Spróbuję później</string>
   <string name="msg_hideicon_warning">&lt;b&gt;Uwagalt&lt;/b&gt;: najlepsze co możemy zrobić to wyświetlenie ikony. Jeśli ją usuniemy, system Android mógłby zatrzymać Adblock Plus w dowolnym momencie, powodując utratę połączenia.</string>
   <string name="msg_hideicon_native">Możesz &lt;b&gt;całkowicie wyłączyć&lt;b&gt; ikonę powiadomień za pomocą ustawień systemu Android. Żeby to zrobić, odznacz opcję &lt;b&gt;Wyświetlaj powiadomienia&lt;/i&gt;  w &lt;i&gt;Informacjach o aplikacji&lt;/i&gt;. Wciśnij &lt;i&gt;Pokaż mi&lt;/i&gt;, aby je teraz otworzyć.</string>
   <string name="configuring_url">https://adblockplus.org/en/android-config</string>
@@ -53,6 +56,9 @@
   <string name="pref_proxyenabled_title">Proxy</string>
   <string name="pref_proxyenabled_summary_on">Proxy Adblock jest wyłączony</string>
   <string name="pref_proxyenabled_summary_off">Proxy Adblock jest wyłączony</string>
+  <string name="pref_acceptableads_title">Dopuszczalne reklamy</string>
+  <string name="pref_acceptableads_summary_on">Zezwalaj na nienatrętne reklamy</string>
+  <string name="pref_acceptableads_summary_off">Blokuj wszystkie reklamy</string>
   <string name="pref_startatboot_title">Uruchom przy starcie</string>
   <string name="pref_startatboot_summary_on">Jeśli włączono, Adblock Plus uruchomi się automatycznie w tle</string>
   <string name="pref_startatboot_summary_off">Adblock Plus musi być uruchamiany ręcznie po starcie systemu</string>

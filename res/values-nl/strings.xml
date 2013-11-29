@@ -5,6 +5,8 @@
   <string name="crash_name">Crash is opgetreden</string>
   <string name="configuration_name">Configuratie informatie</string>
   <string name="proxysettings_name">Proxyconfiguratie</string>
+  <string name="install_name">Adblock Plus has been installed</string>
+  <string name="acceptableads_name">Acceptable Ads in Adblock Plus</string>
   <string name="notif_wifi">Advertenties zijn geblokkeerd op WiFi verbinding</string>
   <string name="notif_wifi_nofiltering">Advertenties via WiFi-verbinding toestaan</string>
   <string name="notif_all">Advertenties zijn geblokkeerd op alle verbindingen</string>
@@ -13,7 +15,8 @@
   <string name="crash_dialog_text">Het lijkt erop dat de er een probleem was met de applicatie die automatisch afsloot bij de vorige sessie. U kunt ons helpen dit te verhelpen door het foutenrapport naar ons te verzenden door op \'OK\' te klikken.</string>
   <string name="crash_dialog_comment_prompt">U kunt eventuele opmerkingen over het probleem hieronder toevoegen:</string>
   <string name="msg_crash_submission_failure">Verzenden van het crash rapport is mislukt, zal later opnieuw proberen.</string>
-  <string name="msg_subscription_offer">Wij hebben een geschikt abonnement voor u geselecteerd: \'%s\'. U kunt het op elk gewenst moment in toepassingsinstellingen aanpassen.</string>
+  <string name="msg_subscription_offer">A subscription has been selected based on your language: \'%s\'. &lt;a&gt;Acceptable Ads&lt;/a&gt; have been enabled. You can change this in the settings.</string>
+  <string name="msg_acceptable_ads">Adblock Plus now supports &lt;a&gt;Acceptable Ads&lt;/a&gt;, and has automatically enabled them. You can disable them in the settings.</string>
   <string name="msg_notraffic">Het lijkt erop dat er geen verkeer door de applicatie passeert.</string>
   <string name="msg_configuration">Adblock Plus kan de proxy-instellingen op uw apparaat niet automatisch veranderen, u kunt dit handmatig configureren.</string>
   <string name="msg_badport">Slechte poort waarde</string>
@@ -23,7 +26,7 @@
   <string name="msg_update_description">Nieuwe update is beschikbaar voor downloaden. Doorgaan?</string>
   <string name="msg_update_downloading">Downloaden update: %d%%</string>
   <string name="msg_update_ready">Klaar om de update te installeren</string>
-  <string name="msg_update_fail">Checken voor updates is mislukt, probeer later nog eens</string>
+  <string name="msg_update_fail">Failed to check for updates, will try again later</string>
   <string name="msg_hideicon_warning">&lt;b&gt;Let op&lt;/b&gt;: Het beste wat we kunnen doen is het icoontje onzichtbaar maken. Als we het pictogram verwijderen, kan Android Adblock Plus ieder moment stopzetten, wat zal resulteren in het verlies van de connectiviteit.</string>
   <string name="msg_hideicon_native">U kunt &lt;b&gt;volledig uitschakelen&lt;/b&gt; notificatie icoontje door de Android instellingen. Voor dit vink uit &lt;i&gt;Toon meldingen&lt;/i&gt; Selecteer  &lt;i&gt;Applicatie info&lt;/i&gt;. Selecteer &lt;i&gt;Laat zien&lt;/i&gt; om nu te openen.</string>
   <string name="configuring_url">https://adblockplus.org/en/android-config</string>
@@ -53,6 +56,9 @@
   <string name="pref_proxyenabled_title">Proxy</string>
   <string name="pref_proxyenabled_summary_on">Adblock proxy is ingeschakeld</string>
   <string name="pref_proxyenabled_summary_off">Adblock proxy is uitgeschakeld</string>
+  <string name="pref_acceptableads_title">Acceptable Ads</string>
+  <string name="pref_acceptableads_summary_on">Allow some non-intrusive advertising</string>
+  <string name="pref_acceptableads_summary_off">Block all advertising</string>
   <string name="pref_startatboot_title">Start bij het opstarten van de telefoon</string>
   <string name="pref_startatboot_summary_on">Adblock Plus zal automatisch starten in de achtergrond als het is ingeschakeld</string>
   <string name="pref_startatboot_summary_off">Adblock Plus moet handmatig worden gestart na het opstarten van het toestel</string>

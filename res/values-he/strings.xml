@@ -5,6 +5,8 @@
   <string name="crash_name">התרחשה קריסה</string>
   <string name="configuration_name">מידע תצורה</string>
   <string name="proxysettings_name">הגדרת פרוקסי</string>
+  <string name="install_name">Adblock Plus הותקן בהצלחה</string>
+  <string name="acceptableads_name">פרסומות מקובלות ב Adblock Plus</string>
   <string name="notif_wifi">פרסומות חסומות בחיבור ה WIFI</string>
   <string name="notif_wifi_nofiltering">אפשור פרסומות בחיבור WiFi</string>
   <string name="notif_all">פרסומות יחסמו בכל החיבורים</string>
@@ -13,8 +15,8 @@
   <string name="crash_dialog_text">נראה שהיישום נתקל בבעיה ונכפתה עליו עצירה בהפעלה הקודמת. ניתן לעזור לנו לתקן זאת אם תשלחו לנו דיווח שגיאה על-ידי לחיצה על \'אישור\'.</string>
   <string name="crash_dialog_comment_prompt">ניתן להוסיף הערות אודות הבעיה למטה:</string>
   <string name="msg_crash_submission_failure">הזנת דיווח הקריסה כשלה, נסה שוב מאוחר יותר.</string>
-  <string name="msg_subscription_offer">אנחנו בחרנו רשימה בשבילך: \'%s\'. אתה יכול לשנות לאיזה רשימה שתבחר בכל זמן בהגדרות Adblock PLus.
-</string>
+  <string name="msg_subscription_offer">מנוי נבחר בהתבסס על השפה שלך: \'%s\'. &lt;a&gt;פרסומות מקובלות&lt;/a&gt; הופעלו כברירית מחדל. באפשרותך לשנות זאת בהגדרות.</string>
+  <string name="msg_acceptable_ads">Adblock Plus תומך עכשיו ב  &lt;a&gt;פרסומות מקובלות&lt;/a&gt;, ומאפשר אותן באופן אוטומטי. באפשרותך לבטל אותן בהגדרות.</string>
   <string name="msg_notraffic">נראה שהתעבורה לא עוברת דרך Adblock Plus.
 </string>
   <string name="msg_configuration">Adblock Plus לא יכול לשנות את הגדרות הפרוסקי במכשירך, בבקשה שנה אותן באופן ידני.
@@ -24,9 +26,9 @@
   <string name="msg_update_available">עדכון חדש זמין</string>
   <string name="msg_update_missing">אתה מפעיל את הגירסה העדכנית ביותר</string>
   <string name="msg_update_description">עדכון חדש זמין להורדה. האם להמשיך?</string>
-  <string name="msg_update_downloading">מוריד עידכון: %d%%</string>
+  <string name="msg_update_downloading">מוריד עדכון: %d%%</string>
   <string name="msg_update_ready">מוכן להתקנת העדכון</string>
-  <string name="msg_update_fail">בדיקת עידכונים כשלה, אנא נסו מאוחר יותר</string>
+  <string name="msg_update_fail">נכשלה הבדיקה לעדכונים, אנסה שוב מאוחר יותר</string>
   <string name="msg_hideicon_warning">&lt;b&gt; שים לב &lt;/b&gt;: הדבר הכי טוב שאנחנו יכולים לעשות זה לגרום לאייקון להיות בלתי נראה.
 אם נמחק את האייקון מערכת ההפעלה עלולה לעצור את Adblock Plus בכל רגע, מה שיגרום לאיבוד קישוריות.
 </string>
@@ -41,11 +43,11 @@
   <string name="about">אודות</string>
   <string name="help">עזרה</string>
   <string name="version">גירסה</string>
-  <string name="build">בילד #</string>
+  <string name="build">בילד#</string>
   <string name="gotit">הבנתי</string>
   <string name="showme">תראה לי</string>
   <string name="configure">הגדרות</string>
-  <string name="opensettings">פתח את הגדרות רשת אלחוטית</string>
+  <string name="opensettings">פתח את הגדרות הרשת האלחוטית</string>
   <string name="synchronize_in_progress">מוריד</string>
   <string name="synchronize_invalid_url">כתובת לא חוקית</string>
   <string name="synchronize_connection_error">שגיאת חיבור</string>
@@ -57,8 +59,11 @@
   <string name="pref_enabled_summary_on">Adblock סינון מופעל</string>
   <string name="pref_enabled_summary_off">Adblock סינון לא זמין</string>
   <string name="pref_proxyenabled_title">פרוקסי</string>
-  <string name="pref_proxyenabled_summary_on">Adblock proxy מוגדר כזמין</string>
-  <string name="pref_proxyenabled_summary_off">Adblock Plus פרוסקי מושבת</string>
+  <string name="pref_proxyenabled_summary_on">Adblock פרוסקי מוגדר כזמין</string>
+  <string name="pref_proxyenabled_summary_off">Adblock פרוסקי מושבת</string>
+  <string name="pref_acceptableads_title">פרסומות מקובלות</string>
+  <string name="pref_acceptableads_summary_on">אפשר קצת פרסום לא פולשני</string>
+  <string name="pref_acceptableads_summary_off">לחסום את כל הפרסומות</string>
   <string name="pref_startatboot_title">הפעל באתחול</string>
   <string name="pref_startatboot_summary_on">Adblock Plus יתחיל אוטומטי ברקע אם זה מאופשר </string>
   <string name="pref_startatboot_summary_off">Adblock Plus צריך להיות מותחל באופן ידני אחרי ריסט למכשיר </string>
@@ -69,7 +74,7 @@
   <string name="pref_wifirefresh_summary_off">עדכונים יבוצעו בכל רשת (WiFi / 3G)</string>
   <string name="pref_hideicon_title">הסתר אייקון</string>
   <string name="pref_hideicon_summary_on">שימוש באייקון מוסתר כדי להפחית את המטרד </string>
-  <string name="pref_hideicon_summary_off">אייקון רגיל בשימוש עכשיו</string>
+  <string name="pref_hideicon_summary_off">אייקון רגיל בשימוש</string>
   <string name="pref_advanced_title">הגדרות מתקדמות </string>
   <string name="pref_proxy_title">פרוסקי </string>
   <string name="pref_proxyhost_title">מארח</string>

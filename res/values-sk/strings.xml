@@ -5,6 +5,8 @@
   <string name="crash_name">Došlo k chybe</string>
   <string name="configuration_name">Informácie o konfigurácii</string>
   <string name="proxysettings_name">Konfigurácia proxy</string>
+  <string name="install_name">Adblock Plus has been installed</string>
+  <string name="acceptableads_name">Acceptable Ads in Adblock Plus</string>
   <string name="notif_wifi">Reklamy sú blokované pri WiFi pripojení</string>
   <string name="notif_wifi_nofiltering">Povolenie reklám pri WiFi pripojení</string>
   <string name="notif_all">Reklamy sú blokované pri všetkých pripojeniach</string>
@@ -13,7 +15,8 @@
   <string name="crash_dialog_text">Zdá sa, že aplikácia zistila problém a bola zastavená pri predchádzajúcom spustení. Pomôžete nám to opraviť, ak nám pošlete hlásenie kliknutím na tlačidlo \"OK\".</string>
   <string name="crash_dialog_comment_prompt">Môžete pridať vaše komentáre o probléme nižšie:</string>
   <string name="msg_crash_submission_failure">Nepodarilo sa odoslať hlásenie o zlyhaní, skúste to neskôr.</string>
-  <string name="msg_subscription_offer">Vybrali sme pre vás vhodnú subskripciu: \"% s\". Môžete to zmeniť kedykoľvek v nastaveniach aplikácie.</string>
+  <string name="msg_subscription_offer">A subscription has been selected based on your language: \'%s\'. &lt;a&gt;Acceptable Ads&lt;/a&gt; have been enabled. You can change this in the settings.</string>
+  <string name="msg_acceptable_ads">Adblock Plus now supports &lt;a&gt;Acceptable Ads&lt;/a&gt;, and has automatically enabled them. You can disable them in the settings.</string>
   <string name="msg_notraffic">Zdá sa, že cez aplikáciu neprechádza žiadna prevádzka.</string>
   <string name="msg_configuration">Adblock Plus nemôže zmeniť proxy nastavenia v prístroji, prosím, nakonfigurujte to manuálne.</string>
   <string name="msg_badport">Zlá hodnota portu</string>
@@ -23,7 +26,7 @@
   <string name="msg_update_description">Nová aktualizácia je k dispozícii na stiahnutie. Chcete pokračovať?</string>
   <string name="msg_update_downloading">Sťahovanie aktualizácie: % d %%</string>
   <string name="msg_update_ready">Pripravený na inštaláciu aktualizácie</string>
-  <string name="msg_update_fail">Nepodarilo sa skontrolovať aktualizácie, prosím skúste to znova neskôr</string>
+  <string name="msg_update_fail">Failed to check for updates, will try again later</string>
   <string name="msg_hideicon_warning">&lt;b&gt;Poznámka &lt;/b&gt;: najlepšie čo môžeme spraviť je spraviť ikonu neviditeľnú. Ak máme odstrániť ikonu, Android môže zastaviť Adblock Plus kedykoľvek, čo bude mať za následok stratu pripojenia.</string>
   <string name="msg_hideicon_native">Môžete &lt;b&gt; úplne zakázať &lt;/b&gt; ikonu v notifikáciach cez Android nastavenia. Pre toto zrušte &lt;i&gt;Zobraz notifikácie &lt;/i&gt; začiarknutie políčka v &lt;i&gt; info o aplikácii&lt;/i&gt;. Stlačte &lt;i&gt; Ukáž mi &lt;/i&gt; ak to chcete otvoriť teraz.</string>
   <string name="configuring_url">https://adblockplus.org/en/android-config</string>
@@ -53,6 +56,9 @@
   <string name="pref_proxyenabled_title">Proxy</string>
   <string name="pref_proxyenabled_summary_on">AdBlock proxy sú zapnuté</string>
   <string name="pref_proxyenabled_summary_off">Adblock proxy sú vypnuté</string>
+  <string name="pref_acceptableads_title">Acceptable Ads</string>
+  <string name="pref_acceptableads_summary_on">Allow some non-intrusive advertising</string>
+  <string name="pref_acceptableads_summary_off">Block all advertising</string>
   <string name="pref_startatboot_title">Spustiť pri štarte</string>
   <string name="pref_startatboot_summary_on">Adblock Plus sa automaticky spustí na pozadí, ak je zapnutý</string>
   <string name="pref_startatboot_summary_off">Adblock Plus je potrebný spustiť manuálne po štarte</string>
