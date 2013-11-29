@@ -5,6 +5,8 @@
   <string name="crash_name">Absturz festgestellt</string>
   <string name="configuration_name">Konfigurationsinformationen</string>
   <string name="proxysettings_name">Proxy-Konfiguration</string>
+  <string name="install_name">Adblock Plus wurde installiert</string>
+  <string name="acceptableads_name">Akzeptable Werbung in Adblock Plus</string>
   <string name="notif_wifi">Werbung wird auf WLAN-Verbindungen blockiert</string>
   <string name="notif_wifi_nofiltering">Werbung wird auf WLAN-Verbindungen durchgelassen</string>
   <string name="notif_all">Werbung wird auf allen Verbindungen blockiert</string>
@@ -13,7 +15,8 @@
   <string name="crash_dialog_text">Adblock Plus hat offenbar ein Problem festgestellt und wurde unsanft beendet. Sie können uns helfen dieses Problem zu beheben indem Sie uns einen Fehlerbericht schicken, klicken Sie hierfür auf \'OK\'.</string>
   <string name="crash_dialog_comment_prompt">Hier können Sie zusätzliche Anmerkungen erfassen:</string>
   <string name="msg_crash_submission_failure">Fehlerbericht konnte nicht versendet werden, wird später erneut versucht.</string>
-  <string name="msg_subscription_offer">Wir haben die folgende Filterliste für Sie ausgewählt: \'%s\'. Sie können in den Einstellungen jederzeit eine andere auswählen.</string>
+  <string name="msg_subscription_offer">Ein Filterabonnement wurde passend zu Ihrer Sprache ausgewählt: \'%s\'. &lt;a&gt;Akzeptable Werbung&lt;/a&gt; wurde aktiviert. Sie können dies in den Einstellungen ändern.</string>
+  <string name="msg_acceptable_ads">Adblock Plus unterstützt jetzt &lt;a&gt;Akzeptable Werbung&lt;/a&gt;, dies wurde automatisch aktiviert. Sie können es in den Einstellungen deaktivieren.</string>
   <string name="msg_notraffic">Scheinbar wird kein Datenverkehr durch Adblock Plus geleitet.</string>
   <string name="msg_configuration">Adblock Plus könnte die Proxy-Einstellungen auf Ihrem Gerät nicht ändern. Bitte konfigurieren Sie sie manuell.</string>
   <string name="msg_badport">Ungültiger Port</string>
@@ -23,7 +26,7 @@
   <string name="msg_update_description">Eine neue Version kann heruntergeladen werden. Fortfahren?</string>
   <string name="msg_update_downloading">Neue Version wird heruntergeladen: %d%%</string>
   <string name="msg_update_ready">Neue Version kann installiert werden</string>
-  <string name="msg_update_fail">Überprüfung auf neue Versionen fehlgeschlagen, bitte versuchen Sie es später erneut</string>
+  <string name="msg_update_fail">Fehler bei der Überprüfung auf Updates, wird später erneut versucht</string>
   <string name="msg_hideicon_warning">&lt;b&gt;Hinweis&lt;/b&gt;: Alles was wir tun können um das Icon zu verstecken, ist es unsichtbar zu machen. Wenn wir es entfernen, könnte Adblock Plus jederzeit vom Android-System beendet werden, was zu einem Verbindungsverlust führt.</string>
   <string name="msg_hideicon_native">Man kann das Benachrichtigungssymbol über die Android Einstellungen &lt;b&gt;komplett ausschalten&lt;/b&gt;. Entfernen Sie einfach das Häkchen bei &lt;i&gt;Benachrichtigungen zeigen&lt;/i&gt; in der &lt;i&gt;App-Info&lt;/i&gt;. Drücken Sie auf &lt;i&gt;Zeig es mir&lt;/i&gt;, um sie jetzt zu öffnen.</string>
   <string name="configuring_url">https://adblockplus.org/de/android-config</string>
@@ -53,6 +56,9 @@
   <string name="pref_proxyenabled_title">Proxy</string>
   <string name="pref_proxyenabled_summary_on">Adblock-Proxy ist aktiv</string>
   <string name="pref_proxyenabled_summary_off">Adblock-Proxy ist inaktiv</string>
+  <string name="pref_acceptableads_title">Akzeptable Werbung</string>
+  <string name="pref_acceptableads_summary_on">Einige nicht aufdringliche Werbung zulassen</string>
+  <string name="pref_acceptableads_summary_off">Alle Werbung blockieren</string>
   <string name="pref_startatboot_title">Beim Starten aktivieren</string>
   <string name="pref_startatboot_summary_on">Adblock Plus wird beim Starten des Gerätes automatisch gestartet, wenn aktiv</string>
   <string name="pref_startatboot_summary_off">Adblock Plus muss nach dem Starten des Gerätes manuell gestartet werden</string>

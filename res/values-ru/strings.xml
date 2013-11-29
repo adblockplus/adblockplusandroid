@@ -5,6 +5,8 @@
   <string name="crash_name">Произошёл сбой</string>
   <string name="configuration_name">Информация о конфигурации</string>
   <string name="proxysettings_name">Настройка прокси</string>
+  <string name="install_name">Adblock Plus has been installed</string>
+  <string name="acceptableads_name">Acceptable Ads in Adblock Plus</string>
   <string name="notif_wifi">Реклама блокируется при подключении по WiFi</string>
   <string name="notif_wifi_nofiltering">Реклама оставляется при подключении по WiFi</string>
   <string name="notif_all">Реклама блокируется при любом подключении</string>
@@ -13,7 +15,8 @@
   <string name="crash_dialog_text">Похоже, приложение столкнулось с проблемой и было принудительно остановлено во время предыдущего запуска. Вы можете помочь нам решить эту проблему, если отправите отчёт об ошибке, нажав «OK».</string>
   <string name="crash_dialog_comment_prompt">Вы можете добавить комментарий по данной проблеме:</string>
   <string name="msg_crash_submission_failure">Не удалось отправить отчёт об ошибке, позже попытка будет повторена.</string>
-  <string name="msg_subscription_offer">Мы выбрали для вас подходящую подписку: \'%s\'. Вы можете изменить её в любое время в настройках приложения.</string>
+  <string name="msg_subscription_offer">A subscription has been selected based on your language: \'%s\'. &lt;a&gt;Acceptable Ads&lt;/a&gt; have been enabled. You can change this in the settings.</string>
+  <string name="msg_acceptable_ads">Adblock Plus now supports &lt;a&gt;Acceptable Ads&lt;/a&gt;, and has automatically enabled them. You can disable them in the settings.</string>
   <string name="msg_notraffic">Похоже, нет трафика, проходящего через приложение.</string>
   <string name="msg_configuration">Adblock Plus не может изменить настройки прокси на вашем устройстве, пожалуйста настройте прокси вручную.</string>
   <string name="msg_badport">Неправильное значение порта</string>
@@ -23,13 +26,13 @@
   <string name="msg_update_description">Доступно новое обновление для скачивания. Продолжить?</string>
   <string name="msg_update_downloading">Загрузка обновления: %d%%</string>
   <string name="msg_update_ready">Обновление готово к установке</string>
-  <string name="msg_update_fail">Ошибка проверки наличия обновления, пожалуйста, попробуйте позже</string>
+  <string name="msg_update_fail">Failed to check for updates, will try again later</string>
   <string name="msg_hideicon_warning">&lt;b&gt;Please note&lt;/b&gt;: лучшее, что мы можем - это сделать иконку уведомления невидимой. Если мы уберём иконку, Android может остановить Adblock Plus в любое время, что приведёт к потере соединения с сетью.</string>
   <string name="msg_hideicon_native">Вы можете &lt;b&gt;полностью отключить&lt;/b&gt; значок уведомления с помощью настроек Android. Для этого снимите флажок &lt;i&gt;Показывать уведомления&lt;/i&gt; в &lt;i&gt;Информации о приложении&lt;/i&gt;. Нажмите&lt;i&gt;Показать&lt;/i&gt;, чтобы открыть настройки сейчас.</string>
   <string name="configuring_url">https://adblockplus.org/ru/android-config</string>
   <string name="configuring_proxy_url">https://adblockplus.org/ru/android-config#proxy</string>
   <string name="ok">OK</string>
-  <string name="cancel">Отмена</string>
+  <string name="cancel">Отменить</string>
   <string name="error">Ошибка</string>
   <string name="warning">Внимание</string>
   <string name="about">О приложении</string>
@@ -53,6 +56,9 @@
   <string name="pref_proxyenabled_title">Прокси</string>
   <string name="pref_proxyenabled_summary_on">Adblock прокси включён</string>
   <string name="pref_proxyenabled_summary_off">Adblock прокси отключён</string>
+  <string name="pref_acceptableads_title">Acceptable Ads</string>
+  <string name="pref_acceptableads_summary_on">Allow some non-intrusive advertising</string>
+  <string name="pref_acceptableads_summary_off">Block all advertising</string>
   <string name="pref_startatboot_title">Запускать при загрузке</string>
   <string name="pref_startatboot_summary_on">Adblock Plus будет запущен автоматически в фоновом режиме, если он включён</string>
   <string name="pref_startatboot_summary_off">Потребуется запустить Adblock Plus вручную после загрузки</string>

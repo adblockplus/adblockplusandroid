@@ -5,6 +5,8 @@
   <string name="crash_name">Трапився збій</string>
   <string name="configuration_name">Дані конфігурації</string>
   <string name="proxysettings_name">Конфігурація проксі</string>
+  <string name="install_name">Adblock Plus було встановлено</string>
+  <string name="acceptableads_name">Прийнятна реклама у Adblock Plus</string>
   <string name="notif_wifi">Реклама блокується при Wi-Fi з\'єднанні</string>
   <string name="notif_wifi_nofiltering">Дозволяється реклама при Wi-Fi з\'єднаннях</string>
   <string name="notif_all">Реклама блокується при всіх з\'єднаннях</string>
@@ -13,7 +15,8 @@
   <string name="crash_dialog_text">Здається, програма зіткнулася з проблемою і було примусово зупинена під час попереднього запуску. Ви можете допомогти нам вирішити цю проблему, якщо відправите звіт про помилку, натиснувши „Гаразд“.</string>
   <string name="crash_dialog_comment_prompt">Ви можете додати коментар по даній проблемі нижче:</string>
   <string name="msg_crash_submission_failure">Не вдалося відправити звіт про помилку, пізніше спроба буде повторена.</string>
-  <string name="msg_subscription_offer">Ми вибрали відповідну підписку для вас: \'%s\'. Ви можете змінити її в будь-який час у налаштуваннях програми.</string>
+  <string name="msg_subscription_offer">Підписки були відібрані на основі вашої мови: \'%s\'. &lt;a&gt;Прийнятна реклама&lt;/a&gt; увімкнена. Ви можете змінити це в налаштуваннях.</string>
+  <string name="msg_acceptable_ads">Adblock Plus вже підтримує &lt;a&gt;Прийнятну рекламу&lt;/a&gt;, і автоматично увімкнув її. Ви можете її вимкнути у налаштуваннях.</string>
   <string name="msg_notraffic">Здається немає трафіку, який проходить через програму.</string>
   <string name="msg_configuration">Adblock Plus не може змінити параметри проксі-сервера на вашому пристрої, задайте їх вручну.</string>
   <string name="msg_badport">Погане значення порту</string>
@@ -23,7 +26,7 @@
   <string name="msg_update_description">Нове оновлення доступне для завантаження. Продовжити?</string>
   <string name="msg_update_downloading">Завантаження оновлення: %d%%</string>
   <string name="msg_update_ready">Оновлення готове до встановлення</string>
-  <string name="msg_update_fail">Не вдалося перевірити оновлення, будь ласка, спробуйте пізніше</string>
+  <string name="msg_update_fail">Не вдалося перевірити наявність оновлень, повторіть спробу пізніше</string>
   <string name="msg_hideicon_warning">&lt;b&gt;Зауважте&lt;/b&gt;: найкраще, що ми можемо - це зробити піктограму повідомлення невидимою. Якщо ми вилучимо іконку, Android може зупинити Adblock Plus в будь-який час, що призведе до втрати з\'єднання з мережею.</string>
   <string name="msg_hideicon_native">Ви можете &lt;b&gt; повністю вимкнути &lt;/b&gt; піктограму сповіщення через параметри Android. Для цього зніміть &lt;i&gt; прапорець &lt;/i&gt; Показувати сповіщення &lt;i&gt; у Інформації про програму &lt;/i&gt;. Натисніть &lt;i&gt; Показати мені &lt;/i&gt;, щоб відкрити їх зараз.</string>
   <string name="configuring_url">https://adblockplus.org/en/android-config</string>
@@ -53,6 +56,9 @@
   <string name="pref_proxyenabled_title">Проксі-сервер</string>
   <string name="pref_proxyenabled_summary_on">Adblock проксі увімкнено</string>
   <string name="pref_proxyenabled_summary_off">Adblock проксі-сервер вимкнено</string>
+  <string name="pref_acceptableads_title">Прийнятна реклама</string>
+  <string name="pref_acceptableads_summary_on">Дозволити деяку ненав\'язливу рекламу</string>
+  <string name="pref_acceptableads_summary_off">Блокувати усю рекламу</string>
   <string name="pref_startatboot_title">Почати завантаження</string>
   <string name="pref_startatboot_summary_on">Якщо це увімкнено, тоAdblock Plus буде запущено автоматично у фоновому режимі</string>
   <string name="pref_startatboot_summary_off">Adblock Plus потрібно запустити вручну після завантаження</string>

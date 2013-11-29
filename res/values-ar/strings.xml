@@ -5,6 +5,8 @@
   <string name="crash_name">وقع انهيار مفاجئ</string>
   <string name="configuration_name">معلومات التكوين</string>
   <string name="proxysettings_name">تكوين الوكيل</string>
+  <string name="install_name">تم تثبيت Adblock Plus</string>
+  <string name="acceptableads_name">إعلان مقبولة في  Adblock Plus</string>
   <string name="notif_wifi">يتم حظر الإعلانات على اتصال وأي فأي</string>
   <string name="notif_wifi_nofiltering">السماح بالإعلانات على اتصال وأي فأي</string>
   <string name="notif_all">يتم حظر الإعلانات في كافة الاتصالات</string>
@@ -13,7 +15,8 @@
   <string name="crash_dialog_text">ويبدو أن التطبيق واجه مشكلة وأوقفت قوة على الإطلاق السابقة. يمكنك مساعدتنا في حل هذه المشكلة إذا قمت بإرسال لنا تقرير عن الخطأ عن طريق النقر فوق \'موافق\'.</string>
   <string name="crash_dialog_comment_prompt">قد يمكنك إضافة تعليقاتك حول المشكلة أدناه:</string>
   <string name="msg_crash_submission_failure">أخفق في تقديم تقرير تحطم، سوف حاول مرة أخرى لاحقاً.</string>
-  <string name="msg_subscription_offer">لقد اخترنا اشتراك مناسب لك: \'%s\'. يمكنك تغيير ذلك في أي وقت في إعدادات التطبيق.</string>
+  <string name="msg_subscription_offer">وقد تم اختيار اشتراك استناداً إلى اللغة الخاصة بك:%s.&lt;a&gt; تم تمكين لإعلانات&lt;/a&gt; اللتي قبلتها. يمكنك تغيير هذا في الإعدادات.</string>
+  <string name="msg_acceptable_ads">Adblock Plus الآن تؤيد  &lt;a&gt; إعلان مقبولة &lt;/a&gt;, وأتاح لهم تلقائياً التفعيل. يمكنك تعطيلها في الإعدادات.</string>
   <string name="msg_notraffic">ويبدو أن المرور لا يتم تمرير من خلال التطبيق.</string>
   <string name="msg_configuration">adblock plus لا يمكنه تغيير أعدادات الوكيل في الإعدادات على الجهاز الخاص بك، الرجاء تكوينه يدوياً.</string>
   <string name="msg_badport">قيمة المنفذ خاطئة</string>
@@ -23,7 +26,7 @@
   <string name="msg_update_description">يتوفر تحديث جديد للتحميل. هل تريد المتابعة ؟</string>
   <string name="msg_update_downloading">تحميل التحديث: %d%%</string>
   <string name="msg_update_ready">جاهز لتثبيت التحديث</string>
-  <string name="msg_update_fail">فشل في التحقق من وجود تحديثات، الرجاء المحاولة مرة أخرى لاحقاً</string>
+  <string name="msg_update_fail">فشل في التحقق من وجود تحديثات، حاول مرة أخرى لاحقاً</string>
   <string name="msg_hideicon_warning">&lt;b&gt;يرجا الملاحضة &lt;/b&gt; إن أفضل ما يمكننا فعله هو جعل رمز غير مرئية. إذا كنا إزالة الرمز، يمكن أن الروبوت وقف    adblock plusأي وقت، الأمر الذي سيؤدي إلى فقدان الاتصال.</string>
   <string name="msg_hideicon_native">يمكنك أن &lt;b&gt; تماما تعطيل &lt;/b&gt; رمز إعلام من خلال إعدادات الروبوت. لإلغاء &lt;i&gt; إظهار إعلامات &lt;/i&gt; خانة الاختيار هذه في &lt;i&gt; تطبيق معلومات &lt;/i&gt;. الصحافة &lt;i&gt; تظهر لي &lt;/i&gt; لفتحه الآن.</string>
   <string name="configuring_url">https://adblockplus.org/en/android-config</string>
@@ -53,6 +56,9 @@
   <string name="pref_proxyenabled_title">الخادم الوكيل</string>
   <string name="pref_proxyenabled_summary_on">يتم تمكين الوكيل Adblock</string>
   <string name="pref_proxyenabled_summary_off">يتم تعطيل الوكيل Adblock</string>
+  <string name="pref_acceptableads_title">إعلان مقبولة</string>
+  <string name="pref_acceptableads_summary_on">السماح لبعض الإعلانات الغير متطفّلة</string>
+  <string name="pref_acceptableads_summary_off">حجب جميع الإعلانات</string>
   <string name="pref_startatboot_title">بدء تشغيل في التمهيد</string>
   <string name="pref_startatboot_summary_on">سوف يبدأ adblock plus في الخلفية تلقائياً إذا تم تمكينه</string>
   <string name="pref_startatboot_summary_off">adblock plus يحتاج إلى البدء يدوياً بعد التمهيد</string>

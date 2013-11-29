@@ -5,6 +5,8 @@
   <string name="crash_name">Összeomlás történt</string>
   <string name="configuration_name">Konfigurációs információ</string>
   <string name="proxysettings_name">Proxy konfiguráció</string>
+  <string name="install_name">Az Adbock Plus sikeresen telepítve</string>
+  <string name="acceptableads_name">Elfogadható hirdetések az Adblock Plusban</string>
   <string name="notif_wifi">Hirdetések blokkolva WiFi kapcsolaton</string>
   <string name="notif_wifi_nofiltering">Hirdetések engedélyezve WiFi kapcsolaton</string>
   <string name="notif_all">Hirdetések blokkolva minden kapcsolaton</string>
@@ -13,7 +15,8 @@
   <string name="crash_dialog_text">Úgy tűnik, hogy az alkalmazás az előző indítás során hibát észlelt és leállt. Segíthetsz nekünk a probléma megoldásában, ha elküldöd a jelentést az \'OK\' gombra való kattintással.</string>
   <string name="crash_dialog_comment_prompt">Ha szeretnél megjegyzést fűzni a problémához, akkor alább megteheted:</string>
   <string name="msg_crash_submission_failure">A jelentés elküldése nem sikerült, később megpróbálom újra.</string>
-  <string name="msg_subscription_offer">Kiválasztottunk egy számodra megfelelő listát: \'%s\'. Ezt a beállítások közt bármikor megváltoztathatod.</string>
+  <string name="msg_subscription_offer">Egy feliratkozás ki lett választva az Ön nyelve alapján: \'%s\'. &lt;a&gt;Az elfogadható hirdetések&lt;/a&gt; be lettek kapcsolva. Ezt a beállításokban módosíthatja.</string>
+  <string name="msg_acceptable_ads">Az Adblock Plus mostantól támogatja az &lt;a&gt;elfogadható hirdetéseket&lt;/a&gt;, és automatikusan bekapcsolta őket. A beállításokban kikapcsolhatók.</string>
   <string name="msg_notraffic">Úgy tűnik, hogy nem halad át forgalom az alkalmazáson.</string>
   <string name="msg_configuration">Az Adblock Plus nem tudta megváltoztatni a proxy beállításokat az eszközödön, kérlek konfiguráld manuálisan.</string>
   <string name="msg_badport">Rossz port érték</string>
@@ -23,7 +26,7 @@
   <string name="msg_update_description">Új frissítés áll készen a letöltésre. Folytatod?</string>
   <string name="msg_update_downloading">Frissítés letöltése: %d%%</string>
   <string name="msg_update_ready">A frissítés készen áll a telepítésre</string>
-  <string name="msg_update_fail">Frissítések keresése sikertelen volt, kérlek próbáld újra később</string>
+  <string name="msg_update_fail">Frissítések keresése sikertelen, később újrapróbálom</string>
   <string name="msg_hideicon_warning">&lt;b&gt;Kérlek, vedd figyelembe&lt;/b&gt;: A legtöbb, amit tehetünk az, hogy láthatatlanná tesszük az ikont. Ha eltávolítjuk az ikont, akkor az Android bármikor leállíthatja az Adblock Plus -t, ami a kapcsolat elvesztéséhez vezet.</string>
   <string name="msg_hideicon_native">&lt;b&gt;Teljesen ki is kapcsolhatod&lt;/b&gt; az értesítési ikont az Android beállításaiban. Hogy ezt megtedd, távolítsd el a jelölést az &lt;i&gt;Értesítések megjelenítése&lt;/i&gt; jelölőnégyzetből az &lt;i&gt;Alkalmazás információk&lt;/i&gt; között. Érintsd meg a &lt;i&gt;Mutasd&lt;/i&gt; gombot a megnyitáshoz.</string>
   <string name="configuring_url">https://adblockplus.org/en/android-config</string>
@@ -53,6 +56,9 @@
   <string name="pref_proxyenabled_title">Proxy</string>
   <string name="pref_proxyenabled_summary_on">Adblock proxy bekapcsolva</string>
   <string name="pref_proxyenabled_summary_off">Adblock proxy kikapcsolva</string>
+  <string name="pref_acceptableads_title">Elfogadható hirdetések</string>
+  <string name="pref_acceptableads_summary_on">Néhány nem tolakodó hirdetés engedélyezése</string>
+  <string name="pref_acceptableads_summary_off">Minden hirdetés blokkolása</string>
   <string name="pref_startatboot_title">Indítás a rendszer indulásakor</string>
   <string name="pref_startatboot_summary_on">Az Adblock Plus automatikusan el fog indulni a háttérben, ha engedélyezed</string>
   <string name="pref_startatboot_summary_off">Az Adblock Plus -t a rendszer indítása után manuálisan kell elindítani</string>
