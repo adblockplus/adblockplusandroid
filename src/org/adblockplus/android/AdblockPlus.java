@@ -339,10 +339,20 @@ public class AdblockPlus extends Application
    */
   public String[] getSelectorsForDomain(final String domain)
   {
+    /* We need to ignore element hiding rules here to work around two bugs:
+     * 1. CSS is being injected even when there's an exception rule with $elemhide
+     * 2. The injected CSS causes blank pages in Chrome for Android
+     *
+     * Starting with 1.1.2, we ignored element hiding rules after download anyway, to keep the
+     * memory usage down. Doing this with libadblockplus is trickier, but would be the clean
+     * solution. */
+    return null;
+/*
     if (!filteringEnabled)
       return null;
 
     return abpEngine.getSelectorsForDomain(domain);
+*/
   }
 
   /**
