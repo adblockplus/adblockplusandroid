@@ -20,7 +20,7 @@
 #include "AndroidLogSystem.h"
 #include "AndroidWebRequest.h"
 #include "Utils.h"
-#include "debug.h"
+#include "Debug.h"
 
 JavaVM* globalJvm;
 AdblockPlus::FilterEngine* filterEngine;

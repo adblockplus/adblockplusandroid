@@ -16,7 +16,7 @@
  */
 
 #include "Utils.h"
-#include "debug.h"
+#include "Debug.h"
 
 const std::string GetString(JNIEnv *pEnv, jstring str)
 {
