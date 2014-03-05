@@ -18,7 +18,7 @@
 #include <AdblockPlus.h>
 #include "AndroidWebRequest.h"
 #include "Utils.h"
-#include "debug.h"
+#include "Debug.h"
 
 namespace
 {

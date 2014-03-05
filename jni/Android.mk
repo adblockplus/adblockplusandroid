@@ -24,7 +24,7 @@ include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE    	:= abpEngine
-LOCAL_SRC_FILES 	:= abpEngine.cpp Utils.cpp AndroidLogSystem.cpp AndroidWebRequest.cpp
+LOCAL_SRC_FILES 	:= AbpEngine.cpp Utils.cpp AndroidLogSystem.cpp AndroidWebRequest.cpp
 
 LOCAL_CPP_FEATURES 	:= rtti exceptions
 LOCAL_CFLAGS += \

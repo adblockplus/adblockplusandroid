@@ -8,3 +8,4 @@ bin
 libs/armeabi
 obj
 gen
+jni/.*
