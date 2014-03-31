@@ -20,8 +20,6 @@ package org.adblockplus.android;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.adblockplus.android.updater.AlarmReceiver;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ComponentName;

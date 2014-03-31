@@ -87,9 +87,9 @@ public class AdblockPlus extends Application
   private boolean filteringEnabled = false;
 
   private ABPEngine abpEngine;
-  
+
   private static AdblockPlus instance;
-  
+
   private static class ReferrerMappingCache extends LinkedHashMap<String, String>
   {
     private static final long serialVersionUID = 1L;
@@ -213,10 +213,10 @@ public class AdblockPlus extends Application
     }
     return networkInfo == null ? false : networkInfo.isConnected();
   }
-  
+
   /**
    * Checks if ProxyService is running.
-   * 
+   *
    * @return true if service is running
    */
   public boolean isServiceRunning()
@@ -261,18 +261,18 @@ public class AdblockPlus extends Application
    */
   public Subscription[] getListedSubscriptions()
   {
-    return abpEngine.getListedSubscriptions();    
+    return abpEngine.getListedSubscriptions();
   }
 
   /**
    * Adds provided subscription and removes previous subscriptions if any.
-   * 
+   *
    * @param url
    *          URL of subscription to add
    */
   public void setSubscription(String url)
   {
-    Subscription[] subscriptions = abpEngine.getListedSubscriptions();    
+    Subscription[] subscriptions = abpEngine.getListedSubscriptions();
     for (Subscription subscription : subscriptions)
     {
       abpEngine.removeSubscription(subscription.url);
@@ -291,10 +291,10 @@ public class AdblockPlus extends Application
       abpEngine.refreshSubscription(subscription.url);
     }
   }
-  
+
   /**
    * Enforces subscription status update.
-   * 
+   *
    * @param url Subscription url
    */
   public void actualizeSubscriptionStatus(String url)
@@ -358,7 +358,7 @@ public class AdblockPlus extends Application
 
   /**
    * Checks if filters match request parameters.
-   * 
+   *
    * @param url
    *          Request URL
    * @param query
@@ -378,7 +378,7 @@ public class AdblockPlus extends Application
 
     if (!filteringEnabled)
       return false;
-    
+
     String contentType = null;
 
     if (accept != null)
@@ -443,7 +443,7 @@ public class AdblockPlus extends Application
     filteringEnabled = enable;
     sendBroadcast(new Intent(BROADCAST_FILTERING_CHANGE).putExtra("enabled", filteringEnabled));
   }
-  
+
   /**
    * Starts ABP engine. It also initiates subscription refresh if it is enabled
    * in user settings.
@@ -482,7 +482,7 @@ public class AdblockPlus extends Application
    * Sets Alarm to call updater after specified number of minutes or after one
    * day if
    * minutes are set to 0.
-   * 
+   *
    * @param minutes
    *          number of minutes to wait
    */

@@ -60,7 +60,7 @@ public class ABPEngine
   {
     context.sendBroadcast(new Intent(AdblockPlus.BROADCAST_SUBSCRIPTION_STATUS).putExtra("url", url).putExtra("status", status).putExtra("time", time));
   }
-  
+
   /**
    * Called when update event occurred.
    * @param url Update download address
@@ -71,11 +71,11 @@ public class ABPEngine
     NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     notificationManager.notify(NOTIFICATION_ID, notification);
   }
-  
+
   private native void initialize(String basePath, String version, String sdkVersion, String locale, boolean developmentBuild);
 
   public native void release();
-  
+
   public native boolean isFirstRun();
 
   public native Subscription[] getListedSubscriptions();
@@ -89,7 +89,7 @@ public class ABPEngine
   public native void refreshSubscription(String url);
 
   public native void actualizeSubscriptionStatus(String url);
-  
+
   public native void setAcceptableAdsEnabled(boolean enabled);
 
   public native String getDocumentationLink();
@@ -99,7 +99,7 @@ public class ABPEngine
   public native String[] getSelectorsForDomain(String domain);
 
   public native void checkUpdates();
-  
+
   private Notification getNotification(String url, String error)
   {
     final PendingIntent emptyIntent = PendingIntent.getActivity(context, 0, new Intent(), 0);
@@ -111,12 +111,12 @@ public class ABPEngine
     builder.setAutoCancel(true);
     builder.setOnlyAlertOnce(true);
     builder.setContentIntent(emptyIntent);
-    
+
     if (url != null)
     {
       builder.setSmallIcon(R.drawable.ic_stat_download);
 
-      
+
       Intent intent = new Intent(context, UpdaterActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
       intent.setAction("download");
       intent.putExtra("url", url);
