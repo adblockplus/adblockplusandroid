@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.List;
@@ -237,7 +238,8 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
           continue;
         try
         {
-          listen = new ServerSocket(p, 1024);
+          // Fix for #232, bind proxy socket to loopback only
+          listen = new ServerSocket(p, 1024, InetAddress.getByName(LOCALHOST));
           port = p;
           break;
         }
