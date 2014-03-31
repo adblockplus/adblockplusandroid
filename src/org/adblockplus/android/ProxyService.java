@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.List;
@@ -395,9 +394,9 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
    */
   private void clearConnectionProxy()
   {
-    String proxyHost = (String) proxyConfiguration.getProperty("adblock.proxyHost");
-    String proxyPort = (String) proxyConfiguration.getProperty("adblock.proxyPort");
-    String proxyExcl = (String) proxyConfiguration.getProperty("adblock.proxyExcl");
+    String proxyHost = proxyConfiguration.getProperty("adblock.proxyHost");
+    String proxyPort = proxyConfiguration.getProperty("adblock.proxyPort");
+    String proxyExcl = proxyConfiguration.getProperty("adblock.proxyExcl");
     int port = 0;
     try
     {
@@ -575,7 +574,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 
   /**
    * Initializes iptables executable.
-   * 
+   *
    * @throws FileNotFoundException
    *           If iptables initialization failed due to provided reasons.
    */

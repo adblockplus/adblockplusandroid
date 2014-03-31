@@ -241,7 +241,7 @@ public class Preferences extends SummarizedPreferences
     }
     unbindService(proxyServiceConnection);
     proxyService = null;
-    
+
     hideConfigurationMsg();
   }
 
@@ -507,7 +507,7 @@ public class Preferences extends SummarizedPreferences
 
   /**
    * Constructs and updates subscription status text.
-   * 
+   *
    * @param text
    *          status message
    * @param time

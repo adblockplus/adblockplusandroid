@@ -46,7 +46,7 @@ public class ProxySettings
   /**
    * Reads proxy settings from link properties on Android 3.1+ using Java
    * reflection.
-   * 
+   *
    * @param linkProperties
    *          android.net.LinkProperties
    * @return ProxyProperties
@@ -64,7 +64,7 @@ public class ProxySettings
 
   /**
    * Reads system proxy settings on Android 3.1+ using Java reflection.
-   * 
+   *
    * @return string array of host, port and exclusion list
    */
   public static String[] getUserProxy(Context context)
@@ -108,7 +108,7 @@ public class ProxySettings
 
   /**
    * Reads system proxy settings on Android 3.1+ using Java reflection.
-   * 
+   *
    * @param pp
    *          ProxyProperties object
    * @return string array of host, port and exclusion list
@@ -132,7 +132,7 @@ public class ProxySettings
      * int proxyPort = pp.getPort();
      */
     method = c.getMethod("getPort");
-    userProxy[1] = String.valueOf((Integer) method.invoke(pp));
+    userProxy[1] = String.valueOf(method.invoke(pp));
 
     /*
      * String proxyEL = pp.getExclusionList()
@@ -149,7 +149,7 @@ public class ProxySettings
   /**
    * Tries to set local proxy in system settings via native call on Android 3.1+
    * devices using Java reflection.
-   * 
+   *
    * @return true if device supports native proxy setting
    */
   public static boolean setConnectionProxy(Context context, String host, int port, String excl)

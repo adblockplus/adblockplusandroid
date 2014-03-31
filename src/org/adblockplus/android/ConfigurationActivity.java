@@ -31,7 +31,7 @@ import android.widget.TextView;
 public class ConfigurationActivity extends Activity
 {
   private int port;
-  
+
   @Override
   public void onCreate(Bundle savedInstanceState)
   {
