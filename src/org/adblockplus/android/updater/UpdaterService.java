@@ -26,6 +26,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import org.adblockplus.android.R;
+import org.adblockplus.android.Utils;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -43,7 +44,7 @@ import android.util.Log;
  */
 public class UpdaterService extends Service
 {
-  private final static String TAG = "UpdaterService";
+  private static final String TAG = Utils.getTag(UpdaterService.class);
 
   private File updateDir;
 
@@ -56,7 +57,7 @@ public class UpdaterService extends Service
   }
 
   @Override
-  public void onStart(Intent intent, int startId)
+  public void onStart(final Intent intent, final int startId)
   {
     super.onStart(intent, startId);
 
@@ -74,20 +75,20 @@ public class UpdaterService extends Service
   }
 
   @Override
-  public IBinder onBind(Intent intent)
+  public IBinder onBind(final Intent intent)
   {
     return null;
   }
 
   private class DownloadTask extends AsyncTask<String, Integer, String>
   {
-    private Context context;
-    private Notification notification;
-    private PendingIntent contentIntent;
-    private NotificationManager notificationManager;
-    private int notificationId = R.string.app_name + 2;
+    private final Context context;
+    private final Notification notification;
+    private final PendingIntent contentIntent;
+    private final NotificationManager notificationManager;
+    private final int notificationId = R.string.app_name + 2;
 
-    public DownloadTask(Context context)
+    public DownloadTask(final Context context)
     {
       this.context = context;
       notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -106,20 +107,20 @@ public class UpdaterService extends Service
     }
 
     @Override
-    protected String doInBackground(String... sUrl)
+    protected String doInBackground(final String... sUrl)
     {
       try
       {
         // Create connection
-        URL url = new URL(sUrl[0]);
+        final URL url = new URL(sUrl[0]);
         Log.e(TAG, "D: " + sUrl[0]);
-        URLConnection connection = url.openConnection();
+        final URLConnection connection = url.openConnection();
         connection.connect();
-        int fileLength = connection.getContentLength();
+        final int fileLength = connection.getContentLength();
         Log.e(TAG, "S: " + fileLength);
 
         // Check if file already exists
-        File updateFile = new File(updateDir, "AdblockPlus-update.apk");
+        final File updateFile = new File(updateDir, "AdblockPlus-update.apk");
         if (updateFile.exists())
         {
           // if (updateFile.length() == fileLength)
@@ -129,10 +130,10 @@ public class UpdaterService extends Service
         }
 
         // Download the file
-        InputStream input = new BufferedInputStream(url.openStream());
-        OutputStream output = new FileOutputStream(updateFile);
+        final InputStream input = new BufferedInputStream(url.openStream());
+        final OutputStream output = new FileOutputStream(updateFile);
 
-        byte data[] = new byte[1024];
+        final byte data[] = new byte[1024];
         long total = 0;
         int count;
         int progress = 0;
@@ -141,7 +142,7 @@ public class UpdaterService extends Service
           total += count;
           output.write(data, 0, count);
 
-          int p = (int) (total * 100 / fileLength);
+          final int p = (int) (total * 100 / fileLength);
           if (p != progress)
           {
             publishProgress(p);
@@ -154,7 +155,7 @@ public class UpdaterService extends Service
         input.close();
         return updateFile.getAbsolutePath();
       }
-      catch (Exception e)
+      catch (final Exception e)
       {
         Log.e(TAG, "Download error", e);
         return null;
@@ -162,26 +163,26 @@ public class UpdaterService extends Service
     }
 
     @Override
-    protected void onProgressUpdate(Integer... progress)
+    protected void onProgressUpdate(final Integer... progress)
     {
       notification.setLatestEventInfo(context, getString(R.string.app_name), String.format(getString(R.string.msg_update_downloading), progress[0]), contentIntent);
       notificationManager.notify(notificationId, notification);
     }
 
     @Override
-    protected void onPostExecute(String result)
+    protected void onPostExecute(final String result)
     {
       notificationManager.cancel(notificationId);
       if (result != null)
       {
-        Notification notification = new Notification();
+        final Notification notification = new Notification();
         notification.icon = R.drawable.ic_stat_download;
         notification.when = System.currentTimeMillis();
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
-        Intent intent = new Intent(context, UpdaterActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        final Intent intent = new Intent(context, UpdaterActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setAction("update");
         intent.putExtra("path", result);
-        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        final PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         notification.setLatestEventInfo(context, context.getText(R.string.app_name), context.getString(R.string.msg_update_ready), contentIntent);
         notificationManager.notify(R.string.app_name + 1, notification);
       }

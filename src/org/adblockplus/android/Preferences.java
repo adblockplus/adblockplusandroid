@@ -62,21 +62,18 @@ import com.actionbarsherlock.view.MenuItem;
  */
 public class Preferences extends SummarizedPreferences
 {
-  private static final String TAG = "Preferences";
-
+  private static final String TAG = Utils.getTag(Preferences.class);
   private static final int ABOUT_DIALOG = 1;
   private static final int HIDEICONWARNING_DIALOG = 2;
 
   private static ProxyService proxyService = null;
-
   private static boolean firstRunActionsPending = true;
 
   private RefreshableListPreference subscriptionList;
-
   private String subscriptionSummary;
 
   @Override
-  public void onCreate(Bundle savedInstanceState)
+  public void onCreate(final Bundle savedInstanceState)
   {
     super.onCreate(savedInstanceState);
 
@@ -85,22 +82,22 @@ public class Preferences extends SummarizedPreferences
     setContentView(R.layout.preferences);
     addPreferencesFromResource(R.xml.preferences);
 
-    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+    final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
     // Check if we need to update assets
-    int lastVersion = prefs.getInt(getString(R.string.pref_version), 0);
+    final int lastVersion = prefs.getInt(getString(R.string.pref_version), 0);
     try
     {
-      int thisVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+      final int thisVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
       if (lastVersion != thisVersion)
       {
         copyAssets();
-        SharedPreferences.Editor editor = prefs.edit();
+        final SharedPreferences.Editor editor = prefs.edit();
         editor.putInt(getString(R.string.pref_version), thisVersion);
         editor.commit();
       }
     }
-    catch (NameNotFoundException e)
+    catch (final NameNotFoundException e)
     {
       copyAssets();
     }
@@ -110,16 +107,16 @@ public class Preferences extends SummarizedPreferences
   protected void onStart()
   {
     super.onStart();
-    AdblockPlus application = AdblockPlus.getApplication();
+    final AdblockPlus application = AdblockPlus.getApplication();
     application.startEngine();
 
     // Initialize subscription list
     subscriptionList = (RefreshableListPreference) findPreference(getString(R.string.pref_subscription));
-    Subscription[] subscriptions = application.getRecommendedSubscriptions();
-    String[] entries = new String[subscriptions.length];
-    String[] entryValues = new String[subscriptions.length];
+    final Subscription[] subscriptions = application.getRecommendedSubscriptions();
+    final String[] entries = new String[subscriptions.length];
+    final String[] entryValues = new String[subscriptions.length];
     int i = 0;
-    for (Subscription subscription : subscriptions)
+    for (final Subscription subscription : subscriptions)
     {
       entries[i] = subscription.title;
       entryValues[i] = subscription.url;
@@ -129,7 +126,7 @@ public class Preferences extends SummarizedPreferences
     subscriptionList.setEntryValues(entryValues);
 
     // Set Acceptable Ads FAQ link
-    HelpfulCheckBoxPreference acceptableAdsCheckBox =
+    final HelpfulCheckBoxPreference acceptableAdsCheckBox =
         (HelpfulCheckBoxPreference) findPreference(getString(R.string.pref_acceptableads));
     acceptableAdsCheckBox.setHelpUrl(AdblockPlus.getApplication().getAcceptableAdsUrl());
   }
@@ -138,24 +135,24 @@ public class Preferences extends SummarizedPreferences
   public void onResume()
   {
     super.onResume();
-    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+    final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
     final AdblockPlus application = AdblockPlus.getApplication();
 
     Subscription current = null;
-    Subscription[] subscriptions = application.getListedSubscriptions();
+    final Subscription[] subscriptions = application.getListedSubscriptions();
     if (subscriptions.length > 0)
     {
       current = subscriptions[0];
     }
 
-    boolean firstRun = firstRunActionsPending && application.isFirstRun();
+    final boolean firstRun = firstRunActionsPending && application.isFirstRun();
     firstRunActionsPending = false;
 
     if (firstRun && current != null)
     {
       showNotificationDialog(getString(R.string.install_name),
-          String.format(getString(R.string.msg_subscription_offer, current.title)),
+          String.format(getString(R.string.msg_subscription_offer), current.title),
           application.getAcceptableAdsUrl());
       application.setNotifiedAboutAcceptableAds(true);
       setAcceptableAdsEnabled(true);
@@ -172,7 +169,7 @@ public class Preferences extends SummarizedPreferences
     subscriptionList.setOnRefreshClickListener(new View.OnClickListener()
     {
       @Override
-      public void onClick(View v)
+      public void onClick(final View v)
       {
         application.refreshSubscriptions();
       }
@@ -193,11 +190,11 @@ public class Preferences extends SummarizedPreferences
     if (current != null)
     {
       subscriptionList.setValue(current.url);
-      application.actualizeSubscriptionStatus(current.url);
+      application.updateSubscriptionStatus(current.url);
     }
-    boolean enabled = prefs.getBoolean(getString(R.string.pref_enabled), false);
-    boolean proxyenabled = prefs.getBoolean(getString(R.string.pref_proxyenabled), true);
-    boolean autoconfigured = prefs.getBoolean(getString(R.string.pref_proxyautoconfigured), false);
+    final boolean enabled = prefs.getBoolean(getString(R.string.pref_enabled), false);
+    final boolean proxyenabled = prefs.getBoolean(getString(R.string.pref_proxyenabled), true);
+    final boolean autoconfigured = prefs.getBoolean(getString(R.string.pref_proxyautoconfigured), false);
 
     // This is weird but UI does not update on back button (when returning from advanced preferences)
     ((SwitchPreference) findPreference(getString(R.string.pref_enabled))).setChecked(enabled);
@@ -210,7 +207,7 @@ public class Preferences extends SummarizedPreferences
     bindService(new Intent(this, ProxyService.class), proxyServiceConnection, 0);
   }
 
-  private void showNotificationDialog(String title, String message, String url)
+  private void showNotificationDialog(final String title, String message, String url)
   {
     url = TextUtils.htmlEncode(url);
     message = TextUtils.htmlEncode(message)
@@ -234,7 +231,7 @@ public class Preferences extends SummarizedPreferences
     {
       unregisterReceiver(receiver);
     }
-    catch (IllegalArgumentException e)
+    catch (final IllegalArgumentException e)
     {
       // ignore - it is thrown if receiver is not registered but it can not be
       // true in normal conditions
@@ -249,27 +246,27 @@ public class Preferences extends SummarizedPreferences
   protected void onStop()
   {
     super.onStop();
-    AdblockPlus application = AdblockPlus.getApplication();
+    final AdblockPlus application = AdblockPlus.getApplication();
     if (!application.isFilteringEnabled())
       application.stopEngine();
   }
 
   @Override
-  public boolean onCreateOptionsMenu(Menu menu)
+  public boolean onCreateOptionsMenu(final Menu menu)
   {
-    MenuInflater inflater = getSupportMenuInflater();
+    final MenuInflater inflater = getSupportMenuInflater();
     inflater.inflate(R.menu.menu_preferences, menu);
     return true;
   }
 
   @Override
-  public boolean onOptionsItemSelected(MenuItem item)
+  public boolean onOptionsItemSelected(final MenuItem item)
   {
     switch (item.getItemId())
     {
       case R.id.menu_help:
-        Uri uri = Uri.parse(getString(R.string.configuring_url));
-        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        final Uri uri = Uri.parse(getString(R.string.configuring_url));
+        final Intent intent = new Intent(Intent.ACTION_VIEW, uri);
         startActivity(intent);
         return true;
       case R.id.menu_about:
@@ -283,31 +280,31 @@ public class Preferences extends SummarizedPreferences
     }
   }
 
-  private void setAcceptableAdsEnabled(boolean enabled)
+  private void setAcceptableAdsEnabled(final boolean enabled)
   {
-    CheckBoxPreference acceptableAdsPreference =
+    final CheckBoxPreference acceptableAdsPreference =
         (CheckBoxPreference) findPreference(getString(R.string.pref_acceptableads));
     acceptableAdsPreference.setChecked(enabled);
-    AdblockPlus application = AdblockPlus.getApplication();
+    final AdblockPlus application = AdblockPlus.getApplication();
     application.setAcceptableAdsEnabled(enabled);
   }
 
-  private void setFilteringEnabled(boolean enabled)
+  private void setFilteringEnabled(final boolean enabled)
   {
-    SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+    final SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
     editor.putBoolean(getString(R.string.pref_enabled), enabled);
     editor.commit();
     ((SwitchPreference) findPreference(getString(R.string.pref_enabled))).setChecked(enabled);
-    AdblockPlus application = AdblockPlus.getApplication();
+    final AdblockPlus application = AdblockPlus.getApplication();
     application.setFilteringEnabled(enabled);
   }
 
-  private void setProxyEnabled(boolean enabled)
+  private void setProxyEnabled(final boolean enabled)
   {
-    SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+    final SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
     editor.putBoolean(getString(R.string.pref_proxyenabled), enabled);
     editor.commit();
-    AdblockPlus application = AdblockPlus.getApplication();
+    final AdblockPlus application = AdblockPlus.getApplication();
     if (enabled && !application.isServiceRunning())
       startService(new Intent(this, ProxyService.class));
   }
@@ -317,13 +314,13 @@ public class Preferences extends SummarizedPreferences
    */
   private void copyAssets()
   {
-    AssetManager assetManager = getAssets();
+    final AssetManager assetManager = getAssets();
     String[] files = null;
     try
     {
       files = assetManager.list("install");
     }
-    catch (IOException e)
+    catch (final IOException e)
     {
       Log.e(TAG, "Failed to get assets list", e);
     }
@@ -332,9 +329,9 @@ public class Preferences extends SummarizedPreferences
       try
       {
         Log.d(TAG, "Copy: install/" + files[i]);
-        InputStream in = assetManager.open("install/" + files[i]);
-        OutputStream out = openFileOutput(files[i], MODE_PRIVATE);
-        byte[] buffer = new byte[1024];
+        final InputStream in = assetManager.open("install/" + files[i]);
+        final OutputStream out = openFileOutput(files[i], MODE_PRIVATE);
+        final byte[] buffer = new byte[1024];
         int read;
         while ((read = in.read(buffer)) != -1)
         {
@@ -344,20 +341,20 @@ public class Preferences extends SummarizedPreferences
         out.flush();
         out.close();
       }
-      catch (Exception e)
+      catch (final Exception e)
       {
         Log.e(TAG, "Asset copy error", e);
       }
     }
   }
 
-  public void showProxySettings(View v)
+  public void showProxySettings(final View v)
   {
     startActivity(new Intent(this, ProxyConfigurationActivity.class).putExtra("port", proxyService.port));
   }
 
   @Override
-  protected Dialog onCreateDialog(int id)
+  protected Dialog onCreateDialog(final int id)
   {
     Dialog dialog = null;
     switch (id)
@@ -366,31 +363,33 @@ public class Preferences extends SummarizedPreferences
         dialog = new AboutDialog(this);
         break;
       case HIDEICONWARNING_DIALOG:
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.warning);
         builder.setIcon(android.R.drawable.ic_dialog_alert);
         builder.setCancelable(false);
-        StringBuffer message = new StringBuffer();
+        final StringBuffer message = new StringBuffer();
         message.append(getString(R.string.msg_hideicon_warning));
         builder.setPositiveButton(R.string.gotit, new DialogInterface.OnClickListener()
-            {
-              public void onClick(DialogInterface dialog, int id)
-              {
-                dialog.cancel();
-              }
-            });
+        {
+          @Override
+          public void onClick(final DialogInterface dialog, final int id)
+          {
+            dialog.cancel();
+          }
+        });
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
         {
           message.append("<br/><br/>");
           message.append(getString(R.string.msg_hideicon_native));
-          builder.setNeutralButton(R.string.showme,  new DialogInterface.OnClickListener()
+          builder.setNeutralButton(R.string.showme, new DialogInterface.OnClickListener()
+          {
+            @Override
+            public void onClick(final DialogInterface dialog, final int id)
             {
-              public void onClick(DialogInterface dialog, int id)
-              {
-                AdblockPlus.showAppDetails(getApplicationContext());
-                dialog.cancel();
-              }
-            });
+              AdblockPlus.showAppDetails(getApplicationContext());
+              dialog.cancel();
+            }
+          });
         }
         builder.setMessage(Html.fromHtml(message.toString()));
         dialog = builder.create();
@@ -400,14 +399,14 @@ public class Preferences extends SummarizedPreferences
   }
 
   @Override
-  public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
+  public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences, final String key)
   {
-    AdblockPlus application = AdblockPlus.getApplication();
+    final AdblockPlus application = AdblockPlus.getApplication();
     if (getString(R.string.pref_enabled).equals(key))
     {
-      boolean enabled = sharedPreferences.getBoolean(key, false);
-      boolean autoconfigured = sharedPreferences.getBoolean(getString(R.string.pref_proxyautoconfigured), false);
-      boolean serviceRunning = application.isServiceRunning();
+      final boolean enabled = sharedPreferences.getBoolean(key, false);
+      final boolean autoconfigured = sharedPreferences.getBoolean(getString(R.string.pref_proxyautoconfigured), false);
+      final boolean serviceRunning = application.isServiceRunning();
       application.setFilteringEnabled(enabled);
       if (enabled)
       {
@@ -422,18 +421,18 @@ public class Preferences extends SummarizedPreferences
     }
     else if (getString(R.string.pref_acceptableads).equals(key))
     {
-      boolean enabled = sharedPreferences.getBoolean(key, false);
+      final boolean enabled = sharedPreferences.getBoolean(key, false);
       application.setAcceptableAdsEnabled(enabled);
     }
     else if (getString(R.string.pref_subscription).equals(key))
     {
-      String url = sharedPreferences.getString(key, null);
+      final String url = sharedPreferences.getString(key, null);
       if (url != null)
         application.setSubscription(url);
     }
     else if (getString(R.string.pref_hideicon).equals(key))
     {
-      boolean hideIcon = sharedPreferences.getBoolean(key, false);
+      final boolean hideIcon = sharedPreferences.getBoolean(key, false);
       if (hideIcon)
         showDialog(HIDEICONWARNING_DIALOG);
       if (proxyService != null)
@@ -442,27 +441,27 @@ public class Preferences extends SummarizedPreferences
     super.onSharedPreferenceChanged(sharedPreferences, key);
   }
 
-  private void showConfigurationMsg(String message)
+  private void showConfigurationMsg(final String message)
   {
-    ViewGroup grp = (ViewGroup) findViewById(R.id.grp_configuration);
-    TextView msg = (TextView) findViewById(R.id.txt_configuration);
+    final ViewGroup grp = (ViewGroup) findViewById(R.id.grp_configuration);
+    final TextView msg = (TextView) findViewById(R.id.txt_configuration);
     msg.setText(Html.fromHtml(message));
     grp.setVisibility(View.VISIBLE);
   }
 
   private void hideConfigurationMsg()
   {
-    ViewGroup grp = (ViewGroup) findViewById(R.id.grp_configuration);
+    final ViewGroup grp = (ViewGroup) findViewById(R.id.grp_configuration);
     grp.setVisibility(View.GONE);
   }
 
-  private BroadcastReceiver receiver = new BroadcastReceiver()
+  private final BroadcastReceiver receiver = new BroadcastReceiver()
   {
     @Override
-    public void onReceive(Context context, Intent intent)
+    public void onReceive(final Context context, final Intent intent)
     {
-      String action = intent.getAction();
-      Bundle extra = intent.getExtras();
+      final String action = intent.getAction();
+      final Bundle extra = intent.getExtras();
       if (action.equals(ProxyService.BROADCAST_STATE_CHANGED))
       {
         if (extra.getBoolean("enabled"))
@@ -485,17 +484,18 @@ public class Preferences extends SummarizedPreferences
       }
       if (action.equals(ProxyService.BROADCAST_PROXY_FAILED))
       {
-        String msg = extra.getString("msg");
+        final String msg = extra.getString("msg");
         new AlertDialog.Builder(Preferences.this).setTitle(R.string.error).setMessage(msg).setIcon(android.R.drawable.ic_dialog_alert).setPositiveButton(R.string.ok, null).create().show();
         setFilteringEnabled(false);
       }
       if (action.equals(AdblockPlus.BROADCAST_SUBSCRIPTION_STATUS))
       {
-        //TODO Should check if url matches active subscription
+        // TODO Should check if url matches active subscription
         final String text = extra.getString("status");
         final long time = extra.getLong("time");
         runOnUiThread(new Runnable()
         {
+          @Override
           public void run()
           {
             setSubscriptionStatus(text, time);
@@ -513,18 +513,18 @@ public class Preferences extends SummarizedPreferences
    * @param time
    *          time of last change
    */
-  private void setSubscriptionStatus(String text, long time)
+  private void setSubscriptionStatus(final String text, final long time)
   {
-    ListPreference subscriptionList = (ListPreference) findPreference(getString(R.string.pref_subscription));
-    CharSequence summary = subscriptionList.getEntry();
-    StringBuilder builder = new StringBuilder();
+    final ListPreference subscriptionList = (ListPreference) findPreference(getString(R.string.pref_subscription));
+    final CharSequence summary = subscriptionList.getEntry();
+    final StringBuilder builder = new StringBuilder();
     if (summary != null)
     {
       builder.append(summary);
       if (text != "")
       {
         builder.append(" (");
-        int id = getResources().getIdentifier(text, "string", getPackageName());
+        final int id = getResources().getIdentifier(text, "string", getPackageName());
         if (id > 0)
           builder.append(getString(id, text));
         else
@@ -532,9 +532,9 @@ public class Preferences extends SummarizedPreferences
         if (time > 0)
         {
           builder.append(": ");
-          Calendar calendar = Calendar.getInstance();
+          final Calendar calendar = Calendar.getInstance();
           calendar.setTimeInMillis(time);
-          Date date = calendar.getTime();
+          final Date date = calendar.getTime();
           builder.append(DateFormat.getDateFormat(this).format(date));
           builder.append(" ");
           builder.append(DateFormat.getTimeFormat(this).format(date));
@@ -547,22 +547,23 @@ public class Preferences extends SummarizedPreferences
   }
 
   @Override
-  protected void onRestoreInstanceState(Bundle state)
+  protected void onRestoreInstanceState(final Bundle state)
   {
     super.onRestoreInstanceState(state);
     subscriptionSummary = state.getString("subscriptionSummary");
   }
 
   @Override
-  protected void onSaveInstanceState(Bundle outState)
+  protected void onSaveInstanceState(final Bundle outState)
   {
     outState.putString("subscriptionSummary", subscriptionSummary);
     super.onSaveInstanceState(outState);
   }
 
-  private ServiceConnection proxyServiceConnection = new ServiceConnection()
+  private final ServiceConnection proxyServiceConnection = new ServiceConnection()
   {
-    public void onServiceConnected(ComponentName className, IBinder service)
+    @Override
+    public void onServiceConnected(final ComponentName className, final IBinder service)
     {
       proxyService = ((ProxyService.LocalBinder) service).getService();
       Log.d(TAG, "Proxy service connected");
@@ -571,7 +572,8 @@ public class Preferences extends SummarizedPreferences
         showConfigurationMsg(getString(R.string.msg_configuration));
     }
 
-    public void onServiceDisconnected(ComponentName className)
+    @Override
+    public void onServiceDisconnected(final ComponentName className)
     {
       proxyService = null;
       Log.d(TAG, "Proxy service disconnected");

@@ -15,16 +15,9 @@
  * along with Adblock Plus.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ADBLOCK_PLUS_ANDROID_LOG_SYSTEM_H
-#define ADBLOCK_PLUS_ANDROID_LOG_SYSTEM_H
+package org.adblockplus.libadblockplus;
 
-#include <AdblockPlus/LogSystem.h>
-
-class AndroidLogSystem : public AdblockPlus::LogSystem
+public interface Disposable
 {
-public:
-  void operator()(LogLevel logLevel, const std::string& message,
-        const std::string& source);
-};
-
-#endif
+  public void dispose();
+}

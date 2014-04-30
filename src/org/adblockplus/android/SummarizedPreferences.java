@@ -49,17 +49,17 @@ public class SummarizedPreferences extends SherlockPreferenceActivity implements
   }
 
   @Override
-  public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
+  public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences, final String key)
   {
-    Preference pref = findPreference(key);
+    final Preference pref = findPreference(key);
     setPrefSummary(pref);
   }
 
-  protected void setPrefSummary(Preference pref)
+  protected void setPrefSummary(final Preference pref)
   {
     if (pref instanceof ListPreference)
     {
-      CharSequence summary = ((ListPreference) pref).getEntry();
+      final CharSequence summary = ((ListPreference) pref).getEntry();
       if (summary != null)
       {
         pref.setSummary(summary);
@@ -67,7 +67,7 @@ public class SummarizedPreferences extends SherlockPreferenceActivity implements
     }
     if (pref instanceof EditTextPreference)
     {
-      CharSequence summary = ((EditTextPreference) pref).getText();
+      final CharSequence summary = ((EditTextPreference) pref).getText();
       if (summary != null)
       {
         pref.setSummary(summary);
@@ -75,11 +75,11 @@ public class SummarizedPreferences extends SherlockPreferenceActivity implements
     }
   }
 
-  protected void initSummaries(PreferenceGroup preference)
+  protected void initSummaries(final PreferenceGroup preference)
   {
     for (int i = preference.getPreferenceCount() - 1; i >= 0; i--)
     {
-      Preference pref = preference.getPreference(i);
+      final Preference pref = preference.getPreference(i);
 
       if (pref instanceof PreferenceGroup || pref instanceof PreferenceScreen)
       {

@@ -15,24 +15,72 @@
  * along with Adblock Plus.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <string>
+
 #include "Utils.h"
-#include "Debug.h"
 
-const std::string GetString(JNIEnv *pEnv, jstring str)
+std::string JniJavaToStdString(JNIEnv* env, jstring str)
 {
-  D(D_WARN, "getString()");
-
-  if (str == NULL)
+  if (!str)
+  {
     return std::string();
+  }
 
-  jboolean iscopy;
+  const char* cStr = env->GetStringUTFChars(str, 0);
+  std::string ret(cStr);
+  env->ReleaseStringUTFChars(str, cStr);
 
-  const char *s = pEnv->GetStringUTFChars(str, &iscopy);
-  jsize len = pEnv->GetStringUTFLength(str);
+  return ret;
+}
 
-  const std::string value(s, len);
+jobject NewJniArrayList(JNIEnv* env)
+{
+  jclass clazz = env->FindClass("java/util/ArrayList");
+  jmethodID ctor = env->GetMethodID(clazz, "<init>", "()V");
+  return env->NewObject(clazz, ctor);
+}
 
-  pEnv->ReleaseStringUTFChars(str, s);
+void JniAddObjectToList(JNIEnv* env, jobject list, jobject value)
+{
+  jmethodID add = env->GetMethodID(env->GetObjectClass(list), "add", "(Ljava/lang/Object;)Z");
+  env->CallBooleanMethod(list, add, value);
+}
 
-  return value;
+void JniThrowException(JNIEnv* env, const std::string& message)
+{
+  jclass clazz = env->FindClass(PKG("AdblockPlusException"));
+  env->ThrowNew(clazz, message.c_str());
+}
+
+void JniThrowException(JNIEnv* env, const std::exception& e)
+{
+  JniThrowException(env, e.what());
+}
+
+void JniThrowException(JNIEnv* env)
+{
+  JniThrowException(env, "Unknown exception from libadblockplus");
+}
+
+JNIEnvAcquire::JNIEnvAcquire(JavaVM* javaVM)
+  : javaVM(javaVM), jniEnv(0), attachmentStatus(0)
+{
+  attachmentStatus = javaVM->GetEnv((void **)&jniEnv, ABP_JNI_VERSION);
+  if (attachmentStatus == JNI_EDETACHED)
+  {
+    if (javaVM->AttachCurrentThread(&jniEnv, 0))
+    {
+      // This one is FATAL, we can't recover from this (because without a JVM we're dead), so
+      // throwing a runtime_exception in a ctor can be tolerated here IMHO
+      throw std::runtime_error("Failed to get JNI environment");
+    }
+  }
+}
+
+JNIEnvAcquire::~JNIEnvAcquire()
+{
+  if (attachmentStatus == JNI_EDETACHED)
+  {
+    javaVM->DetachCurrentThread();
+  }
 }

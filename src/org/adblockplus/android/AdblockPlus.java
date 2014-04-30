@@ -32,6 +32,7 @@ import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import org.adblockplus.android.updater.AlarmReceiver;
+import org.apache.commons.lang.StringUtils;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
@@ -55,14 +56,18 @@ import android.util.Log;
 
 public class AdblockPlus extends Application
 {
-  private final static String TAG = "Application";
+  private static final String TAG = Utils.getTag(AdblockPlus.class);
 
-  private final static Pattern RE_JS = Pattern.compile(".*\\.js$", Pattern.CASE_INSENSITIVE);
-  private final static Pattern RE_CSS = Pattern.compile(".*\\.css$", Pattern.CASE_INSENSITIVE);
-  private final static Pattern RE_IMAGE = Pattern.compile(".*\\.(?:gif|png|jpe?g|bmp|ico)$", Pattern.CASE_INSENSITIVE);
-  private final static Pattern RE_FONT = Pattern.compile(".*\\.(?:ttf|woff)$", Pattern.CASE_INSENSITIVE);
-  private final static Pattern RE_HTML = Pattern.compile(".*\\.html?$", Pattern.CASE_INSENSITIVE);
+  private static final Pattern RE_JS = Pattern.compile(".*\\.js$", Pattern.CASE_INSENSITIVE);
+  private static final Pattern RE_CSS = Pattern.compile(".*\\.css$", Pattern.CASE_INSENSITIVE);
+  private static final Pattern RE_IMAGE = Pattern.compile(".*\\.(?:gif|png|jpe?g|bmp|ico)$", Pattern.CASE_INSENSITIVE);
+  private static final Pattern RE_FONT = Pattern.compile(".*\\.(?:ttf|woff)$", Pattern.CASE_INSENSITIVE);
+  private static final Pattern RE_HTML = Pattern.compile(".*\\.html?$", Pattern.CASE_INSENSITIVE);
 
+  /**
+   * Update notification id.
+   */
+  public static final int UPDATE_NOTIFICATION_ID = R.string.app_name + 1;
   /**
    * Broadcasted when filtering is enabled or disabled.
    */
@@ -70,17 +75,15 @@ public class AdblockPlus extends Application
   /**
    * Broadcasted when subscription status changes.
    */
-  public final static String BROADCAST_SUBSCRIPTION_STATUS = "org.adblockplus.android.subscription.status";
+  public static final String BROADCAST_SUBSCRIPTION_STATUS = "org.adblockplus.android.subscription.status";
   /**
    * Broadcasted when filter match check is performed.
    */
-  public final static String BROADCAST_FILTER_MATCHES = "org.adblockplus.android.filter.matches";
-
+  public static final String BROADCAST_FILTER_MATCHES = "org.adblockplus.android.filter.matches";
   /**
    * Cached list of recommended subscriptions.
    */
   private Subscription[] subscriptions;
-
   /**
    * Indicates whether filtering is enabled or not.
    */
@@ -101,13 +104,13 @@ public class AdblockPlus extends Application
     }
 
     @Override
-    protected boolean removeEldestEntry(Map.Entry<String, String> eldest)
+    protected boolean removeEldestEntry(final Map.Entry<String, String> eldest)
     {
       return size() > MAX_SIZE;
     }
   };
 
-  private ReferrerMappingCache referrerMapping = new ReferrerMappingCache();
+  private final ReferrerMappingCache referrerMapping = new ReferrerMappingCache();
 
   /**
    * Returns pointer to itself (singleton pattern).
@@ -122,10 +125,10 @@ public class AdblockPlus extends Application
     int buildNumber = -1;
     try
     {
-      PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(), 0);
+      final PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(), 0);
       buildNumber = pi.versionCode;
     }
-    catch (NameNotFoundException e)
+    catch (final NameNotFoundException e)
     {
       // ignore - this shouldn't happen
       Log.e(TAG, e.getMessage(), e);
@@ -136,15 +139,15 @@ public class AdblockPlus extends Application
   /**
    * Opens Android application settings
    */
-  public static void showAppDetails(Context context)
+  public static void showAppDetails(final Context context)
   {
-    String packageName = context.getPackageName();
-    Intent intent = new Intent();
+    final String packageName = context.getPackageName();
+    final Intent intent = new Intent();
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD)
     {
       // above 2.3
       intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-      Uri uri = Uri.fromParts("package", packageName, null);
+      final Uri uri = Uri.fromParts("package", packageName, null);
       intent.setData(uri);
     }
     else
@@ -164,48 +167,39 @@ public class AdblockPlus extends Application
    */
   public static String getDeviceName()
   {
-    String manufacturer = Build.MANUFACTURER;
-    String model = Build.MODEL;
+    final String manufacturer = Build.MANUFACTURER;
+    final String model = Build.MODEL;
     if (model.startsWith(manufacturer))
-      return capitalize(model);
+      return Utils.capitalizeString(model);
     else
-      return capitalize(manufacturer) + " " + model;
+      return Utils.capitalizeString(manufacturer) + " " + model;
   }
 
-  public static void appendRawTextFile(Context context, StringBuilder text, int id)
+  public static void appendRawTextFile(final Context context, final StringBuilder text, final int id)
   {
-    InputStream inputStream = context.getResources().openRawResource(id);
-    InputStreamReader in = new InputStreamReader(inputStream);
-    BufferedReader buf = new BufferedReader(in);
+    // TODO: What about closing the resources?
+    final InputStream inputStream = context.getResources().openRawResource(id);
+    final InputStreamReader in = new InputStreamReader(inputStream);
+    final BufferedReader buf = new BufferedReader(in);
     String line;
     try
     {
       while ((line = buf.readLine()) != null)
         text.append(line);
     }
-    catch (IOException e)
+    catch (final IOException e)
     {
+      // TODO: How about real logging?
       e.printStackTrace();
     }
-  }
-
-  private static String capitalize(String s)
-  {
-    if (s == null || s.length() == 0)
-      return "";
-    char first = s.charAt(0);
-    if (Character.isUpperCase(first))
-      return s;
-    else
-      return Character.toUpperCase(first) + s.substring(1);
   }
 
   /**
    * Checks if device has a WiFi connection available.
    */
-  public static boolean isWiFiConnected(Context context)
+  public static boolean isWiFiConnected(final Context context)
   {
-    ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    final ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
     NetworkInfo networkInfo = null;
     if (connectivityManager != null)
     {
@@ -221,9 +215,9 @@ public class AdblockPlus extends Application
    */
   public boolean isServiceRunning()
   {
-    ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+    final ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
     // Actually it returns not only running services, so extra check is required
-    for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
+    for (final RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
     {
       if (service.service.getClassName().equals(ProxyService.class.getCanonicalName()) && service.pid > 0)
         return true;
@@ -236,8 +230,8 @@ public class AdblockPlus extends Application
    */
   public boolean checkWriteExternalPermission()
   {
-    String permission = "android.permission.WRITE_EXTERNAL_STORAGE";
-    int res = checkCallingOrSelfPermission(permission);
+    final String permission = "android.permission.WRITE_EXTERNAL_STORAGE";
+    final int res = checkCallingOrSelfPermission(permission);
     return res == PackageManager.PERMISSION_GRANTED;
   }
 
@@ -251,6 +245,7 @@ public class AdblockPlus extends Application
    */
   public Subscription[] getRecommendedSubscriptions()
   {
+    // TODO: Why don't we re-check?
     if (subscriptions == null)
       subscriptions = abpEngine.getRecommendedSubscriptions();
     return subscriptions;
@@ -270,14 +265,9 @@ public class AdblockPlus extends Application
    * @param url
    *          URL of subscription to add
    */
-  public void setSubscription(String url)
+  public void setSubscription(final String url)
   {
-    Subscription[] subscriptions = abpEngine.getListedSubscriptions();
-    for (Subscription subscription : subscriptions)
-    {
-      abpEngine.removeSubscription(subscription.url);
-    }
-    abpEngine.addSubscription(url);
+    abpEngine.setSubscription(url);
   }
 
   /**
@@ -285,11 +275,7 @@ public class AdblockPlus extends Application
    */
   public void refreshSubscriptions()
   {
-    Subscription[] subscriptions = abpEngine.getListedSubscriptions();
-    for (Subscription subscription : subscriptions)
-    {
-      abpEngine.refreshSubscription(subscription.url);
-    }
+    abpEngine.refreshSubscriptions();
   }
 
   /**
@@ -297,16 +283,15 @@ public class AdblockPlus extends Application
    *
    * @param url Subscription url
    */
-  public void actualizeSubscriptionStatus(String url)
+  public void updateSubscriptionStatus(final String url)
   {
-    abpEngine.actualizeSubscriptionStatus(url);
+    abpEngine.updateSubscriptionStatus(url);
   }
-
 
   /**
    * Enables or disables Acceptable Ads
    */
-  public void setAcceptableAdsEnabled(boolean enabled)
+  public void setAcceptableAdsEnabled(final boolean enabled)
   {
     abpEngine.setAcceptableAdsEnabled(enabled);
   }
@@ -318,7 +303,7 @@ public class AdblockPlus extends Application
     return documentationLink.replace("%LINK%", "acceptable_ads").replace("%LANG%", locale);
   }
 
-  public void setNotifiedAboutAcceptableAds(boolean notified)
+  public void setNotifiedAboutAcceptableAds(final boolean notified)
   {
     final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
     final Editor editor = preferences.edit();
@@ -370,7 +355,7 @@ public class AdblockPlus extends Application
    * @return true if matched filter was found
    * @throws Exception
    */
-  public boolean matches(String url, String query, String referrer, String accept)
+  public boolean matches(final String url, final String query, final String referrer, final String accept)
   {
     final String fullUrl = !"".equals(query) ? url + "?" + query : url;
     if (referrer != null)
@@ -409,7 +394,7 @@ public class AdblockPlus extends Application
 
     final List<String> referrerChain = buildReferrerChain(referrer);
     Log.d("Referrer chain", fullUrl + ": " + referrerChain.toString());
-    String[] referrerChainArray = referrerChain.toArray(new String[referrerChain.size()]);
+    final String[] referrerChainArray = referrerChain.toArray(new String[referrerChain.size()]);
     return abpEngine.matches(fullUrl, contentType, referrerChainArray);
   }
 
@@ -438,7 +423,7 @@ public class AdblockPlus extends Application
   /**
    * Enables or disables filtering.
    */
-  public void setFilteringEnabled(boolean enable)
+  public void setFilteringEnabled(final boolean enable)
   {
     filteringEnabled = enable;
     sendBroadcast(new Intent(BROADCAST_FILTERING_CHANGE).putExtra("enabled", filteringEnabled));
@@ -452,8 +437,8 @@ public class AdblockPlus extends Application
   {
     if (abpEngine == null)
     {
-      File basePath = getFilesDir();
-      abpEngine = new ABPEngine(this, basePath.getAbsolutePath());
+      final File basePath = getFilesDir();
+      abpEngine = ABPEngine.create(AdblockPlus.getApplication(), ABPEngine.generateAppInfo(this), basePath.getAbsolutePath());
     }
   }
 
@@ -464,7 +449,7 @@ public class AdblockPlus extends Application
   {
     if (abpEngine != null)
     {
-      abpEngine.release();
+      abpEngine.dispose();
       abpEngine = null;
       Log.i(TAG, "stopEngine");
     }
@@ -475,7 +460,7 @@ public class AdblockPlus extends Application
    */
   public void checkUpdates()
   {
-    abpEngine.checkUpdates();
+    abpEngine.checkForUpdates();
   }
 
   /**
@@ -486,9 +471,9 @@ public class AdblockPlus extends Application
    * @param minutes
    *          number of minutes to wait
    */
-  public void scheduleUpdater(int minutes)
+  public void scheduleUpdater(final int minutes)
   {
-    Calendar updateTime = Calendar.getInstance();
+    final Calendar updateTime = Calendar.getInstance();
 
     if (minutes == 0)
     {
@@ -506,10 +491,10 @@ public class AdblockPlus extends Application
       updateTime.add(Calendar.MINUTE, minutes);
     }
 
-    Intent updater = new Intent(this, AlarmReceiver.class);
-    PendingIntent recurringUpdate = PendingIntent.getBroadcast(this, 0, updater, PendingIntent.FLAG_CANCEL_CURRENT);
+    final Intent updater = new Intent(this, AlarmReceiver.class);
+    final PendingIntent recurringUpdate = PendingIntent.getBroadcast(this, 0, updater, PendingIntent.FLAG_CANCEL_CURRENT);
     // Set non-waking alarm
-    AlarmManager alarms = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+    final AlarmManager alarms = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
     alarms.set(AlarmManager.RTC, updateTime.getTimeInMillis(), recurringUpdate);
   }
 
@@ -522,9 +507,9 @@ public class AdblockPlus extends Application
     // Check for crash report
     try
     {
-      InputStreamReader reportFile = new InputStreamReader(openFileInput(CrashHandler.REPORT_FILE));
+      final InputStreamReader reportFile = new InputStreamReader(openFileInput(CrashHandler.REPORT_FILE));
       final char[] buffer = new char[0x1000];
-      StringBuilder out = new StringBuilder();
+      final StringBuilder out = new StringBuilder();
       int read;
       do
       {
@@ -533,8 +518,8 @@ public class AdblockPlus extends Application
           out.append(buffer, 0, read);
       }
       while (read >= 0);
-      String report = out.toString();
-      if (!"".equals(report))
+      final String report = out.toString();
+      if (StringUtils.isNotEmpty(report))
       {
         final Intent intent = new Intent(this, CrashReportDialog.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -542,13 +527,12 @@ public class AdblockPlus extends Application
         startActivity(intent);
       }
     }
-    catch (FileNotFoundException e)
+    catch (final FileNotFoundException e)
     {
       // ignore
     }
-    catch (IOException e)
+    catch (final IOException e)
     {
-      // TODO Auto-generated catch block
       Log.e(TAG, e.getMessage(), e);
     }
 

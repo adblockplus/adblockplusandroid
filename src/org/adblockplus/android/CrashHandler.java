@@ -34,9 +34,9 @@ import android.util.Log;
 public class CrashHandler implements UncaughtExceptionHandler
 {
   public static final String REPORT_FILE = "AdblockPlus_Crash_Report.txt";
-  private UncaughtExceptionHandler defaultUEH;
+  private final UncaughtExceptionHandler defaultUEH;
   private NotificationManager notificationManager;
-  private Context context;
+  private final Context context;
 
   private boolean generateReport;
   private boolean restoreProxy;
@@ -44,7 +44,7 @@ public class CrashHandler implements UncaughtExceptionHandler
   private String port;
   private String excl;
 
-  public CrashHandler(Context context)
+  public CrashHandler(final Context context)
   {
     defaultUEH = Thread.getDefaultUncaughtExceptionHandler();
     this.context = context;
@@ -59,7 +59,7 @@ public class CrashHandler implements UncaughtExceptionHandler
   }
 
   @Override
-  public void uncaughtException(Thread t, Throwable e)
+  public void uncaughtException(final Thread t, final Throwable e)
   {
     if (generateReport)
       writeToFile(e, REPORT_FILE);
@@ -73,7 +73,7 @@ public class CrashHandler implements UncaughtExceptionHandler
       {
         notificationManager.cancel(ProxyService.ONGOING_NOTIFICATION_ID);
       }
-      catch (Throwable ex)
+      catch (final Throwable ex)
       {
         ex.printStackTrace();
       }
@@ -83,27 +83,27 @@ public class CrashHandler implements UncaughtExceptionHandler
     defaultUEH.uncaughtException(t, e);
   }
 
-  public void generateReport(boolean report)
+  public void generateReport(final boolean report)
   {
     generateReport = report;
   }
 
   @SuppressLint("WorldReadableFiles")
-  private void writeToFile(Throwable error, String filename)
+  private void writeToFile(final Throwable error, final String filename)
   {
     Log.e("DCR", "Writing crash report");
     int versionCode = -1;
     try
     {
-      PackageInfo pi = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+      final PackageInfo pi = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
       versionCode = pi.versionCode;
     }
-    catch (NameNotFoundException ex)
+    catch (final NameNotFoundException ex)
     {
     }
     try
     {
-      PrintWriter pw = new PrintWriter(context.openFileOutput(filename, Context.MODE_WORLD_READABLE));
+      final PrintWriter pw = new PrintWriter(context.openFileOutput(filename, Context.MODE_WORLD_READABLE));
       // Write Android version
       pw.println(Build.VERSION.SDK_INT);
       // Write application build number
@@ -111,7 +111,7 @@ public class CrashHandler implements UncaughtExceptionHandler
 
       // Write exception data
       printThrowable(error, pw);
-      Throwable cause = error.getCause();
+      final Throwable cause = error.getCause();
       // Write cause data
       if (cause != null)
       {
@@ -121,19 +121,19 @@ public class CrashHandler implements UncaughtExceptionHandler
       pw.flush();
       pw.close();
     }
-    catch (Throwable e)
+    catch (final Throwable e)
     {
       e.printStackTrace();
     }
   }
 
-  private void printThrowable(Throwable error, PrintWriter pw)
+  private void printThrowable(final Throwable error, final PrintWriter pw)
   {
     // Use simplest format for speed - we do not have much time
     pw.println(error.getClass().getName());
     pw.println(error.getMessage());
-    StackTraceElement[] trace = error.getStackTrace();
-    for (StackTraceElement element : trace)
+    final StackTraceElement[] trace = error.getStackTrace();
+    for (final StackTraceElement element : trace)
     {
       pw.print(element.getClassName());
       pw.print("|");
@@ -148,7 +148,7 @@ public class CrashHandler implements UncaughtExceptionHandler
     }
   }
 
-  public void saveProxySettings(String host, String port, String excl)
+  public void saveProxySettings(final String host, final String port, final String excl)
   {
     Log.e("DCR", "Saving proxy " + host + ":" + port + "/" + excl);
     this.host = host;
@@ -166,7 +166,7 @@ public class CrashHandler implements UncaughtExceptionHandler
     {
       p = Integer.valueOf(port);
     }
-    catch (NumberFormatException e)
+    catch (final NumberFormatException e)
     {
       // ignore - no valid port, it will be correctly processed later
     }

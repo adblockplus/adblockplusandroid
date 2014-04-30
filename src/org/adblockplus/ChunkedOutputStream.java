@@ -33,7 +33,7 @@ public class ChunkedOutputStream extends FilterOutputStream
   private static final byte[] FINAL_CHUNK = new byte[] {'0', '\r', '\n', '\r', '\n'};
   private boolean wroteFinalChunk = false;
 
-  public ChunkedOutputStream(OutputStream out)
+  public ChunkedOutputStream(final OutputStream out)
   {
     super(out);
   }
@@ -47,13 +47,13 @@ public class ChunkedOutputStream extends FilterOutputStream
   }
 
   @Override
-  public void write(byte[] buffer, int offset, int length) throws IOException
+  public void write(final byte[] buffer, final int offset, final int length) throws IOException
   {
     writeChunk(buffer, offset, length);
   }
 
   @Override
-  public void write(byte[] buffer) throws IOException
+  public void write(final byte[] buffer) throws IOException
   {
     int offset = 0;
     int remain = buffer.length;
@@ -69,7 +69,7 @@ public class ChunkedOutputStream extends FilterOutputStream
   }
 
   @Override
-  public void write(int oneByte) throws IOException
+  public void write(final int oneByte) throws IOException
   {
     throw new UnsupportedOperationException("Not implemented");
   }
@@ -81,7 +81,7 @@ public class ChunkedOutputStream extends FilterOutputStream
     wroteFinalChunk = true;
   }
 
-  private void writeChunk(byte buffer[], int offset, int length) throws IOException
+  private void writeChunk(final byte buffer[], final int offset, final int length) throws IOException
   {
     // Zero sized buffers are ok on slow connections but not in our case - zero
     // chunk is used to indicate the end of transfer.
@@ -98,7 +98,7 @@ public class ChunkedOutputStream extends FilterOutputStream
     }
   }
 
-  private void writeHex(int i) throws IOException
+  private void writeHex(final int i) throws IOException
   {
     out.write(Integer.toHexString(i).getBytes());
     out.write(CRLF);

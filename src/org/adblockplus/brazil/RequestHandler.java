@@ -84,10 +84,10 @@ public class RequestHandler extends BaseRequestHandler
 {
   private AdblockPlus application;
   private String via;
-  private static Pattern RE_HTTP = Pattern.compile("^https?:");
+  private static final Pattern RE_HTTP = Pattern.compile("^https?:");
 
   @Override
-  public boolean init(Server server, String prefix)
+  public boolean init(final Server server, final String prefix)
   {
     super.init(server, prefix);
 
@@ -98,7 +98,7 @@ public class RequestHandler extends BaseRequestHandler
   }
 
   @Override
-  public boolean respond(Request request) throws IOException
+  public boolean respond(final Request request) throws IOException
   {
     boolean block = false;
 
@@ -106,7 +106,7 @@ public class RequestHandler extends BaseRequestHandler
     {
       block = application.matches(request.url, request.query, request.getRequestHeader("referer"), request.getRequestHeader("accept"));
     }
-    catch (Exception e)
+    catch (final Exception e)
     {
       Log.e(prefix, "Filter error", e);
     }
@@ -142,7 +142,7 @@ public class RequestHandler extends BaseRequestHandler
      * "Proxy-Connection" may be used (instead of just "Connection")
      * to keep alive a connection between a client and this proxy.
      */
-    String pc = request.headers.get("Proxy-Connection");
+    final String pc = request.headers.get("Proxy-Connection");
     if (pc != null)
     {
       request.connectionHeader = "Proxy-Connection";
@@ -151,7 +151,7 @@ public class RequestHandler extends BaseRequestHandler
 
     HttpRequest.removePointToPointHeaders(request.headers, false);
 
-    HttpRequest target = new HttpRequest(url);
+    final HttpRequest target = new HttpRequest(url);
     try
     {
       target.setMethod(request.method);
@@ -168,7 +168,7 @@ public class RequestHandler extends BaseRequestHandler
 
       if (request.postData != null)
       {
-        OutputStream out = target.getOutputStream();
+        final OutputStream out = target.getOutputStream();
         out.write(request.postData);
         out.close();
       }
@@ -190,13 +190,13 @@ public class RequestHandler extends BaseRequestHandler
       {
         request.responseHeaders.add("Via", target.status.substring(0, 8) + via);
       }
-      catch (StringIndexOutOfBoundsException e)
+      catch (final StringIndexOutOfBoundsException e)
       {
         request.responseHeaders.add("Via", via);
       }
 
       // Detect if we need to add ElemHide filters
-      String type = request.responseHeaders.get("Content-Type");
+      final String type = request.responseHeaders.get("Content-Type");
 
       String[] selectors = null;
       if (type != null && type.toLowerCase().startsWith("text/html"))
@@ -207,7 +207,7 @@ public class RequestHandler extends BaseRequestHandler
         {
           reqHost = (new URL(request.url)).getHost();
         }
-        catch (MalformedURLException e)
+        catch (final MalformedURLException e)
         {
           // We are transparent, it's not our deal if it's malformed.
         }
@@ -217,7 +217,7 @@ public class RequestHandler extends BaseRequestHandler
       // If no filters are applicable just pass through the response
       if (selectors == null || target.getResponseCode() != 200)
       {
-        int contentLength = target.getContentLength();
+        final int contentLength = target.getContentLength();
         if (contentLength == 0)
         {
           // we do not use request.sendResponse to avoid arbitrary
@@ -232,7 +232,7 @@ public class RequestHandler extends BaseRequestHandler
       // Insert filters otherwise
       else
       {
-        HttpInputStream his = target.getInputStream();
+        final HttpInputStream his = target.getInputStream();
         int size = target.getContentLength();
         if (size < 0)
         {
@@ -290,7 +290,7 @@ public class RequestHandler extends BaseRequestHandler
               Charset.forName(extractedCharsetName);
               charsetName = extractedCharsetName;
             }
-            catch (IllegalArgumentException e)
+            catch (final IllegalArgumentException e)
             {
               Log.e(prefix, "Unsupported site charset, falling back to " + charsetName, e);
             }
@@ -299,10 +299,10 @@ public class RequestHandler extends BaseRequestHandler
 
         request.sendHeaders(-1, null, -1);
 
-        byte[] buf = new byte[Math.min(4096, size)];
+        final byte[] buf = new byte[Math.min(4096, size)];
 
         boolean sent = selectors == null;
-        BoyerMoore matcher = new BoyerMoore("<html".getBytes());
+        final BoyerMoore matcher = new BoyerMoore("<html".getBytes());
 
         while (size > 0)
         {
@@ -319,11 +319,11 @@ public class RequestHandler extends BaseRequestHandler
             // Search for <html> tag
             if (!sent && count > 0)
             {
-              List<Integer> matches = matcher.match(buf, 0, count);
+              final List<Integer> matches = matcher.match(buf, 0, count);
               if (!matches.isEmpty())
               {
                 // Add filters right before match
-                int m = matches.get(0);
+                final int m = matches.get(0);
                 out.write(buf, 0, m);
                 out.write("<style type=\"text/css\">\n".getBytes());
                 out.write(StringUtils.join(selectors, ",\r\n").getBytes(charsetName));
@@ -335,7 +335,7 @@ public class RequestHandler extends BaseRequestHandler
             }
             out.write(buf, 0, count);
           }
-          catch (IOException e)
+          catch (final IOException e)
           {
             break;
           }
@@ -347,7 +347,7 @@ public class RequestHandler extends BaseRequestHandler
           ((ChunkedOutputStream) out).writeFinalChunk();
       }
     }
-    catch (InterruptedIOException e)
+    catch (final InterruptedIOException e)
     {
       /*
        * Read timeout while reading from the remote side. We use a
@@ -355,19 +355,19 @@ public class RequestHandler extends BaseRequestHandler
        */
       request.sendError(408, "Timeout / No response");
     }
-    catch (EOFException e)
+    catch (final EOFException e)
     {
       request.sendError(500, "No response");
     }
-    catch (UnknownHostException e)
+    catch (final UnknownHostException e)
     {
       request.sendError(500, "Unknown host");
     }
-    catch (ConnectException e)
+    catch (final ConnectException e)
     {
       request.sendError(500, "Connection refused");
     }
-    catch (IOException e)
+    catch (final IOException e)
     {
       /*
        * An IOException will happen if we can't communicate with the

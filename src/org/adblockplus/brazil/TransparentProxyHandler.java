@@ -31,13 +31,13 @@ public class TransparentProxyHandler implements Handler
 {
 
   @Override
-  public boolean init(Server server, String prefix)
+  public boolean init(final Server server, final String prefix)
   {
     return true;
   }
 
   @Override
-  public boolean respond(Request request) throws IOException
+  public boolean respond(final Request request) throws IOException
   {
     if (!request.url.contains("://"))
     {

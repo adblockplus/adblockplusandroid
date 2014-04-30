@@ -47,22 +47,22 @@ import android.widget.Toast;
  */
 public class AdvancedPreferences extends SummarizedPreferences
 {
-  private static final String TAG = "AdvancedPreferences";
+  private static final String TAG = Utils.getTag(AdvancedPreferences.class);
 
   private static final int CONFIGURATION_DIALOG = 1;
 
   private ProxyService proxyService = null;
 
   @Override
-  public void onCreate(Bundle savedInstanceState)
+  public void onCreate(final Bundle savedInstanceState)
   {
     super.onCreate(savedInstanceState);
 
     addPreferencesFromResource(R.xml.preferences_advanced);
 
-    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+    final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-    PreferenceScreen screen = getPreferenceScreen();
+    final PreferenceScreen screen = getPreferenceScreen();
     if (ProxyService.NATIVE_PROXY_SUPPORTED)
     {
       screen.removePreference(findPreference(getString(R.string.pref_proxy)));
@@ -77,21 +77,23 @@ public class AdvancedPreferences extends SummarizedPreferences
     }
     else
     {
-      Preference prefUpdate = findPreference(getString(R.string.pref_checkupdate));
+      final Preference prefUpdate = findPreference(getString(R.string.pref_checkupdate));
       prefUpdate.setOnPreferenceClickListener(new OnPreferenceClickListener()
       {
-        public boolean onPreferenceClick(Preference preference)
+        @Override
+        public boolean onPreferenceClick(final Preference preference)
         {
-          AdblockPlus application = AdblockPlus.getApplication();
+          final AdblockPlus application = AdblockPlus.getApplication();
           application.checkUpdates();
           return true;
         }
       });
 
-      Preference prefConfiguration = findPreference(getString(R.string.pref_configuration));
+      final Preference prefConfiguration = findPreference(getString(R.string.pref_configuration));
       prefConfiguration.setOnPreferenceClickListener(new OnPreferenceClickListener()
       {
-        public boolean onPreferenceClick(Preference preference)
+        @Override
+        public boolean onPreferenceClick(final Preference preference)
         {
           showDialog(CONFIGURATION_DIALOG);
           return true;
@@ -104,8 +106,8 @@ public class AdvancedPreferences extends SummarizedPreferences
   public void onResume()
   {
     super.onResume();
-    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-    int refresh = Integer.valueOf(prefs.getString(getString(R.string.pref_refresh), "0"));
+    final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+    final int refresh = Integer.valueOf(prefs.getString(getString(R.string.pref_refresh), "0"));
     findPreference(getString(R.string.pref_wifirefresh)).setEnabled(refresh > 0);
     connect();
   }
@@ -118,13 +120,13 @@ public class AdvancedPreferences extends SummarizedPreferences
   }
 
   @Override
-  public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
+  public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences, final String key)
   {
     if (getString(R.string.pref_proxyenabled).equals(key))
     {
-      AdblockPlus application = AdblockPlus.getApplication();
-      boolean enabled = sharedPreferences.getBoolean(key, false);
-      boolean serviceRunning = application.isServiceRunning();
+      final AdblockPlus application = AdblockPlus.getApplication();
+      final boolean enabled = sharedPreferences.getBoolean(key, false);
+      final boolean serviceRunning = application.isServiceRunning();
       if (enabled)
       {
         if (!serviceRunning)
@@ -135,7 +137,7 @@ public class AdvancedPreferences extends SummarizedPreferences
         if (serviceRunning)
           stopService(new Intent(this, ProxyService.class));
         // If disabled, disable filtering as well
-        SharedPreferences.Editor editor = sharedPreferences.edit();
+        final SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(getString(R.string.pref_enabled), false);
         editor.commit();
         application.setFilteringEnabled(false);
@@ -143,18 +145,18 @@ public class AdvancedPreferences extends SummarizedPreferences
     }
     if (getString(R.string.pref_refresh).equals(key))
     {
-      int refresh = Integer.valueOf(sharedPreferences.getString(key, "0"));
+      final int refresh = Integer.valueOf(sharedPreferences.getString(key, "0"));
       findPreference(getString(R.string.pref_wifirefresh)).setEnabled(refresh > 0);
     }
     if (getString(R.string.pref_crashreport).equals(key))
     {
-      boolean report = sharedPreferences.getBoolean(key, getResources().getBoolean(R.bool.def_crashreport));
+      final boolean report = sharedPreferences.getBoolean(key, getResources().getBoolean(R.bool.def_crashreport));
       try
       {
-        CrashHandler handler = (CrashHandler) Thread.getDefaultUncaughtExceptionHandler();
+        final CrashHandler handler = (CrashHandler) Thread.getDefaultUncaughtExceptionHandler();
         handler.generateReport(report);
       }
-      catch (ClassCastException e)
+      catch (final ClassCastException e)
       {
         // ignore - default handler in use
       }
@@ -163,13 +165,13 @@ public class AdvancedPreferences extends SummarizedPreferences
   }
 
   @Override
-  protected Dialog onCreateDialog(int id)
+  protected Dialog onCreateDialog(final int id)
   {
     Dialog dialog = null;
     switch (id)
     {
       case CONFIGURATION_DIALOG:
-        List<String> items = new ArrayList<String>();
+        final List<String> items = new ArrayList<String>();
         items.add(AdblockPlus.getDeviceName());
         items.add(String.format("API: %d Build: %d", Build.VERSION.SDK_INT, AdblockPlus.getApplication().getBuildNumber()));
         if (proxyService != null)
@@ -179,10 +181,10 @@ public class AdvancedPreferences extends SummarizedPreferences
           {
             items.add("Running in root mode");
             items.add("iptables output:");
-            List<String> output = proxyService.getIptablesOutput();
+            final List<String> output = proxyService.getIptablesOutput();
             if (output != null)
             {
-              for (String line : output)
+              for (final String line : output)
               {
                 if (!"".equals(line))
                   items.add(line);
@@ -195,7 +197,7 @@ public class AdvancedPreferences extends SummarizedPreferences
           }
           if (ProxyService.NATIVE_PROXY_SUPPORTED)
           {
-            String[] px = ProxySettings.getUserProxy(getApplicationContext());
+            final String[] px = ProxySettings.getUserProxy(getApplicationContext());
             if (px != null)
             {
               items.add("System settings:");
@@ -213,29 +215,30 @@ public class AdvancedPreferences extends SummarizedPreferences
           items.add("Service not running");
         }
 
-        ScrollView scrollPane = new ScrollView(this);
-        TextView messageText = new TextView(this);
+        final ScrollView scrollPane = new ScrollView(this);
+        final TextView messageText = new TextView(this);
         messageText.setPadding(12, 6, 12, 6);
         messageText.setText(TextUtils.join("\n", items));
         messageText.setOnClickListener(new View.OnClickListener()
         {
 
           @Override
-          public void onClick(View v)
+          public void onClick(final View v)
           {
-            ClipboardManager manager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-            TextView showTextParam = (TextView) v;
+            final ClipboardManager manager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+            final TextView showTextParam = (TextView) v;
             manager.setText(showTextParam.getText());
             Toast.makeText(v.getContext(), R.string.msg_clipboard, Toast.LENGTH_SHORT).show();
           }
         });
         scrollPane.addView(messageText);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(scrollPane).setTitle(R.string.configuration_name).setIcon(android.R.drawable.ic_dialog_info).setCancelable(false)
             .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener()
             {
-              public void onClick(DialogInterface dialog, int id)
+              @Override
+              public void onClick(final DialogInterface dialog, final int id)
               {
                 dialog.cancel();
               }
@@ -257,15 +260,17 @@ public class AdvancedPreferences extends SummarizedPreferences
     proxyService = null;
   }
 
-  private ServiceConnection proxyServiceConnection = new ServiceConnection()
+  private final ServiceConnection proxyServiceConnection = new ServiceConnection()
   {
-    public void onServiceConnected(ComponentName className, IBinder service)
+    @Override
+    public void onServiceConnected(final ComponentName className, final IBinder service)
     {
       proxyService = ((ProxyService.LocalBinder) service).getService();
       Log.d(TAG, "Proxy service connected");
     }
 
-    public void onServiceDisconnected(ComponentName className)
+    @Override
+    public void onServiceDisconnected(final ComponentName className)
     {
       proxyService = null;
       Log.d(TAG, "Proxy service disconnected");

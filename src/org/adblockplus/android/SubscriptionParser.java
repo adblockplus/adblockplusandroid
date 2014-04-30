@@ -33,17 +33,17 @@ class SubscriptionParser extends DefaultHandler
   private static final String PREFIXES = "prefixes";
   private static final String AUTHOR = "author";
 
-  private List<Subscription> subscriptions;
+  private final List<Subscription> subscriptions;
   private Subscription currentSubscription;
 
-  public SubscriptionParser(List<Subscription> subscriptions)
+  public SubscriptionParser(final List<Subscription> subscriptions)
   {
     super();
     this.subscriptions = subscriptions;
   }
 
   @Override
-  public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
+  public void startElement(final String uri, final String localName, final String qName, final Attributes attributes) throws SAXException
   {
     if (localName.equalsIgnoreCase(SUBSCRIPTION))
     {
@@ -52,10 +52,10 @@ class SubscriptionParser extends DefaultHandler
       currentSubscription.specialization = attributes.getValue(SPECIALIZATION);
       currentSubscription.url = attributes.getValue(URL);
       currentSubscription.homepage = attributes.getValue(HOMEPAGE);
-      String prefix = attributes.getValue(PREFIXES);
+      final String prefix = attributes.getValue(PREFIXES);
       if (prefix != null)
       {
-        String[] prefixes = prefix.split(",");
+        final String[] prefixes = prefix.split(",");
         currentSubscription.prefixes = prefixes;
       }
       currentSubscription.author = attributes.getValue(AUTHOR);
@@ -64,7 +64,7 @@ class SubscriptionParser extends DefaultHandler
   }
 
   @Override
-  public void endElement(String uri, String localName, String qName) throws SAXException
+  public void endElement(final String uri, final String localName, final String qName) throws SAXException
   {
     if (localName.equalsIgnoreCase(SUBSCRIPTION))
     {
