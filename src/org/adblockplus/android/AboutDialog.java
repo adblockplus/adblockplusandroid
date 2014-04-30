@@ -31,14 +31,14 @@ public class AboutDialog extends Dialog
 {
   private static Context context = null;
 
-  public AboutDialog(Context context)
+  public AboutDialog(final Context context)
   {
     super(context);
     AboutDialog.context = context;
   }
 
   @Override
-  public void onCreate(Bundle savedInstanceState)
+  public void onCreate(final Bundle savedInstanceState)
   {
     requestWindowFeature(Window.FEATURE_NO_TITLE);
     setContentView(R.layout.about);
@@ -48,17 +48,17 @@ public class AboutDialog extends Dialog
     int versionCode = -1;
     try
     {
-      PackageInfo pi = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+      final PackageInfo pi = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
       versionName = pi.versionName;
       versionCode = pi.versionCode;
     }
-    catch (NameNotFoundException ex)
+    catch (final NameNotFoundException ex)
     {
       // ignore - it can not happen because we query information about ourselves
     }
 
     // Construct html
-    StringBuilder info = new StringBuilder();
+    final StringBuilder info = new StringBuilder();
     info.append("<h3>");
     info.append(context.getString(R.string.app_name));
     info.append("</h3>");
@@ -75,7 +75,7 @@ public class AboutDialog extends Dialog
     AdblockPlus.appendRawTextFile(context, info, R.raw.legal);
 
     // Show text
-    TextView tv = (TextView) findViewById(R.id.about_text);
+    final TextView tv = (TextView) findViewById(R.id.about_text);
     tv.setText(Html.fromHtml(info.toString()));
     tv.setMovementMethod(LinkMovementMethod.getInstance());
   }

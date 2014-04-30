@@ -37,7 +37,7 @@ import android.view.Window;
 public class UpdaterActivity extends Activity
 {
   @Override
-  public void onCreate(Bundle savedInstanceState)
+  public void onCreate(final Bundle savedInstanceState)
   {
     super.onCreate(savedInstanceState);
 
@@ -56,7 +56,7 @@ public class UpdaterActivity extends Activity
       new AlertDialog.Builder(this).setTitle(R.string.msg_update_available).setMessage(getString(R.string.msg_update_description)).setIcon(android.R.drawable.ic_dialog_info)
           .setPositiveButton(R.string.ok, new OnClickListener() {
             @Override
-            public void onClick(DialogInterface arg0, int arg1)
+            public void onClick(final DialogInterface arg0, final int arg1)
             {
               // Start download service
               startService(new Intent(UpdaterActivity.this, UpdaterService.class).putExtras(extras));
@@ -64,13 +64,13 @@ public class UpdaterActivity extends Activity
             }
           }).setNegativeButton(R.string.cancel, new OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which)
+            public void onClick(final DialogInterface dialog, final int which)
             {
               finish();
             }
           }).setOnCancelListener(new OnCancelListener() {
             @Override
-            public void onCancel(DialogInterface dialog)
+            public void onCancel(final DialogInterface dialog)
             {
               finish();
             }
@@ -79,18 +79,18 @@ public class UpdaterActivity extends Activity
     // Install downloaded update
     else
     {
-      String file = getIntent().getStringExtra("path");
-      File updateFile = new File(file);
+      final String file = getIntent().getStringExtra("path");
+      final File updateFile = new File(file);
       try
       {
-        Intent installerIntent = new Intent();
+        final Intent installerIntent = new Intent();
         installerIntent.setAction(Intent.ACTION_VIEW);
         installerIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         installerIntent.setDataAndType(Uri.fromFile(updateFile), "application/vnd.android.package-archive");
         startActivity(installerIntent);
         android.os.Process.killProcess(android.os.Process.myPid());
       }
-      catch (Exception e)
+      catch (final Exception e)
       {
         e.printStackTrace();
       }

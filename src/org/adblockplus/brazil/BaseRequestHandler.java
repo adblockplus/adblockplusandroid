@@ -38,20 +38,20 @@ public abstract class BaseRequestHandler implements Handler
   protected String prefix;
 
   @Override
-  public boolean init(Server server, String prefix)
+  public boolean init(final Server server, final String prefix)
   {
     this.prefix = prefix;
 
-    Properties props = server.props;
+    final Properties props = server.props;
 
     proxyHost = props.getProperty(prefix + PROXY_HOST);
 
-    String s = props.getProperty(prefix + PROXY_PORT);
+    final String s = props.getProperty(prefix + PROXY_PORT);
     try
     {
       proxyPort = Integer.decode(s).intValue();
     }
-    catch (Exception e)
+    catch (final Exception e)
     {
     }
 
@@ -65,10 +65,10 @@ public abstract class BaseRequestHandler implements Handler
   /**
    * Dump the headers on stderr
    */
-  public static String dumpHeaders(int count, Request request, MimeHeaders headers, boolean sent)
+  public static String dumpHeaders(final int count, final Request request, final MimeHeaders headers, final boolean sent)
   {
     String prompt;
-    StringBuffer sb = new StringBuffer();
+    final StringBuffer sb = new StringBuffer();
     String label = "   " + count;
     label = label.substring(label.length() - 4);
     if (sent)

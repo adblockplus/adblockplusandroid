@@ -33,22 +33,22 @@ public class RefreshableListPreference extends ListPreference
 {
   private OnClickListener refreshClickListener;
 
-  public RefreshableListPreference(Context context, AttributeSet attrs)
+  public RefreshableListPreference(final Context context, final AttributeSet attrs)
   {
     super(context, attrs);
   }
 
   @Override
-  protected void onBindView(View view)
+  protected void onBindView(final View view)
   {
     super.onBindView(view);
     final ImageView refreshImage = new ImageView(getContext());
-    ViewGroup widgetFrameView = ((ViewGroup) view.findViewById(android.R.id.widget_frame));
+    final ViewGroup widgetFrameView = ((ViewGroup) view.findViewById(android.R.id.widget_frame));
     if (widgetFrameView == null)
       return;
     widgetFrameView.setVisibility(View.VISIBLE);
-    int rightPaddingDip = android.os.Build.VERSION.SDK_INT < 14 ? 8 : 5;
-    float density = getContext().getResources().getDisplayMetrics().density;
+    final int rightPaddingDip = android.os.Build.VERSION.SDK_INT < 14 ? 8 : 5;
+    final float density = getContext().getResources().getDisplayMetrics().density;
     if (widgetFrameView instanceof LinearLayout)
     {
       ((LinearLayout) widgetFrameView).setOrientation(LinearLayout.HORIZONTAL);
@@ -59,7 +59,7 @@ public class RefreshableListPreference extends ListPreference
     refreshImage.setOnClickListener(new OnClickListener()
     {
       @Override
-      public void onClick(View v)
+      public void onClick(final View v)
       {
         if (refreshClickListener != null)
           refreshClickListener.onClick(refreshImage);
@@ -67,7 +67,7 @@ public class RefreshableListPreference extends ListPreference
     });
   }
 
-  public void setOnRefreshClickListener(OnClickListener l)
+  public void setOnRefreshClickListener(final OnClickListener l)
   {
     refreshClickListener = l;
   }

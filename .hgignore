@@ -5,6 +5,6 @@ local.properties
 proguard.cfg
 crowdin.yaml
 bin
-libs/armeabi
+libs/armeabi*
 obj
 gen

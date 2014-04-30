@@ -46,17 +46,17 @@ import android.widget.Toast;
  */
 public final class CrashReportDialog extends Activity
 {
-  private final static String TAG = "CrashReportDialog";
+  private static final String TAG = Utils.getTag(CrashReportDialog.class);
   private String report;
 
   @Override
-  protected void onCreate(Bundle savedInstanceState)
+  protected void onCreate(final Bundle savedInstanceState)
   {
     super.onCreate(savedInstanceState);
     requestWindowFeature(Window.FEATURE_LEFT_ICON);
     setContentView(R.layout.crashreport);
 
-    Bundle extras = getIntent().getExtras();
+    final Bundle extras = getIntent().getExtras();
     if (extras == null)
     {
       finish();
@@ -67,18 +67,18 @@ public final class CrashReportDialog extends Activity
     getWindow().setFeatureDrawableResource(Window.FEATURE_LEFT_ICON, android.R.drawable.ic_dialog_alert);
   }
 
-  public void onOk(View v)
+  public void onOk(final View v)
   {
-    String comment = ((EditText) findViewById(R.id.comments)).getText().toString();
+    final String comment = ((EditText) findViewById(R.id.comments)).getText().toString();
 
     try
     {
-      String[] reportLines = report.split(System.getProperty("line.separator"));
-      int api = Integer.parseInt(reportLines[0]);
-      int build = Integer.parseInt(reportLines[1]);
+      final String[] reportLines = report.split(System.getProperty("line.separator"));
+      final int api = Integer.parseInt(reportLines[0]);
+      final int build = Integer.parseInt(reportLines[1]);
 
-      XmlSerializer xmlSerializer = Xml.newSerializer();
-      StringWriter writer = new StringWriter();
+      final XmlSerializer xmlSerializer = Xml.newSerializer();
+      final StringWriter writer = new StringWriter();
 
       xmlSerializer.setOutput(writer);
       xmlSerializer.startDocument("UTF-8", true);
@@ -92,7 +92,7 @@ public final class CrashReportDialog extends Activity
       xmlSerializer.text(reportLines[3]);
       xmlSerializer.endTag("", "message");
       xmlSerializer.startTag("", "stacktrace");
-      Pattern p = Pattern.compile("\\|");
+      final Pattern p = Pattern.compile("\\|");
       boolean hasCause = false;
       int i = 4;
       while (i < reportLines.length)
@@ -113,7 +113,7 @@ public final class CrashReportDialog extends Activity
           continue;
         }
         Log.e(TAG, "Line: " + reportLines[i]);
-        String[] element = TextUtils.split(reportLines[i], p);
+        final String[] element = TextUtils.split(reportLines[i], p);
         xmlSerializer.startTag("", "frame");
         xmlSerializer.attribute("", "class", element[0]);
         xmlSerializer.attribute("", "method", element[1]);
@@ -133,34 +133,34 @@ public final class CrashReportDialog extends Activity
       xmlSerializer.endTag("", "crashreport");
       xmlSerializer.endDocument();
 
-      String xml = writer.toString();
-      HttpClient httpclient = new DefaultHttpClient();
-      HttpPost httppost = new HttpPost(getString(R.string.crash_report_url));
+      final String xml = writer.toString();
+      final HttpClient httpclient = new DefaultHttpClient();
+      final HttpPost httppost = new HttpPost(getString(R.string.crash_report_url));
       httppost.setHeader("Content-Type", "text/xml; charset=UTF-8");
       httppost.addHeader("X-Adblock-Plus", "yes");
       httppost.setEntity(new StringEntity(xml));
-      HttpResponse httpresponse = httpclient.execute(httppost);
-      StatusLine statusLine = httpresponse.getStatusLine();
+      final HttpResponse httpresponse = httpclient.execute(httppost);
+      final StatusLine statusLine = httpresponse.getStatusLine();
       Log.e(TAG, statusLine.getStatusCode() + " " + statusLine.getReasonPhrase());
       Log.e(TAG, EntityUtils.toString(httpresponse.getEntity()));
       if (statusLine.getStatusCode() != 200)
         throw new ClientProtocolException();
-      String response = EntityUtils.toString(httpresponse.getEntity());
+      final String response = EntityUtils.toString(httpresponse.getEntity());
       if (!"saved".equals(response))
         throw new ClientProtocolException();
       deleteFile(CrashHandler.REPORT_FILE);
     }
-    catch (ClientProtocolException e)
+    catch (final ClientProtocolException e)
     {
       Log.e(TAG, "Failed to submit a crash", e);
       Toast.makeText(this, R.string.msg_crash_submission_failure, Toast.LENGTH_LONG).show();
     }
-    catch (IOException e)
+    catch (final IOException e)
     {
       Log.e(TAG, "Failed to submit a crash", e);
       Toast.makeText(this, R.string.msg_crash_submission_failure, Toast.LENGTH_LONG).show();
     }
-    catch (Exception e)
+    catch (final Exception e)
     {
       Log.e(TAG, "Failed to create report", e);
       // Assuming corrupted report file, just silently deleting it
@@ -169,7 +169,7 @@ public final class CrashReportDialog extends Activity
     finish();
   }
 
-  public void onCancel(View v)
+  public void onCancel(final View v)
   {
     deleteFile(CrashHandler.REPORT_FILE);
     finish();

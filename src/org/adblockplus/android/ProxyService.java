@@ -70,38 +70,38 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     RootTools.debugMode = false;
   }
 
-  private static final String TAG = "ProxyService";
+  private static final String TAG = Utils.getTag(ProxyService.class);
   private static final boolean logRequests = false;
 
   // Do not use 8080 because it is a "dirty" port, Android uses it if something goes wrong
-  // First element is reserved for previously used port
+  // first element is reserved for previously used port
   private static final int[] portVariants = new int[] {-1, 2020, 3030, 4040, 5050, 6060, 7070, 9090, 1234, 12345, 4321, 0};
 
-  private final static int DEFAULT_TIMEOUT = 3000;
-  private final static int NO_TRAFFIC_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+  private static final int DEFAULT_TIMEOUT = 3000;
+  private static final int NO_TRAFFIC_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
-  final static int ONGOING_NOTIFICATION_ID = R.string.app_name;
+  static final int ONGOING_NOTIFICATION_ID = R.string.app_name;
   private static final long POSITION_RIGHT = Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD ? Long.MIN_VALUE : Long.MAX_VALUE;
-  private final static int NOTRAFFIC_NOTIFICATION_ID = R.string.app_name + 3;
+  private static final int NOTRAFFIC_NOTIFICATION_ID = R.string.app_name + 3;
 
   /**
    * Broadcasted when service starts or stops.
    */
-  public final static String BROADCAST_STATE_CHANGED = "org.adblockplus.android.service.state";
+  public static final String BROADCAST_STATE_CHANGED = "org.adblockplus.android.service.state";
   /**
    * Broadcasted if proxy fails to start.
    */
-  public final static String BROADCAST_PROXY_FAILED = "org.adblockplus.android.proxy.failure";
+  public static final String BROADCAST_PROXY_FAILED = "org.adblockplus.android.proxy.failure";
 
-  private final static String IPTABLES_RETURN = " -t nat -m owner --uid-owner {{UID}} -A OUTPUT -p tcp -j RETURN\n";
-  private final static String IPTABLES_ADD_HTTP = " -t nat -A OUTPUT -p tcp --dport 80 -j REDIRECT --to {{PORT}}\n";
+  private static final String IPTABLES_RETURN = " -t nat -m owner --uid-owner {{UID}} -A OUTPUT -p tcp -j RETURN\n";
+  private static final String IPTABLES_ADD_HTTP = " -t nat -A OUTPUT -p tcp --dport 80 -j REDIRECT --to {{PORT}}\n";
 
   boolean hideIcon;
   private Handler notrafficHandler;
 
   protected ProxyServer proxy = null;
   protected int port;
-  private Properties proxyConfiguration = new Properties();
+  private final Properties proxyConfiguration = new Properties();
 
   /**
    * Indicates that service is working with root privileges.
@@ -128,13 +128,13 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     {
       // Proxy is running in separate thread, it's just some resolution request during initialization.
       // Not worth spawning a separate thread for this.
-      StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitNetwork().build();
+      final StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitNetwork().build();
       StrictMode.setThreadPolicy(policy);
     }
 
     // Get port for local proxy
-    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-    Resources resources = getResources();
+    final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+    final Resources resources = getResources();
 
     // Try to read user proxy settings
     String proxyHost = null;
@@ -152,7 +152,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 
       Log.d(TAG, "PRX: " + proxyHost + ":" + proxyPort + "(" + proxyExcl + ")");
       // not used but left for future reference
-      String[] px = ProxySettings.getUserProxy(getApplicationContext());
+      final String[] px = ProxySettings.getUserProxy(getApplicationContext());
       if (px != null)
         Log.d(TAG, "PRX: " + px[0] + ":" + px[1] + "(" + px[2] + ")");
     }
@@ -172,31 +172,31 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       {
         initIptables();
 
-        StringBuffer cmd = new StringBuffer();
-        int uid = getPackageManager().getPackageInfo(getPackageName(), 0).applicationInfo.uid;
+        final StringBuffer cmd = new StringBuffer();
+        final int uid = getPackageManager().getPackageInfo(getPackageName(), 0).applicationInfo.uid;
         cmd.append(iptables);
         cmd.append(IPTABLES_RETURN.replace("{{UID}}", String.valueOf(uid)));
-        String rules = cmd.toString();
+        final String rules = cmd.toString();
         RootTools.sendShell(rules, DEFAULT_TIMEOUT);
         transparent = true;
       }
-      catch (FileNotFoundException e)
+      catch (final FileNotFoundException e)
       {
         // ignore - this is "normal" case
       }
-      catch (NameNotFoundException e)
+      catch (final NameNotFoundException e)
       {
         Log.e(TAG, "Failed to initialize iptables", e);
       }
-      catch (IOException e)
+      catch (final IOException e)
       {
         Log.e(TAG, "Failed to initialize iptables", e);
       }
-      catch (RootToolsException e)
+      catch (final RootToolsException e)
       {
         Log.e(TAG, "Failed to initialize iptables", e);
       }
-      catch (TimeoutException e)
+      catch (final TimeoutException e)
       {
         Log.e(TAG, "Failed to initialize iptables", e);
       }
@@ -216,7 +216,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 
     // Save current native proxy situation. The service is always started on the first run so
     // we will always have a correct value from the box
-    SharedPreferences.Editor editor = prefs.edit();
+    final SharedPreferences.Editor editor = prefs.edit();
     editor.putBoolean(getString(R.string.pref_proxyautoconfigured), transparent || nativeProxyAutoConfigured);
     editor.commit();
 
@@ -231,7 +231,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       portVariants[0] = prefs.getInt(getString(R.string.pref_lastport), -1);
       ServerSocket listen = null;
       String msg = null;
-      for (int p : portVariants)
+      for (final int p : portVariants)
       {
         if (p < 0)
           continue;
@@ -242,7 +242,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
           port = p;
           break;
         }
-        catch (IOException e)
+        catch (final IOException e)
         {
           Log.e(TAG, null, e);
           msg = e.getMessage();
@@ -289,25 +289,25 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       // Redirect traffic via iptables
       try
       {
-        StringBuffer cmd = new StringBuffer();
+        final StringBuffer cmd = new StringBuffer();
         cmd.append(iptables);
         cmd.append(IPTABLES_ADD_HTTP.replace("{{PORT}}", String.valueOf(port)));
-        String rules = cmd.toString();
+        final String rules = cmd.toString();
         RootTools.sendShell(rules, DEFAULT_TIMEOUT);
       }
-      catch (FileNotFoundException e)
+      catch (final FileNotFoundException e)
       {
         // ignore - this is "normal" case
       }
-      catch (IOException e)
+      catch (final IOException e)
       {
         Log.e(TAG, "Failed to initialize iptables", e);
       }
-      catch (RootToolsException e)
+      catch (final RootToolsException e)
       {
         Log.e(TAG, "Failed to initialize iptables", e);
       }
-      catch (TimeoutException e)
+      catch (final TimeoutException e)
       {
         Log.e(TAG, "Failed to initialize iptables", e);
       }
@@ -320,10 +320,10 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     startForeground(ONGOING_NOTIFICATION_ID, getNotification());
 
     // If automatic setting of proxy was blocked, check if user has set it manually
-    boolean manual = isManual();
+    final boolean manual = isManual();
     if (manual && NATIVE_PROXY_SUPPORTED)
     {
-      ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+      final ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
       updateNoTrafficCheck(connectivityManager);
     }
 
@@ -332,7 +332,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   }
 
   @Override
-  public int onStartCommand(Intent intent, int flags, int startId)
+  public int onStartCommand(final Intent intent, final int flags, final int startId)
   {
     return START_STICKY;
   }
@@ -359,7 +359,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
           {
             RootTools.sendShell(iptables + " -t nat -F OUTPUT", DEFAULT_TIMEOUT);
           }
-          catch (Exception e)
+          catch (final Exception e)
           {
             Log.e(TAG, "Failed to clear iptables", e);
           }
@@ -394,16 +394,16 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
    */
   private void clearConnectionProxy()
   {
-    String proxyHost = proxyConfiguration.getProperty("adblock.proxyHost");
-    String proxyPort = proxyConfiguration.getProperty("adblock.proxyPort");
-    String proxyExcl = proxyConfiguration.getProperty("adblock.proxyExcl");
+    final String proxyHost = proxyConfiguration.getProperty("adblock.proxyHost");
+    final String proxyPort = proxyConfiguration.getProperty("adblock.proxyPort");
+    final String proxyExcl = proxyConfiguration.getProperty("adblock.proxyExcl");
     int port = 0;
     try
     {
       if (proxyHost != null)
         port = Integer.valueOf(proxyPort);
     }
-    catch (NumberFormatException e)
+    catch (final NumberFormatException e)
     {
       Log.e(TAG, "Bad port setting", e);
     }
@@ -413,7 +413,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   /**
    * Sets user proxy settings in proxy service properties.
    */
-  private void configureUserProxy(Properties config, String proxyHost, String proxyPort, String proxyExcl, String proxyUser, String proxyPass)
+  private void configureUserProxy(final Properties config, final String proxyHost, final String proxyPort, final String proxyExcl, final String proxyUser, final String proxyPass)
   {
     // Clean previous settings
     config.remove("adblock.proxyHost");
@@ -445,7 +445,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     {
       p = Integer.valueOf(proxyPort);
     }
-    catch (NumberFormatException e)
+    catch (final NumberFormatException e)
     {
       return;
     }
@@ -471,41 +471,41 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     if (proxyUser != null && !"".equals(proxyUser) && proxyPass != null && !"".equals(proxyPass))
     {
       // Base64 encode user:password
-      String proxyAuth = "Basic " + new String(Base64.encode(proxyUser + ":" + proxyPass));
+      final String proxyAuth = "Basic " + new String(Base64.encode(proxyUser + ":" + proxyPass));
       config.put("adblock.auth", proxyAuth);
       if (!transparent)
         config.put("https.auth", proxyAuth);
     }
   }
 
-  private void passProxySettings(String proxyHost, String proxyPort, String proxyExcl)
+  private void passProxySettings(final String proxyHost, final String proxyPort, final String proxyExcl)
   {
     try
     {
-      CrashHandler handler = (CrashHandler) Thread.getDefaultUncaughtExceptionHandler();
+      final CrashHandler handler = (CrashHandler) Thread.getDefaultUncaughtExceptionHandler();
       handler.saveProxySettings(proxyHost, proxyPort, proxyExcl);
     }
-    catch (ClassCastException e)
+    catch (final ClassCastException e)
     {
       // ignore - default handler in use
     }
   }
 
   @Override
-  public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
+  public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences, final String key)
   {
     if (!NATIVE_PROXY_SUPPORTED)
     {
-      String ketHost = getString(R.string.pref_proxyhost);
-      String keyPort = getString(R.string.pref_proxyport);
-      String keyUser = getString(R.string.pref_proxyuser);
-      String keyPass = getString(R.string.pref_proxypass);
+      final String ketHost = getString(R.string.pref_proxyhost);
+      final String keyPort = getString(R.string.pref_proxyport);
+      final String keyUser = getString(R.string.pref_proxyuser);
+      final String keyPass = getString(R.string.pref_proxypass);
       if (key.equals(ketHost) || key.equals(keyPort) || key.equals(keyUser) || key.equals(keyPass))
       {
-        String proxyHost = sharedPreferences.getString(ketHost, null);
-        String proxyPort = sharedPreferences.getString(keyPort, null);
-        String proxyUser = sharedPreferences.getString(keyUser, null);
-        String proxyPass = sharedPreferences.getString(keyPass, null);
+        final String proxyHost = sharedPreferences.getString(ketHost, null);
+        final String proxyPort = sharedPreferences.getString(keyPort, null);
+        final String proxyUser = sharedPreferences.getString(keyUser, null);
+        final String proxyPass = sharedPreferences.getString(keyPass, null);
         if (proxy != null)
         {
           configureUserProxy(proxyConfiguration, proxyHost, proxyPort, null, proxyUser, proxyPass);
@@ -544,7 +544,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   /**
    * Checks if specified host is local.
    */
-  private static final boolean isLocalHost(String host)
+  private static final boolean isLocalHost(final String host)
   {
     if (host == null)
       return false;
@@ -554,18 +554,18 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       if (host.equalsIgnoreCase("localhost"))
         return true;
 
-      String className = "android.net.NetworkUtils";
-      Class<?> c = Class.forName(className);
+      final String className = "android.net.NetworkUtils";
+      final Class<?> c = Class.forName(className);
       /*
        * InetAddress address = NetworkUtils.numericToInetAddress(host);
        */
-      Method method = c.getMethod("numericToInetAddress", String.class);
-      InetAddress address = (InetAddress) method.invoke(null, host);
+      final Method method = c.getMethod("numericToInetAddress", String.class);
+      final InetAddress address = (InetAddress) method.invoke(null, host);
 
       if (address.isLoopbackAddress())
         return true;
     }
-    catch (Exception e)
+    catch (final Exception e)
     {
       Log.w(TAG, null, e);
     }
@@ -583,7 +583,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     if (!RootTools.isAccessGiven())
       throw new FileNotFoundException("No root access");
 
-    File ipt = getFileStreamPath("iptables");
+    final File ipt = getFileStreamPath("iptables");
 
     if (!ipt.exists())
     {
@@ -591,17 +591,17 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       throw new FileNotFoundException("No iptables executable");
     }
 
-    String path = ipt.getAbsolutePath();
+    final String path = ipt.getAbsolutePath();
 
     RootTools.sendShell("chmod 700 " + path, DEFAULT_TIMEOUT);
 
     boolean compatible = false;
     boolean version = false;
 
-    String command = path + " --version\n" + path + " -L -t nat -n\n";
+    final String command = path + " --version\n" + path + " -L -t nat -n\n";
 
-    List<String> result = RootTools.sendShell(command, DEFAULT_TIMEOUT);
-    for (String line : result)
+    final List<String> result = RootTools.sendShell(command, DEFAULT_TIMEOUT);
+    for (final String line : result)
     {
       if (line.contains("OUTPUT"))
         compatible = true;
@@ -623,12 +623,12 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     if (iptables == null)
       return null;
 
-    String command = iptables + " -L -t nat -n\n";
+    final String command = iptables + " -L -t nat -n\n";
     try
     {
       return RootTools.sendShell(command, DEFAULT_TIMEOUT);
     }
-    catch (Exception e)
+    catch (final Exception e)
     {
       Log.e(TAG, "Failed to get iptables configuration", e);
       return null;
@@ -639,17 +639,17 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
    * Raises or removes no traffic notification based on current link proxy
    * settings
    */
-  private void updateNoTrafficCheck(ConnectivityManager connectivityManager)
+  private void updateNoTrafficCheck(final ConnectivityManager connectivityManager)
   {
     try
     {
-      Object pp = ProxySettings.getActiveLinkProxy(connectivityManager);
-      String[] userProxy = ProxySettings.getUserProxy(pp);
+      final Object pp = ProxySettings.getActiveLinkProxy(connectivityManager);
+      final String[] userProxy = ProxySettings.getUserProxy(pp);
       if (userProxy != null)
         Log.i(TAG, "Proxy settings: " + userProxy[0] + ":" + userProxy[1] + "(" + userProxy[2] + ")");
       updateNoTrafficCheck(userProxy);
     }
-    catch (Exception e)
+    catch (final Exception e)
     {
       // This should not happen
       Log.e(TAG, null, e);
@@ -659,9 +659,9 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   /**
    * Raises or removes no traffic notification based on the user proxy settings
    */
-  private void updateNoTrafficCheck(String[] userProxy)
+  private void updateNoTrafficCheck(final String[] userProxy)
   {
-    boolean ourProxy = userProxy != null && isLocalHost(userProxy[0]) && Integer.valueOf(userProxy[1]) == port;
+    final boolean ourProxy = userProxy != null && isLocalHost(userProxy[0]) && Integer.valueOf(userProxy[1]) == port;
     if (ourProxy != proxyManualyConfigured)
     {
       proxyManualyConfigured = ourProxy;
@@ -677,7 +677,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       notrafficHandler = new Handler();
       notrafficHandler.postDelayed(noTraffic, NO_TRAFFIC_TIMEOUT);
     }
-    NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+    final NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
     notificationManager.notify(ONGOING_NOTIFICATION_ID, getNotification());
   }
 
@@ -690,7 +690,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     {
       notrafficHandler.removeCallbacks(noTraffic);
       sendStateChangedBroadcast();
-      NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+      final NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
       notificationManager.notify(ONGOING_NOTIFICATION_ID, getNotification());
       notificationManager.cancel(NOTRAFFIC_NOTIFICATION_ID);
     }
@@ -700,7 +700,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   @SuppressLint("NewApi")
   private Notification getNotification()
   {
-    boolean filtering = AdblockPlus.getApplication().isFilteringEnabled();
+    final boolean filtering = AdblockPlus.getApplication().isFilteringEnabled();
 
     int msgId = R.string.notif_waiting;
     if (nativeProxyAutoConfigured || proxyManualyConfigured)
@@ -708,40 +708,40 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     if (transparent)
       msgId = R.string.notif_all;
 
-    NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+    final NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
     if (hideIcon && msgId != R.string.notif_waiting)
     {
       builder.setWhen(POSITION_RIGHT);
       builder.setSmallIcon(R.drawable.transparent);
-      //builder.setContent(new RemoteViews(getPackageName(), R.layout.notif_hidden));
+      // builder.setContent(new RemoteViews(getPackageName(), R.layout.notif_hidden));
     }
     else
     {
       builder.setWhen(0);
       builder.setSmallIcon(R.drawable.ic_stat_blocking);
     }
-    PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, Preferences.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK), 0);
+    final PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, Preferences.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK), 0);
     builder.setContentIntent(contentIntent);
     builder.setContentTitle(getText(R.string.app_name));
     builder.setContentText(getString(msgId, port));
     builder.setOngoing(true);
 
-    Notification notification = builder.getNotification();
+    final Notification notification = builder.getNotification();
     return notification;
   }
 
-  public void setEmptyIcon(boolean hide)
+  public void setEmptyIcon(final boolean hide)
   {
     hideIcon = hide;
-    NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+    final NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
     notificationManager.notify(ONGOING_NOTIFICATION_ID, getNotification());
   }
 
   public void sendStateChangedBroadcast()
   {
     Log.i(TAG, "Broadcasting " + BROADCAST_STATE_CHANGED);
-    boolean manual = isManual();
-    Intent stateIntent = new Intent(BROADCAST_STATE_CHANGED).putExtra("enabled", true).putExtra("port", port).putExtra("manual", manual);
+    final boolean manual = isManual();
+    final Intent stateIntent = new Intent(BROADCAST_STATE_CHANGED).putExtra("enabled", true).putExtra("port", port).putExtra("manual", manual);
     if (manual)
       stateIntent.putExtra("configured", proxyManualyConfigured);
     sendBroadcast(stateIntent);
@@ -758,7 +758,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   }
 
   @Override
-  public IBinder onBind(Intent intent)
+  public IBinder onBind(final Intent intent)
   {
     return binder;
   }
@@ -767,25 +767,26 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
    * Executed if no traffic is detected after a period of time. Notifies user
    * about possible configuration problems.
    */
-  private Runnable noTraffic = new Runnable()
+  private final Runnable noTraffic = new Runnable()
   {
+    @Override
     public void run()
     {
       // It's weird but notrafficHandler.removeCallbacks(noTraffic) does not remove this callback
       if (notrafficHandler == null)
         return;
       // Show warning notification
-      NotificationCompat.Builder builder = new NotificationCompat.Builder(ProxyService.this);
+      final NotificationCompat.Builder builder = new NotificationCompat.Builder(ProxyService.this);
       builder.setSmallIcon(R.drawable.ic_stat_warning);
       builder.setWhen(System.currentTimeMillis());
       builder.setAutoCancel(true);
-      Intent intent = new Intent(ProxyService.this, ConfigurationActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+      final Intent intent = new Intent(ProxyService.this, ConfigurationActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
       intent.putExtra("port", port);
-      PendingIntent contentIntent = PendingIntent.getActivity(ProxyService.this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+      final PendingIntent contentIntent = PendingIntent.getActivity(ProxyService.this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
       builder.setContentIntent(contentIntent);
       builder.setContentTitle(getText(R.string.app_name));
       builder.setContentText(getText(R.string.notif_notraffic));
-      NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+      final NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
       notificationManager.notify(NOTRAFFIC_NOTIFICATION_ID, builder.getNotification());
     }
   };
@@ -793,10 +794,10 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   /**
    * Stops no traffic check if traffic is detected by proxy service.
    */
-  private BroadcastReceiver filterReceiver = new BroadcastReceiver()
+  private final BroadcastReceiver filterReceiver = new BroadcastReceiver()
   {
     @Override
-    public void onReceive(final Context context, Intent intent)
+    public void onReceive(final Context context, final Intent intent)
     {
       if (intent.getAction().equals(AdblockPlus.BROADCAST_FILTERING_CHANGE))
       {
@@ -804,9 +805,9 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
         // receive this broadcast despite the fact we have unsubscribed from
         // it and notification is not removed because it is changed to new one
         // during removal.
-        if (!ProxyService.this.isNativeProxyAutoConfigured())
+        if (!isNativeProxyAutoConfigured())
         {
-          NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+          final NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
           notificationManager.notify(ONGOING_NOTIFICATION_ID, getNotification());
         }
       }
@@ -821,10 +822,10 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   /**
    * Stops service if proxy fails.
    */
-  private BroadcastReceiver proxyReceiver = new BroadcastReceiver()
+  private final BroadcastReceiver proxyReceiver = new BroadcastReceiver()
   {
     @Override
-    public void onReceive(final Context context, Intent intent)
+    public void onReceive(final Context context, final Intent intent)
     {
       if (intent.getAction().equals(ProxyService.BROADCAST_PROXY_FAILED))
       {
@@ -837,24 +838,24 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
    * Monitors system network connection settings changes and updates proxy
    * settings accordingly.
    */
-  private BroadcastReceiver connectionReceiver = new BroadcastReceiver()
+  private final BroadcastReceiver connectionReceiver = new BroadcastReceiver()
   {
     @Override
-    public void onReceive(Context ctx, Intent intent)
+    public void onReceive(final Context ctx, final Intent intent)
     {
-      String action = intent.getAction();
+      final String action = intent.getAction();
       Log.i(TAG, "Action: " + action);
       // Connectivity change
       if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action))
       {
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        final ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         // TODO Should we use ConnectivityManagerCompat.getNetworkInfoFromBroadcast() instead?
-        NetworkInfo info = connectivityManager.getActiveNetworkInfo();
+        final NetworkInfo info = connectivityManager.getActiveNetworkInfo();
         if (info == null)
           return;
-        String typeName = info.getTypeName();
-        String subtypeName = info.getSubtypeName();
-        boolean available = info.isAvailable();
+        final String typeName = info.getTypeName();
+        final String subtypeName = info.getSubtypeName();
+        final boolean available = info.isAvailable();
 
         Log.i(TAG, "Network Type: " + typeName + ", subtype: " + subtypeName + ", available: " + available);
         if (info.getType() == ConnectivityManager.TYPE_WIFI)
@@ -872,10 +873,10 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       // Proxy change
       else if (Proxy.PROXY_CHANGE_ACTION.equals(action))
       {
-        Object pp = intent.getParcelableExtra("proxy");
+        final Object pp = intent.getParcelableExtra("proxy");
         try
         {
-          String[] userProxy = ProxySettings.getUserProxy(pp);
+          final String[] userProxy = ProxySettings.getUserProxy(pp);
           if (nativeProxyAutoConfigured)
           {
             if (userProxy != null && Integer.valueOf(userProxy[1]) != port)
@@ -894,7 +895,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
             updateNoTrafficCheck(userProxy);
           }
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
           // This should not happen
           Log.e(TAG, null, e);
@@ -914,7 +915,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
         this.interrupt();
         this.join();
       }
-      catch (Exception e)
+      catch (final Exception e)
       {
         // ignore - it always happens
       }
@@ -922,7 +923,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     }
 
     @Override
-    public void log(int level, Object obj, String message)
+    public void log(final int level, final Object obj, final String message)
     {
       if (level <= logLevel)
       {

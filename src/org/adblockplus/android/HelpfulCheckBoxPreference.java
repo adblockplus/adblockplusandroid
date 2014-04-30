@@ -35,13 +35,13 @@ public class HelpfulCheckBoxPreference extends CheckBoxPreference
   private OnClickListener helpClickListener;
   private String url;
 
-  public HelpfulCheckBoxPreference(Context context, AttributeSet attrs)
+  public HelpfulCheckBoxPreference(final Context context, final AttributeSet attrs)
   {
     super(context, attrs);
   }
 
   @Override
-  protected void onBindView(View view)
+  protected void onBindView(final View view)
   {
     super.onBindView(view);
 
@@ -62,7 +62,7 @@ public class HelpfulCheckBoxPreference extends CheckBoxPreference
     helpImage.setOnClickListener(new OnClickListener()
     {
       @Override
-      public void onClick(View v)
+      public void onClick(final View v)
       {
         if (helpClickListener != null)
         {
@@ -70,20 +70,20 @@ public class HelpfulCheckBoxPreference extends CheckBoxPreference
         }
         else if (url != null)
         {
-          Uri uri = Uri.parse(url);
-          Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+          final Uri uri = Uri.parse(url);
+          final Intent intent = new Intent(Intent.ACTION_VIEW, uri);
           HelpfulCheckBoxPreference.this.getContext().startActivity(intent);
         }
       }
     });
   }
 
-  public void setOnHelpClickListener(OnClickListener l)
+  public void setOnHelpClickListener(final OnClickListener l)
   {
     helpClickListener = l;
   }
 
-  public void setHelpUrl(String url)
+  public void setHelpUrl(final String url)
   {
     this.url = url;
   }

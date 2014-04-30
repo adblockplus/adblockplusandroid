@@ -29,17 +29,17 @@ import android.util.Log;
 
 public class ProxySettings
 {
-  private static final String TAG = "ProxySettings";
+  private static final String TAG = Utils.getTag(ProxySettings.class);
 
-  public static Object getActiveLinkProxy(ConnectivityManager connectivityManager) throws Exception
+  public static Object getActiveLinkProxy(final ConnectivityManager connectivityManager) throws Exception
   {
     /*
      * LinkProperties lp = connectivityManager.getActiveLinkProperties()
      */
-    Method method = connectivityManager.getClass().getMethod("getActiveLinkProperties");
-    Object lp = method.invoke(connectivityManager);
+    final Method method = connectivityManager.getClass().getMethod("getActiveLinkProperties");
+    final Object lp = method.invoke(connectivityManager);
 
-    Object pp = ProxySettings.getLinkProxy(lp);
+    final Object pp = ProxySettings.getLinkProxy(lp);
     return pp;
   }
 
@@ -52,13 +52,13 @@ public class ProxySettings
    * @return ProxyProperties
    * @throws Exception
    */
-  public static Object getLinkProxy(Object linkProperties) throws Exception
+  public static Object getLinkProxy(final Object linkProperties) throws Exception
   {
     /*
      * linkProperties.getHttpProxy();
      */
-    Method method = linkProperties.getClass().getMethod("getHttpProxy");
-    Object pp = method.invoke(linkProperties);
+    final Method method = linkProperties.getClass().getMethod("getHttpProxy");
+    final Object pp = method.invoke(linkProperties);
     return pp;
   }
 
@@ -67,7 +67,7 @@ public class ProxySettings
    *
    * @return string array of host, port and exclusion list
    */
-  public static String[] getUserProxy(Context context)
+  public static String[] getUserProxy(final Context context)
   {
     Method method = null;
     try
@@ -77,12 +77,12 @@ public class ProxySettings
        */
       method = ConnectivityManager.class.getMethod("getProxy");
     }
-    catch (NoSuchMethodException e)
+    catch (final NoSuchMethodException e)
     {
       // This is normal situation for pre-ICS devices
       return null;
     }
-    catch (Exception e)
+    catch (final Exception e)
     {
       // This should not happen
       Log.e(TAG, "getProxy failure", e);
@@ -91,14 +91,14 @@ public class ProxySettings
 
     try
     {
-      ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-      Object pp = method.invoke(connectivityManager);
+      final ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+      final Object pp = method.invoke(connectivityManager);
       if (pp == null)
         return null;
 
       return getUserProxy(pp);
     }
-    catch (Exception e)
+    catch (final Exception e)
     {
       // This should not happen
       Log.e(TAG, "getProxy failure", e);
@@ -114,12 +114,12 @@ public class ProxySettings
    * @return string array of host, port and exclusion list
    * @throws Exception
    */
-  protected static String[] getUserProxy(Object pp) throws Exception
+  protected static String[] getUserProxy(final Object pp) throws Exception
   {
-    String[] userProxy = new String[3];
+    final String[] userProxy = new String[3];
 
-    String className = "android.net.ProxyProperties";
-    Class<?> c = Class.forName(className);
+    final String className = "android.net.ProxyProperties";
+    final Class<?> c = Class.forName(className);
     Method method;
 
     /*
@@ -152,7 +152,7 @@ public class ProxySettings
    *
    * @return true if device supports native proxy setting
    */
-  public static boolean setConnectionProxy(Context context, String host, int port, String excl)
+  public static boolean setConnectionProxy(final Context context, final String host, final int port, final String excl)
   {
     Method method = null;
     try
@@ -163,12 +163,12 @@ public class ProxySettings
        */
       method = ConnectivityManager.class.getMethod("getActiveLinkProperties");
     }
-    catch (NoSuchMethodException e)
+    catch (final NoSuchMethodException e)
     {
       // This is normal situation for pre-ICS devices
       return false;
     }
-    catch (Exception e)
+    catch (final Exception e)
     {
       // This should not happen
       Log.e(TAG, "setHttpProxy failure", e);
@@ -176,27 +176,27 @@ public class ProxySettings
     }
     try
     {
-      ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-      Object lp = method.invoke(connectivityManager);
+      final ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+      final Object lp = method.invoke(connectivityManager);
       // There is no active link now, but device has native proxy support
       if (lp == null)
         return true;
 
-      String className = "android.net.ProxyProperties";
-      Class<?> c = Class.forName(className);
+      final String className = "android.net.ProxyProperties";
+      final Class<?> c = Class.forName(className);
       method = lp.getClass().getMethod("setHttpProxy", c);
       if (host != null)
       {
         /*
          * ProxyProperties pp = new ProxyProperties(host, port, excl);
          */
-        Class<?>[] parameter = new Class[] {String.class, int.class, String.class};
-        Object args[] = new Object[3];
+        final Class<?>[] parameter = new Class[] { String.class, int.class, String.class };
+        final Object args[] = new Object[3];
         args[0] = host;
         args[1] = Integer.valueOf(port);
         args[2] = excl;
-        Constructor<?> cons = c.getConstructor(parameter);
-        Object pp = cons.newInstance(args);
+        final Constructor<?> cons = c.getConstructor(parameter);
+        final Object pp = cons.newInstance(args);
         /*
          * lp.setHttpProxy(pp);
          */
@@ -207,11 +207,11 @@ public class ProxySettings
         /*
          * lp.setHttpProxy(null);
          */
-        method.invoke(lp, new Object[] {null});
+        method.invoke(lp, new Object[] { null });
       }
 
       Intent intent = null;
-      NetworkInfo ni = connectivityManager.getActiveNetworkInfo();
+      final NetworkInfo ni = connectivityManager.getActiveNetworkInfo();
       switch (ni.getType())
       {
         case ConnectivityManager.TYPE_WIFI:
@@ -233,12 +233,12 @@ public class ProxySettings
 
       return true;
     }
-    catch (SecurityException e)
+    catch (final SecurityException e)
     {
       // This is ok for 4.1.2+, 4.2.2+ and later
       return false;
     }
-    catch (Exception e)
+    catch (final Exception e)
     {
       // This should not happen
       Log.e(TAG, "setHttpProxy failure", e);

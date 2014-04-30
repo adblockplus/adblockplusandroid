@@ -33,31 +33,31 @@ public class ConfigurationActivity extends Activity
   private int port;
 
   @Override
-  public void onCreate(Bundle savedInstanceState)
+  public void onCreate(final Bundle savedInstanceState)
   {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.configuration);
     port = getIntent().getIntExtra("port", 0);
-    String msg1 = getString(R.string.msg_notraffic);
-    String msg2 = getString(R.string.msg_configuration);
+    final String msg1 = getString(R.string.msg_notraffic);
+    final String msg2 = getString(R.string.msg_configuration);
     ((TextView) findViewById(R.id.message_text)).setText(Html.fromHtml(msg1 + " " + msg2));
   }
 
-  public void onOk(View view)
+  public void onOk(final View view)
   {
     finish();
   }
 
-  public void onHelp(View view)
+  public void onHelp(final View view)
   {
-    Intent intent;
+    final Intent intent;
     if (ProxyService.NATIVE_PROXY_SUPPORTED)
     {
       intent = new Intent(this, ProxyConfigurationActivity.class).putExtra("port", port);
     }
     else
     {
-      Uri uri = Uri.parse(getString(R.string.configuring_proxy_url));
+      final Uri uri = Uri.parse(getString(R.string.configuring_proxy_url));
       intent = new Intent(Intent.ACTION_VIEW, uri);
     }
     startActivity(intent);

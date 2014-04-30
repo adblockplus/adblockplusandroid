@@ -63,7 +63,7 @@ import sunlabs.brazil.util.MatchString;
 public class SSLConnectionHandler extends BaseRequestHandler
 {
   @Override
-  public boolean respond(Request request) throws IOException
+  public boolean respond(final Request request) throws IOException
   {
     if (!request.method.equals("CONNECT"))
       return false;
@@ -87,7 +87,7 @@ public class SSLConnectionHandler extends BaseRequestHandler
       }
       else
       {
-        int c = request.url.indexOf(':');
+        final int c = request.url.indexOf(':');
         host = request.url.substring(0, c);
         port = Integer.parseInt(request.url.substring(c + 1));
       }
@@ -97,7 +97,7 @@ public class SSLConnectionHandler extends BaseRequestHandler
       serverSocket.setKeepAlive(true);
       serverSocket.connect(new InetSocketAddress(host, port));
     }
-    catch (Exception e)
+    catch (final Exception e)
     {
       request.sendError(500, "SSL connection failure");
       return true;
@@ -108,7 +108,7 @@ public class SSLConnectionHandler extends BaseRequestHandler
       if (proxyHost != null)
       {
         // Forward request to upstream proxy
-        OutputStream out = serverSocket.getOutputStream();
+        final OutputStream out = serverSocket.getOutputStream();
         out.write((request.method + " " + request.url + " " + request.protocol + "\r\n").getBytes());
         request.headers.print(out);
         out.write("\r\n".getBytes());
@@ -117,14 +117,14 @@ public class SSLConnectionHandler extends BaseRequestHandler
       else
       {
         // Send response to client
-        OutputStream out = request.sock.getOutputStream();
+        final OutputStream out = request.sock.getOutputStream();
         out.write((request.protocol + " 200 Connection established\r\n\r\n").getBytes());
         out.flush();
       }
 
       // Start bi-directional data transfer
-      ConnectionHandler client = new ConnectionHandler(request.sock, serverSocket);
-      ConnectionHandler server = new ConnectionHandler(serverSocket, request.sock);
+      final ConnectionHandler client = new ConnectionHandler(request.sock, serverSocket);
+      final ConnectionHandler server = new ConnectionHandler(serverSocket, request.sock);
       client.start();
       server.start();
 
@@ -132,7 +132,7 @@ public class SSLConnectionHandler extends BaseRequestHandler
       client.join();
       server.join();
     }
-    catch (InterruptedException e)
+    catch (final InterruptedException e)
     {
       request.log(Server.LOG_ERROR, prefix, "Data exchange error: " + e.getMessage());
     }
@@ -146,10 +146,10 @@ public class SSLConnectionHandler extends BaseRequestHandler
 
   private class ConnectionHandler extends Thread
   {
-    private InputStream in;
-    private OutputStream out;
+    private final InputStream in;
+    private final OutputStream out;
 
-    ConnectionHandler(Socket sin, Socket sout) throws IOException
+    ConnectionHandler(final Socket sin, final Socket sout) throws IOException
     {
       in = sin.getInputStream();
       out = sout.getOutputStream();
@@ -158,7 +158,7 @@ public class SSLConnectionHandler extends BaseRequestHandler
     @Override
     public void run()
     {
-      byte[] buf = new byte[4096];
+      final byte[] buf = new byte[4096];
       int count;
 
       try
@@ -169,7 +169,7 @@ public class SSLConnectionHandler extends BaseRequestHandler
         }
         out.flush();
       }
-      catch (IOException e)
+      catch (final IOException e)
       {
         e.printStackTrace();
       }

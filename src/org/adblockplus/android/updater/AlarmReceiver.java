@@ -30,6 +30,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.adblockplus.android.AdblockPlus;
 import org.adblockplus.android.R;
+import org.adblockplus.android.Utils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -58,8 +59,7 @@ import android.util.Log;
  */
 public class AlarmReceiver extends BroadcastReceiver
 {
-
-  private static final String TAG = "AlarmReceiver";
+  private static final String TAG = Utils.getTag(AlarmReceiver.class);
   private static final int NOTIFICATION_ID = R.string.app_name + 1;
 
   @Override
@@ -74,7 +74,7 @@ public class AlarmReceiver extends BroadcastReceiver
 
     // Check network availability
     boolean connected = false;
-    ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    final ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
     NetworkInfo networkInfo = null;
     if (connectivityManager != null)
     {
@@ -95,7 +95,8 @@ public class AlarmReceiver extends BroadcastReceiver
     // Get update info
     if (application.checkWriteExternalPermission() && connected)
     {
-      Thread thread = new Thread(new Runnable() {
+      final Thread thread = new Thread(new Runnable()
+      {
         @Override
         public void run()
         {
@@ -103,40 +104,40 @@ public class AlarmReceiver extends BroadcastReceiver
           try
           {
             // Read updates manifest
-            DefaultHttpClient httpClient = new DefaultHttpClient();
+            final DefaultHttpClient httpClient = new DefaultHttpClient();
 
-            String locale = Locale.getDefault().toString().toLowerCase();
-            String device = AdblockPlus.getDeviceName();
-            boolean releaseBuild = context.getResources().getBoolean(R.bool.def_release);
-            String updateUrlTemplate = context.getString(releaseBuild ? R.string.update_url : R.string.devbuild_update_url);
-            URL updateUrl = new URL(String.format(updateUrlTemplate, Build.VERSION.SDK_INT, AdblockPlus.getApplication().getBuildNumber(), locale, device));
+            final String locale = Locale.getDefault().toString().toLowerCase();
+            final String device = AdblockPlus.getDeviceName();
+            final boolean releaseBuild = context.getResources().getBoolean(R.bool.def_release);
+            final String updateUrlTemplate = context.getString(releaseBuild ? R.string.update_url : R.string.devbuild_update_url);
+            final URL updateUrl = new URL(String.format(updateUrlTemplate, Build.VERSION.SDK_INT, AdblockPlus.getApplication().getBuildNumber(), locale, device));
             // The following line correctly url-encodes query string parameters
-            URI uri = new URI(updateUrl.getProtocol(), updateUrl.getUserInfo(), updateUrl.getHost(), updateUrl.getPort(), updateUrl.getPath(), updateUrl.getQuery(), updateUrl.getRef());
-            HttpGet httpGet = new HttpGet(uri);
+            final URI uri = new URI(updateUrl.getProtocol(), updateUrl.getUserInfo(), updateUrl.getHost(), updateUrl.getPort(), updateUrl.getPath(), updateUrl.getQuery(), updateUrl.getRef());
+            final HttpGet httpGet = new HttpGet(uri);
 
-            HttpResponse httpResponse = httpClient.execute(httpGet);
-            HttpEntity httpEntity = httpResponse.getEntity();
-            String xml = EntityUtils.toString(httpEntity);
+            final HttpResponse httpResponse = httpClient.execute(httpGet);
+            final HttpEntity httpEntity = httpResponse.getEntity();
+            final String xml = EntityUtils.toString(httpEntity);
 
             // Parse XML
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            DocumentBuilder db = dbf.newDocumentBuilder();
+            final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            final DocumentBuilder db = dbf.newDocumentBuilder();
 
-            InputSource is = new InputSource();
+            final InputSource is = new InputSource();
             is.setCharacterStream(new StringReader(xml));
-            Document doc = db.parse(is);
+            final Document doc = db.parse(is);
 
             // Find best match
-            NodeList nl = doc.getElementsByTagName("updatecheck");
+            final NodeList nl = doc.getElementsByTagName("updatecheck");
             int newBuild = -1;
             int newApi = -1;
             String newUrl = null;
             for (int i = 0; i < nl.getLength(); i++)
             {
-              Element e = (Element) nl.item(i);
-              String url = e.getAttribute("package");
-              int build = Integer.parseInt(e.getAttribute("build"));
-              int api = Integer.parseInt(e.getAttribute("api"));
+              final Element e = (Element) nl.item(i);
+              final String url = e.getAttribute("package");
+              final int build = Integer.parseInt(e.getAttribute("build"));
+              final int api = Integer.parseInt(e.getAttribute("api"));
               if (api > android.os.Build.VERSION.SDK_INT)
                 continue;
               if ((build > newBuild) || (build == newBuild && api > newApi))
@@ -147,17 +148,17 @@ public class AlarmReceiver extends BroadcastReceiver
               }
             }
 
-            int thisBuild = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode;
+            final int thisBuild = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode;
 
             // Notify user if newer update was found
             if (thisBuild < newBuild)
             {
               notification.icon = R.drawable.ic_stat_download;
-              Intent intent = new Intent(context, UpdaterActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+              final Intent intent = new Intent(context, UpdaterActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
               intent.setAction("download");
               intent.putExtra("url", newUrl);
               intent.putExtra("build", newBuild);
-              PendingIntent updateIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+              final PendingIntent updateIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
               notification.setLatestEventInfo(context, context.getText(R.string.app_name), context.getString(R.string.msg_update_available), updateIntent);
               notificationManager.notify(NOTIFICATION_ID, notification);
             }
@@ -169,23 +170,23 @@ public class AlarmReceiver extends BroadcastReceiver
             }
             success = true;
           }
-          catch (IOException e)
+          catch (final IOException e)
           {
           }
-          catch (NumberFormatException e)
+          catch (final NumberFormatException e)
           {
           }
-          catch (NameNotFoundException e)
+          catch (final NameNotFoundException e)
           {
           }
-          catch (ParserConfigurationException e)
+          catch (final ParserConfigurationException e)
           {
           }
-          catch (SAXException e)
+          catch (final SAXException e)
           {
             Log.e(TAG, "Error", e);
           }
-          catch (URISyntaxException e)
+          catch (final URISyntaxException e)
           {
             Log.e(TAG, "Error", e);
           }
