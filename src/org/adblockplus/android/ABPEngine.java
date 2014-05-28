@@ -200,15 +200,12 @@ public final class ABPEngine
 
   public void setSubscription(final String url)
   {
-    Subscription sub = null;
     for (final Subscription s : this.filterEngine.getListedSubscriptions())
     {
-      if (url.equals(s.getProperty("url").toString()))
-      {
-        sub = s;
-      }
       s.removeFromList();
     }
+
+    final Subscription sub = this.filterEngine.getSubscription(url);
     if (sub != null)
     {
       sub.addToList();
