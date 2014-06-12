@@ -18,6 +18,7 @@
 package org.adblockplus.android;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.adblockplus.libadblockplus.AppInfo;
 import org.adblockplus.libadblockplus.EventCallback;
@@ -79,7 +80,7 @@ public final class ABPEngine
       Log.e(TAG, "Failed to get the application version number", e);
     }
     final String sdkVersion = String.valueOf(VERSION.SDK_INT);
-    final String locale = context.getResources().getConfiguration().locale.toString();
+    final String locale = Locale.getDefault().toString().replace('_', '-');
     final boolean developmentBuild = !context.getResources().getBoolean(R.bool.def_release);
 
     return AppInfo.builder()
