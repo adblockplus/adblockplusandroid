@@ -93,24 +93,7 @@ public class AdblockPlus extends Application
 
   private static AdblockPlus instance;
 
-  private static class ReferrerMappingCache extends LinkedHashMap<String, String>
-  {
-    private static final long serialVersionUID = 1L;
-    private static final int MAX_SIZE = 5000;
-
-    public ReferrerMappingCache()
-    {
-      super(MAX_SIZE + 1, 0.75f, true);
-    }
-
-    @Override
-    protected boolean removeEldestEntry(final Map.Entry<String, String> eldest)
-    {
-      return size() > MAX_SIZE;
-    }
-  };
-
-  private final ReferrerMappingCache referrerMapping = new ReferrerMappingCache();
+  private final ReferrerMapping referrerMapping = new ReferrerMapping();
 
   /**
    * Returns pointer to itself (singleton pattern).
@@ -359,7 +342,7 @@ public class AdblockPlus extends Application
   {
     final String fullUrl = !"".equals(query) ? url + "?" + query : url;
     if (referrer != null)
-      referrerMapping.put(fullUrl, referrer);
+      referrerMapping.add(fullUrl, referrer);
 
     if (!filteringEnabled)
       return false;
@@ -392,24 +375,10 @@ public class AdblockPlus extends Application
     if (contentType == null)
       contentType = "OTHER";
 
-    final List<String> referrerChain = buildReferrerChain(referrer);
+    final List<String> referrerChain = referrerMapping.buildReferrerChain(referrer);
     Log.d("Referrer chain", fullUrl + ": " + referrerChain.toString());
     final String[] referrerChainArray = referrerChain.toArray(new String[referrerChain.size()]);
     return abpEngine.matches(fullUrl, contentType, referrerChainArray);
-  }
-
-  private List<String> buildReferrerChain(String url)
-  {
-    final List<String> referrerChain = new ArrayList<String>();
-    // We need to limit the chain length to ensure we don't block indefinitely if there's
-    // a referrer loop.
-    final int maxChainLength = 10;
-    for (int i = 0; i < maxChainLength && url != null; i++)
-    {
-      referrerChain.add(0, url);
-      url = referrerMapping.get(url);
-    }
-    return referrerChain;
   }
 
   /**
