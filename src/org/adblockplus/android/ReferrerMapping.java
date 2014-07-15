@@ -43,9 +43,9 @@ public class ReferrerMapping
 
   private final MappingCache mappingCache = new MappingCache();
 
-  public void add(String fullUrl, String referrer)
+  public void add(String url, String referrer)
   {
-    mappingCache.put(fullUrl, referrer);
+    mappingCache.put(url, referrer);
   }
 
   public List<String> buildReferrerChain(String url)
