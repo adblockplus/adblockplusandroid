@@ -42,14 +42,14 @@ Building with Eclipse
 - [Eclipse](https://www.eclipse.org)
 - [Android Developer Tools for Eclipse](http://developer.android.com/tools/sdk/eclipse-adt.html)
   (both _Developer Tools_ and _NDK Plugins_)
-- [C++ Developer Tools for Eclipse](http://projects.eclipse.org/projects/tools.cdt)
 
 ### Building
 
-1. Select _Import_ in the _File_ menu, then _Existing Android Projects Into Workspace_.
-2. Select the project directory (_adblockplusandroid_) as _Root Directory_.
-3. Select the projects _Adblock Plus_, _library_ and _android-switch-backport_.
-4. Revert any local changes to _.classpath_ in _adblockplusandroid_
+1. Ensure the `NDKROOT` environment variable points to your NDK directory.
+2. Select _Import_ in the _File_ menu, then _Existing Android Projects Into Workspace_.
+3. Select the project directory (_adblockplusandroid_) as _Root Directory_.
+4. Select the projects _Adblock Plus_, _library_ and _android-switch-backport_.
+5. Revert any local changes to _.classpath_ in _adblockplusandroid_
    and _adblockplusandroid/submodules/android-switch-backport_.
 
 ### Running
