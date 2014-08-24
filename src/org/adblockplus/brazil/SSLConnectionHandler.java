@@ -171,7 +171,7 @@ public class SSLConnectionHandler extends BaseRequestHandler
       }
       catch (final IOException e)
       {
-        e.printStackTrace();
+        // Just swallow as we can't recover from this
       }
     }
   }

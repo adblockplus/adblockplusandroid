@@ -20,6 +20,9 @@ package org.adblockplus.android;
 import java.io.PrintWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
 
+import org.adblockplus.android.compat.LinkProperties;
+import org.adblockplus.android.compat.ProxyProperties;
+
 import android.annotation.SuppressLint;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -170,6 +173,20 @@ public class CrashHandler implements UncaughtExceptionHandler
     {
       // ignore - no valid port, it will be correctly processed later
     }
-    ProxySettings.setConnectionProxy(context, host, p, excl);
+
+    try
+    {
+      final LinkProperties linkProperties = LinkProperties.fromContext(this.context);
+      if (linkProperties != null && linkProperties.isValid())
+      {
+        linkProperties.setHttpProxy(new ProxyProperties(this.host, p, this.excl));
+      }
+    }
+    catch (final Throwable t)
+    {
+      // This method here must not throw any exceptions to make sure it does not kill anything else.
+      // And it's safe to ignore this exception here, because if resetting the proxy fails, then it fails ... and we don't get a second chance to
+      // clear it again (because we're most likely currently crashing).
+    }
   }
 }

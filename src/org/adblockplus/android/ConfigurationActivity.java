@@ -51,7 +51,7 @@ public class ConfigurationActivity extends Activity
   public void onHelp(final View view)
   {
     final Intent intent;
-    if (ProxyService.NATIVE_PROXY_SUPPORTED)
+    if (Utils.isNativeProxySupported(this))
     {
       intent = new Intent(this, ProxyConfigurationActivity.class).putExtra("port", port);
     }
