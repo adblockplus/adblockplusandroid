@@ -20,7 +20,7 @@ public class ProxyConfigurationActivity extends Activity
     final int port = getIntent().getIntExtra("port", 0);
 
     final StringBuilder info = new StringBuilder();
-    final int textId = ProxyService.NATIVE_PROXY_SUPPORTED ? R.raw.proxysettings : R.raw.proxysettings_old;
+    final int textId = Utils.isNativeProxySupported(this) ? R.raw.proxysettings : R.raw.proxysettings_old;
     AdblockPlus.appendRawTextFile(this, info, textId);
     final String msg = String.format(info.toString(), port);
 
@@ -28,7 +28,7 @@ public class ProxyConfigurationActivity extends Activity
     tv.setText(Html.fromHtml(msg));
     tv.setMovementMethod(LinkMovementMethod.getInstance());
 
-    final Button buttonToHide = (Button) findViewById(ProxyService.NATIVE_PROXY_SUPPORTED ? R.id.gotit : R.id.opensettings);
+    final Button buttonToHide = (Button) findViewById(Utils.isNativeProxySupported(this) ? R.id.gotit : R.id.opensettings);
     buttonToHide.setVisibility(View.GONE);
   }
 

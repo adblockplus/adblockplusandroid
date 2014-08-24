@@ -29,6 +29,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -86,6 +87,19 @@ public class RequestHandler extends BaseRequestHandler
   private String via;
   private static final Pattern RE_HTTP = Pattern.compile("^https?:");
 
+  private static final AtomicLong BLOCKED_REQUESTS = new AtomicLong();
+  private static final AtomicLong UNBLOCKED_REQUESTS = new AtomicLong();
+
+  public static long getBlockedRequestCount()
+  {
+    return BLOCKED_REQUESTS.get();
+  }
+
+  public static long getUnblockedRequestCount()
+  {
+    return UNBLOCKED_REQUESTS.get();
+  }
+
   @Override
   public boolean init(final Server server, final String prefix)
   {
@@ -116,14 +130,18 @@ public class RequestHandler extends BaseRequestHandler
     int count = request.server.requestCount;
     if (shouldLogHeaders)
     {
+      // FIXME Don't log to "err"
       System.err.println(dumpHeaders(count, request, request.headers, true));
     }
 
     if (block)
     {
       request.sendHeaders(204, null, 0);
+      BLOCKED_REQUESTS.incrementAndGet();
       return true;
     }
+
+    UNBLOCKED_REQUESTS.incrementAndGet();
 
     // Do not further process non-http requests
     if (!RE_HTTP.matcher(request.url).find())

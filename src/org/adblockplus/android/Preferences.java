@@ -28,19 +28,16 @@ import org.jraf.android.backport.switchwidget.SwitchPreference;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.PreferenceManager;
@@ -66,16 +63,29 @@ public class Preferences extends SummarizedPreferences
   private static final int ABOUT_DIALOG = 1;
   private static final int HIDEICONWARNING_DIALOG = 2;
 
-  private static ProxyService proxyService = null;
   private static boolean firstRunActionsPending = true;
 
   private RefreshableListPreference subscriptionList;
   private String subscriptionSummary;
 
+  private ServiceBinder serviceBinder = null;
+
   @Override
   public void onCreate(final Bundle savedInstanceState)
   {
     super.onCreate(savedInstanceState);
+
+    this.serviceBinder = new ServiceBinder(this).setOnConnectHandler(new ServiceBinder.OnConnectHandler()
+    {
+      @Override
+      public void onConnect(final ProxyService proxyService)
+      {
+        if (proxyService.isManual() && !proxyService.isRegistered())
+        {
+          Preferences.this.showConfigurationMsg(Preferences.this.getString(R.string.msg_configuration));
+        }
+      }
+    });
 
     PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
     PreferenceManager.setDefaultValues(this, R.xml.preferences_advanced, true);
@@ -204,7 +214,7 @@ public class Preferences extends SummarizedPreferences
     if (enabled || firstRun || (proxyenabled && !autoconfigured))
       setProxyEnabled(true);
 
-    bindService(new Intent(this, ProxyService.class), proxyServiceConnection, 0);
+    this.serviceBinder.bind();
   }
 
   private void showNotificationDialog(final String title, String message, String url)
@@ -236,8 +246,7 @@ public class Preferences extends SummarizedPreferences
       // ignore - it is thrown if receiver is not registered but it can not be
       // true in normal conditions
     }
-    unbindService(proxyServiceConnection);
-    proxyService = null;
+    this.serviceBinder.unbind();
 
     hideConfigurationMsg();
   }
@@ -350,7 +359,11 @@ public class Preferences extends SummarizedPreferences
 
   public void showProxySettings(final View v)
   {
-    startActivity(new Intent(this, ProxyConfigurationActivity.class).putExtra("port", proxyService.port));
+    final ProxyService proxyService = this.serviceBinder.get();
+    if (proxyService != null)
+    {
+      startActivity(new Intent(this, ProxyConfigurationActivity.class).putExtra("port", proxyService.port));
+    }
   }
 
   @Override
@@ -435,6 +448,7 @@ public class Preferences extends SummarizedPreferences
       final boolean hideIcon = sharedPreferences.getBoolean(key, false);
       if (hideIcon)
         showDialog(HIDEICONWARNING_DIALOG);
+      final ProxyService proxyService = this.serviceBinder.get();
       if (proxyService != null)
         proxyService.setEmptyIcon(hideIcon);
     }
@@ -559,24 +573,4 @@ public class Preferences extends SummarizedPreferences
     outState.putString("subscriptionSummary", subscriptionSummary);
     super.onSaveInstanceState(outState);
   }
-
-  private final ServiceConnection proxyServiceConnection = new ServiceConnection()
-  {
-    @Override
-    public void onServiceConnected(final ComponentName className, final IBinder service)
-    {
-      proxyService = ((ProxyService.LocalBinder) service).getService();
-      Log.d(TAG, "Proxy service connected");
-
-      if (proxyService.isManual() && proxyService.noTraffic())
-        showConfigurationMsg(getString(R.string.msg_configuration));
-    }
-
-    @Override
-    public void onServiceDisconnected(final ComponentName className)
-    {
-      proxyService = null;
-      Log.d(TAG, "Proxy service disconnected");
-    }
-  };
 }

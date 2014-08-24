@@ -20,23 +20,23 @@ package org.adblockplus.android;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.adblockplus.android.compat.ProxyProperties;
+import org.adblockplus.android.configurators.IptablesProxyConfigurator;
+import org.apache.commons.lang.StringUtils;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.text.ClipboardManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -51,7 +51,7 @@ public class AdvancedPreferences extends SummarizedPreferences
 
   private static final int CONFIGURATION_DIALOG = 1;
 
-  private ProxyService proxyService = null;
+  private ServiceBinder serviceBinder = null;
 
   @Override
   public void onCreate(final Bundle savedInstanceState)
@@ -62,8 +62,10 @@ public class AdvancedPreferences extends SummarizedPreferences
 
     final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
+    this.serviceBinder = new ServiceBinder(this);
+
     final PreferenceScreen screen = getPreferenceScreen();
-    if (ProxyService.NATIVE_PROXY_SUPPORTED)
+    if (Utils.isNativeProxySupported(this))
     {
       screen.removePreference(findPreference(getString(R.string.pref_proxy)));
       if (prefs.getBoolean(getString(R.string.pref_proxyautoconfigured), false))
@@ -109,14 +111,14 @@ public class AdvancedPreferences extends SummarizedPreferences
     final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
     final int refresh = Integer.valueOf(prefs.getString(getString(R.string.pref_refresh), "0"));
     findPreference(getString(R.string.pref_wifirefresh)).setEnabled(refresh > 0);
-    connect();
+    this.serviceBinder.bind();
   }
 
   @Override
   public void onPause()
   {
     super.onPause();
-    disconnect();
+    this.serviceBinder.unbind();
   }
 
   @Override
@@ -174,19 +176,22 @@ public class AdvancedPreferences extends SummarizedPreferences
         final List<String> items = new ArrayList<String>();
         items.add(AdblockPlus.getDeviceName());
         items.add(String.format("API: %d Build: %d", Build.VERSION.SDK_INT, AdblockPlus.getApplication().getBuildNumber()));
+
+        final ProxyService proxyService = this.serviceBinder.get();
+
         if (proxyService != null)
         {
           items.add(String.format("Local port: %d", proxyService.port));
-          if (proxyService.isTransparent())
+          if (proxyService.isIptables())
           {
             items.add("Running in root mode");
             items.add("iptables output:");
-            final List<String> output = proxyService.getIptablesOutput();
+            final List<String> output = IptablesProxyConfigurator.getIptablesOutput(getApplicationContext());
             if (output != null)
             {
               for (final String line : output)
               {
-                if (!"".equals(line))
+                if (StringUtils.isNotEmpty(line))
                   items.add(line);
               }
             }
@@ -195,13 +200,13 @@ public class AdvancedPreferences extends SummarizedPreferences
           {
             items.add("Has native proxy auto configured");
           }
-          if (ProxyService.NATIVE_PROXY_SUPPORTED)
+          if (Utils.isNativeProxySupported(this))
           {
-            final String[] px = ProxySettings.getUserProxy(getApplicationContext());
-            if (px != null)
+            final ProxyProperties pp = ProxyProperties.fromContext(getApplicationContext());
+            if (pp != null)
             {
               items.add("System settings:");
-              items.add(String.format("Host: [%s] Port: [%s] Excl: [%s]", px[0], px[1], px[2]));
+              items.add(String.format("Host: [%s] Port: [%d] Excl: [%s]", pp.getHost(), pp.getPort(), pp.getExclusionList()));
             }
           }
           items.add("Proxy settings:");
@@ -221,7 +226,6 @@ public class AdvancedPreferences extends SummarizedPreferences
         messageText.setText(TextUtils.join("\n", items));
         messageText.setOnClickListener(new View.OnClickListener()
         {
-
           @Override
           public void onClick(final View v)
           {
@@ -234,7 +238,10 @@ public class AdvancedPreferences extends SummarizedPreferences
         scrollPane.addView(messageText);
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setView(scrollPane).setTitle(R.string.configuration_name).setIcon(android.R.drawable.ic_dialog_info).setCancelable(false)
+        builder.setView(scrollPane)
+            .setTitle(R.string.configuration_name)
+            .setIcon(android.R.drawable.ic_dialog_info)
+            .setCancelable(false)
             .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener()
             {
               @Override
@@ -248,32 +255,4 @@ public class AdvancedPreferences extends SummarizedPreferences
     }
     return dialog;
   }
-
-  private void connect()
-  {
-    bindService(new Intent(this, ProxyService.class), proxyServiceConnection, 0);
-  }
-
-  private void disconnect()
-  {
-    unbindService(proxyServiceConnection);
-    proxyService = null;
-  }
-
-  private final ServiceConnection proxyServiceConnection = new ServiceConnection()
-  {
-    @Override
-    public void onServiceConnected(final ComponentName className, final IBinder service)
-    {
-      proxyService = ((ProxyService.LocalBinder) service).getService();
-      Log.d(TAG, "Proxy service connected");
-    }
-
-    @Override
-    public void onServiceDisconnected(final ComponentName className)
-    {
-      proxyService = null;
-      Log.d(TAG, "Proxy service disconnected");
-    }
-  };
 }

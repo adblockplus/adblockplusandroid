@@ -23,11 +23,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
@@ -76,10 +73,6 @@ public class AdblockPlus extends Application
    * Broadcasted when subscription status changes.
    */
   public static final String BROADCAST_SUBSCRIPTION_STATUS = "org.adblockplus.android.subscription.status";
-  /**
-   * Broadcasted when filter match check is performed.
-   */
-  public static final String BROADCAST_FILTER_MATCHES = "org.adblockplus.android.filter.matches";
   /**
    * Cached list of recommended subscriptions.
    */
@@ -228,7 +221,6 @@ public class AdblockPlus extends Application
    */
   public Subscription[] getRecommendedSubscriptions()
   {
-    // TODO: Why don't we re-check?
     if (subscriptions == null)
       subscriptions = abpEngine.getRecommendedSubscriptions();
     return subscriptions;
@@ -340,7 +332,7 @@ public class AdblockPlus extends Application
    */
   public boolean matches(final String url, final String query, final String referrer, final String accept)
   {
-    final String fullUrl = !"".equals(query) ? url + "?" + query : url;
+    final String fullUrl = StringUtils.isNotEmpty(query) ? url + "?" + query : url;
     if (referrer != null)
       referrerMapping.add(fullUrl, referrer);
 
@@ -376,7 +368,6 @@ public class AdblockPlus extends Application
       contentType = "OTHER";
 
     final List<String> referrerChain = referrerMapping.buildReferrerChain(referrer);
-    Log.d("Referrer chain", fullUrl + ": " + referrerChain.toString());
     final String[] referrerChainArray = referrerChain.toArray(new String[referrerChain.size()]);
     return abpEngine.matches(fullUrl, contentType, referrerChainArray);
   }
