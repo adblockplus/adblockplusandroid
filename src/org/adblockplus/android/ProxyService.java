@@ -64,6 +64,11 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   private static final long POSITION_RIGHT = Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD ? Long.MIN_VALUE : Long.MAX_VALUE;
 
   /**
+   * This flag indicates that this mobile device runs an Android version that allows the user to configure a http(s) proxy.
+   */
+  public static final boolean GLOBAL_PROXY_USER_CONFIGURABLE = Build.VERSION.SDK_INT >= 12; // Honeycomb 3.1
+
+  /**
    * Broadcasted when service starts or stops.
    */
   public static final String BROADCAST_STATE_CHANGED = "org.adblockplus.android.SERVICE_STATE_CHANGED";

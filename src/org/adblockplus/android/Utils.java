@@ -17,7 +17,6 @@
 
 package org.adblockplus.android;
 
-import org.adblockplus.android.configurators.NativeProxyConfigurator;
 import org.adblockplus.android.updater.UpdaterActivity;
 import org.adblockplus.libadblockplus.JsValue;
 import org.adblockplus.libadblockplus.Subscription;
@@ -31,23 +30,9 @@ import android.support.v4.app.NotificationCompat;
 
 public final class Utils
 {
-  private static boolean nativeProxySupportChecked = false;
-  private static boolean nativeProxySupported = false;
-
   private Utils()
   {
     //
-  }
-
-  public static synchronized boolean isNativeProxySupported(final Context context)
-  {
-    if (!nativeProxySupportChecked)
-    {
-      nativeProxySupported = NativeProxyConfigurator.canUse(context);
-      nativeProxySupportChecked = true;
-    }
-
-    return nativeProxySupported;
   }
 
   public static String getTag(final Class<?> clazz)
