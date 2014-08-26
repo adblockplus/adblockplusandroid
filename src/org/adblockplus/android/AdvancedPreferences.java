@@ -65,7 +65,7 @@ public class AdvancedPreferences extends SummarizedPreferences
     this.serviceBinder = new ServiceBinder(this);
 
     final PreferenceScreen screen = getPreferenceScreen();
-    if (Utils.isNativeProxySupported(this))
+    if (ProxyService.GLOBAL_PROXY_USER_CONFIGURABLE)
     {
       screen.removePreference(findPreference(getString(R.string.pref_proxy)));
       if (prefs.getBoolean(getString(R.string.pref_proxyautoconfigured), false))
@@ -200,7 +200,7 @@ public class AdvancedPreferences extends SummarizedPreferences
           {
             items.add("Has native proxy auto configured");
           }
-          if (Utils.isNativeProxySupported(this))
+          if (ProxyService.GLOBAL_PROXY_USER_CONFIGURABLE)
           {
             final ProxyProperties pp = ProxyProperties.fromContext(getApplicationContext());
             if (pp != null)
