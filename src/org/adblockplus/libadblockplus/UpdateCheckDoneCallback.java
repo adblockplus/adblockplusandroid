@@ -17,7 +17,7 @@
 
 package org.adblockplus.libadblockplus;
 
-public abstract class UpdaterCallback implements Disposable
+public abstract class UpdateCheckDoneCallback implements Disposable
 {
   private final Disposer disposer;
   protected final long ptr;
@@ -28,13 +28,13 @@ public abstract class UpdaterCallback implements Disposable
     registerNatives();
   }
 
-  public UpdaterCallback()
+  public UpdateCheckDoneCallback()
   {
     this.ptr = ctor(this);
     this.disposer = new Disposer(this, new DisposeWrapper(this.ptr));
   }
 
-  public abstract void updaterCallback(String error);
+  public abstract void updateCheckDoneCallback(String error);
 
   @Override
   public void dispose()
