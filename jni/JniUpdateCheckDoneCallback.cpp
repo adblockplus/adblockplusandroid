@@ -42,7 +42,7 @@ void JniUpdateCheckDoneCallback::Callback(const std::string& arg)
   JNIEnvAcquire env(GetJavaVM());
 
   jclass clazz = env->GetObjectClass(GetCallbackObject());
-  jmethodID method = env->GetMethodID(clazz, "updateCallback", "(Ljava/lang/String;)V");
+  jmethodID method = env->GetMethodID(clazz, "updateCheckDoneCallback", "(Ljava/lang/String;)V");
 
   if (method)
   {
