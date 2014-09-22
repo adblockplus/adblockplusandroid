@@ -21,22 +21,23 @@ static jlong JNICALL JniCtor(JNIEnv* env, jclass clazz, jobject callbackObject)
 {
   try
   {
-    return JniPtrToLong(new JniUpdaterCallback(env, callbackObject));
+    return JniPtrToLong(new JniUpdateCheckDoneCallback(env, callbackObject));
   }
   CATCH_THROW_AND_RETURN(env, 0)
 }
 
 static void JNICALL JniDtor(JNIEnv* env, jclass clazz, jlong ptr)
 {
-  delete JniLongToTypePtr<JniUpdaterCallback>(ptr);
+  delete JniLongToTypePtr<JniUpdateCheckDoneCallback>(ptr);
 }
 
-JniUpdaterCallback::JniUpdaterCallback(JNIEnv* env, jobject callbackObject)
+JniUpdateCheckDoneCallback::JniUpdateCheckDoneCallback(
+  JNIEnv* env, jobject callbackObject)
   : JniCallbackBase(env, callbackObject)
 {
 }
 
-void JniUpdaterCallback::Callback(const std::string& arg)
+void JniUpdateCheckDoneCallback::Callback(const std::string& arg)
 {
   JNIEnvAcquire env(GetJavaVM());
 
@@ -58,7 +59,9 @@ static JNINativeMethod methods[] =
   { (char*)"dtor", (char*)"(J)V", (void*)JniDtor }
 };
 
-extern "C" JNIEXPORT void JNICALL Java_org_adblockplus_libadblockplus_UpdaterCallback_registerNatives(JNIEnv *env, jclass clazz)
+extern "C" JNIEXPORT void JNICALL
+Java_org_adblockplus_libadblockplus_UpdateCheckDoneCallback_registerNatives(
+  JNIEnv *env, jclass clazz)
 {
   env->RegisterNatives(clazz, methods, sizeof(methods) / sizeof(methods[0]));
 }

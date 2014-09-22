@@ -31,6 +31,17 @@ static jobject SubscriptionsToArrayList(JNIEnv* env, std::vector<AdblockPlus::Su
   return list;
 }
 
+static AdblockPlus::FilterEngine::ContentType ConvertContentType(JNIEnv *env,
+    jobject jContentType)
+{
+  jclass contentTypeClass = env->GetObjectClass(jContentType);
+  jmethodID nameMethod = env->GetMethodID(contentTypeClass, "name",
+                                          "()Ljava/lang/String;");
+  jstring jValue = (jstring) env->CallObjectMethod(jContentType, nameMethod);
+  const std::string value = JniJavaToStdString(env, jValue);
+  return AdblockPlus::FilterEngine::StringToContentType(value);
+}
+
 static jlong JNICALL JniCtor(JNIEnv* env, jclass clazz, jlong enginePtr)
 {
   try
@@ -160,18 +171,22 @@ static void JNICALL JniSetFilterChangeCallback(JNIEnv* env, jclass clazz, jlong 
 static void JNICALL JniForceUpdateCheck(JNIEnv* env, jclass clazz, jlong ptr, jlong updaterPtr)
 {
   AdblockPlus::FilterEngine* engine = JniLongToTypePtr<AdblockPlus::FilterEngine>(ptr);
-  JniUpdaterCallback* callback = JniLongToTypePtr<JniUpdaterCallback>(updaterPtr);
+  JniUpdateCheckDoneCallback* callback =
+      JniLongToTypePtr<JniUpdateCheckDoneCallback>(updaterPtr);
 
-  AdblockPlus::FilterEngine::UpdaterCallback updaterCallback = 0;
+  AdblockPlus::FilterEngine::UpdateCheckDoneCallback
+      updateCheckDoneCallback = 0;
 
   if (updaterPtr)
   {
-    updaterCallback = std::tr1::bind(&JniUpdaterCallback::Callback, callback, std::tr1::placeholders::_1);
+    updateCheckDoneCallback =
+        std::tr1::bind(&JniUpdateCheckDoneCallback::Callback, callback,
+                       std::tr1::placeholders::_1);
   }
 
   try
   {
-    engine->ForceUpdateCheck(updaterCallback);
+    engine->ForceUpdateCheck(updateCheckDoneCallback);
   }
   CATCH_AND_THROW(env)
 }
@@ -198,12 +213,13 @@ static jobject JNICALL JniGetElementHidingSelectors(JNIEnv* env, jclass clazz, j
   CATCH_THROW_AND_RETURN(env, 0)
 }
 
-static jobject JNICALL JniMatches(JNIEnv* env, jclass clazz, jlong ptr, jstring jUrl, jstring jContentType, jstring jDocumentUrl)
+static jobject JNICALL JniMatches(JNIEnv* env, jclass clazz, jlong ptr, jstring jUrl, jobject jContentType, jstring jDocumentUrl)
 {
   AdblockPlus::FilterEngine* engine = JniLongToTypePtr<AdblockPlus::FilterEngine>(ptr);
 
   std::string url = JniJavaToStdString(env, jUrl);
-  std::string contentType = JniJavaToStdString(env, jContentType);
+  AdblockPlus::FilterEngine::ContentType contentType =
+      ConvertContentType(env, jContentType);
   std::string documentUrl = JniJavaToStdString(env, jDocumentUrl);
 
   try
@@ -215,12 +231,13 @@ static jobject JNICALL JniMatches(JNIEnv* env, jclass clazz, jlong ptr, jstring 
   CATCH_THROW_AND_RETURN(env, 0)
 }
 
-static jobject JNICALL JniMatchesMany(JNIEnv* env, jclass clazz, jlong ptr, jstring jUrl, jstring jContentType, jobjectArray jDocumentUrls)
+static jobject JNICALL JniMatchesMany(JNIEnv* env, jclass clazz, jlong ptr, jstring jUrl, jobject jContentType, jobjectArray jDocumentUrls)
 {
   AdblockPlus::FilterEngine* engine = JniLongToTypePtr<AdblockPlus::FilterEngine>(ptr);
 
   std::string url = JniJavaToStdString(env, jUrl);
-  std::string contentType = JniJavaToStdString(env, jContentType);
+  AdblockPlus::FilterEngine::ContentType contentType =
+      ConvertContentType(env, jContentType);
 
   std::vector<std::string> documentUrls;
 
@@ -282,8 +299,8 @@ static JNINativeMethod methods[] =
   { (char*)"removeFilterChangeCallback", (char*)"(J)V", (void*)JniRemoveFilterChangeCallback },
   { (char*)"forceUpdateCheck", (char*)"(JJ)V", (void*)JniForceUpdateCheck },
   { (char*)"getElementHidingSelectors", (char*)"(JLjava/lang/String;)Ljava/util/List;", (void*)JniGetElementHidingSelectors },
-  { (char*)"matches", (char*)"(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)" TYP("Filter"), (void*)JniMatches },
-  { (char*)"matches", (char*)"(JLjava/lang/String;Ljava/lang/String;[Ljava/lang/String;)" TYP("Filter"), (void*)JniMatchesMany },
+  { (char*)"matches", (char*)"(JLjava/lang/String;" TYP("FilterEngine$ContentType") "Ljava/lang/String;)" TYP("Filter"), (void*)JniMatches },
+  { (char*)"matches", (char*)"(JLjava/lang/String;" TYP("FilterEngine$ContentType") "[Ljava/lang/String;)" TYP("Filter"), (void*)JniMatchesMany },
   { (char*)"getPref", (char*)"(JLjava/lang/String;)" TYP("JsValue"), (void*)JniGetPref },
   { (char*)"setPref", (char*)"(JLjava/lang/String;J)V", (void*)JniSetPref },
   { (char*)"dtor", (char*)"(J)V", (void*)JniDtor }

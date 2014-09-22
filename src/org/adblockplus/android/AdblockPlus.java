@@ -29,6 +29,7 @@ import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import org.adblockplus.android.updater.AlarmReceiver;
+import org.adblockplus.libadblockplus.FilterEngine.ContentType;
 import org.apache.commons.lang.StringUtils;
 
 import android.app.ActivityManager;
@@ -339,33 +340,33 @@ public class AdblockPlus extends Application
     if (!filteringEnabled)
       return false;
 
-    String contentType = null;
+    ContentType contentType = null;
 
     if (accept != null)
     {
       if (accept.contains("text/css"))
-        contentType = "STYLESHEET";
+        contentType = ContentType.STYLESHEET;
       else if (accept.contains("image/*"))
-        contentType = "IMAGE";
+        contentType = ContentType.IMAGE;
       else if (accept.contains("text/html"))
-        contentType = "SUBDOCUMENT";
+        contentType = ContentType.SUBDOCUMENT;
     }
 
     if (contentType == null)
     {
       if (RE_JS.matcher(url).find())
-        contentType = "SCRIPT";
+        contentType = ContentType.SCRIPT;
       else if (RE_CSS.matcher(url).find())
-        contentType = "STYLESHEET";
+        contentType = ContentType.STYLESHEET;
       else if (RE_IMAGE.matcher(url).find())
-        contentType = "IMAGE";
+        contentType = ContentType.IMAGE;
       else if (RE_FONT.matcher(url).find())
-        contentType = "FONT";
+        contentType = ContentType.FONT;
       else if (RE_HTML.matcher(url).find())
-        contentType = "SUBDOCUMENT";
+        contentType = ContentType.SUBDOCUMENT;
     }
     if (contentType == null)
-      contentType = "OTHER";
+      contentType = ContentType.OTHER;
 
     final List<String> referrerChain = referrerMapping.buildReferrerChain(referrer);
     final String[] referrerChainArray = referrerChain.toArray(new String[referrerChain.size()]);

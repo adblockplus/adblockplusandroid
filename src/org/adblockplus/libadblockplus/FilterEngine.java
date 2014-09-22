@@ -30,6 +30,12 @@ public final class FilterEngine implements Disposable
     registerNatives();
   }
 
+  public static enum ContentType
+  {
+    OTHER, SCRIPT, IMAGE, STYLESHEET, OBJECT, SUBDOCUMENT, DOCUMENT, XMLHTTPREQUEST,
+    OBJECT_SUBREQUEST, FONT, MEDIA
+  }
+
   public FilterEngine(final JsEngine jsEngine)
   {
     this.ptr = ctor(jsEngine.ptr);
@@ -81,7 +87,7 @@ public final class FilterEngine implements Disposable
     forceUpdateCheck(this.ptr, 0);
   }
 
-  public void forceUpdateCheck(final UpdaterCallback callback)
+  public void forceUpdateCheck(final UpdateCheckDoneCallback callback)
   {
     forceUpdateCheck(this.ptr, callback != null ? callback.ptr : 0);
   }
@@ -91,12 +97,12 @@ public final class FilterEngine implements Disposable
     return getElementHidingSelectors(this.ptr, domain);
   }
 
-  public Filter matches(final String url, final String contentType, final String documentUrl)
+  public Filter matches(final String url, final ContentType contentType, final String documentUrl)
   {
     return matches(this.ptr, url, contentType, documentUrl);
   }
 
-  public Filter matches(final String url, final String contentType, final String[] documentUrls)
+  public Filter matches(final String url, final ContentType contentType, final String[] documentUrls)
   {
     return matches(this.ptr, url, contentType, documentUrls);
   }
@@ -159,9 +165,9 @@ public final class FilterEngine implements Disposable
 
   private final static native JsValue getPref(long ptr, String pref);
 
-  private final static native Filter matches(long ptr, String url, String contentType, String documentUrl);
+  private final static native Filter matches(long ptr, String url, ContentType contentType, String documentUrl);
 
-  private final static native Filter matches(long ptr, String url, String contentType, String[] documentUrls);
+  private final static native Filter matches(long ptr, String url, ContentType contentType, String[] documentUrls);
 
   private final static native void setPref(long ptr, String pref, long valuePtr);
 

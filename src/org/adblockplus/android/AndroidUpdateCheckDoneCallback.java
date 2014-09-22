@@ -17,24 +17,24 @@
 
 package org.adblockplus.android;
 
-import org.adblockplus.libadblockplus.UpdaterCallback;
+import org.adblockplus.libadblockplus.UpdateCheckDoneCallback;
 import org.apache.commons.lang.StringUtils;
 
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 
-public class AndroidUpdaterCallback extends UpdaterCallback
+public class AndroidUpdateCheckDoneCallback extends UpdateCheckDoneCallback
 {
   private final Context context;
 
-  public AndroidUpdaterCallback(final Context context)
+  public AndroidUpdateCheckDoneCallback(final Context context)
   {
     this.context = context;
   }
 
   @Override
-  public void updaterCallback(final String error)
+  public void updateCheckDoneCallback(final String error)
   {
     // TODO: Check if we need this 'manualUpdate' mechanism (initiated by 'checkForUpdates()')
     // if (!error.empty())

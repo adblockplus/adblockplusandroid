@@ -53,10 +53,10 @@ public:
   void Callback(AdblockPlus::JsValueList& params);
 };
 
-class JniUpdaterCallback : public JniCallbackBase
+class JniUpdateCheckDoneCallback : public JniCallbackBase
 {
 public:
-  JniUpdaterCallback(JNIEnv* env, jobject callbackObject);
+  JniUpdateCheckDoneCallback(JNIEnv* env, jobject callbackObject);
   void Callback(const std::string& arg);
 };
 

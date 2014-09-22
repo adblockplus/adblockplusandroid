@@ -25,10 +25,11 @@ import org.adblockplus.libadblockplus.EventCallback;
 import org.adblockplus.libadblockplus.Filter;
 import org.adblockplus.libadblockplus.FilterChangeCallback;
 import org.adblockplus.libadblockplus.FilterEngine;
+import org.adblockplus.libadblockplus.FilterEngine.ContentType;
 import org.adblockplus.libadblockplus.JsEngine;
 import org.adblockplus.libadblockplus.LogSystem;
 import org.adblockplus.libadblockplus.Subscription;
-import org.adblockplus.libadblockplus.UpdaterCallback;
+import org.adblockplus.libadblockplus.UpdateCheckDoneCallback;
 import org.adblockplus.libadblockplus.WebRequest;
 
 import android.content.Context;
@@ -59,7 +60,7 @@ public final class ABPEngine
   private volatile LogSystem logSystem;
   private volatile WebRequest webRequest;
   private volatile EventCallback updateCallback;
-  private volatile UpdaterCallback updaterCallback;
+  private volatile UpdateCheckDoneCallback updateCheckDoneCallback;
   private volatile FilterChangeCallback filterChangeCallback;
 
   private ABPEngine(final Context context)
@@ -111,7 +112,7 @@ public final class ABPEngine
     engine.filterChangeCallback = new AndroidFilterChangeCallback(context);
     engine.filterEngine.setFilterChangeCallback(engine.filterChangeCallback);
 
-    engine.updaterCallback = new AndroidUpdaterCallback(context);
+    engine.updateCheckDoneCallback = new AndroidUpdateCheckDoneCallback(context);
 
     return engine;
   }
@@ -149,10 +150,10 @@ public final class ABPEngine
       this.updateCallback = null;
     }
 
-    if (this.updaterCallback != null)
+    if (this.updateCheckDoneCallback != null)
     {
-      this.updaterCallback.dispose();
-      this.updaterCallback = null;
+      this.updateCheckDoneCallback.dispose();
+      this.updateCheckDoneCallback = null;
     }
 
     if (this.filterChangeCallback != null)
@@ -243,7 +244,7 @@ public final class ABPEngine
     return this.filterEngine.getPref("documentation_link").toString();
   }
 
-  public boolean matches(final String fullUrl, final String contentType, final String[] referrerChainArray)
+  public boolean matches(final String fullUrl, final ContentType contentType, final String[] referrerChainArray)
   {
     final Filter filter = this.filterEngine.matches(fullUrl, contentType, referrerChainArray);
 
@@ -265,7 +266,7 @@ public final class ABPEngine
 
   public void checkForUpdates()
   {
-    this.filterEngine.forceUpdateCheck(this.updaterCallback);
+    this.filterEngine.forceUpdateCheck(this.updateCheckDoneCallback);
   }
 
   public void updateSubscriptionStatus(final String url)
