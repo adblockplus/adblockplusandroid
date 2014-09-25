@@ -23,6 +23,7 @@ import org.adblockplus.libadblockplus.Subscription;
 import org.apache.commons.lang.StringUtils;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -52,33 +53,32 @@ public final class Utils
     return Character.isUpperCase(first) ? s : Character.toUpperCase(first) + s.substring(1);
   }
 
-  protected static Notification createUpdateNotification(final Context context, final String url, final String error)
+  protected static void showUpdateNotification(final Context context, final String url,
+                                               final String error)
   {
-    final PendingIntent emptyIntent = PendingIntent.getActivity(context, 0, new Intent(), 0);
-
     final NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
     builder.setContentTitle(context.getText(R.string.app_name));
     builder.setSmallIcon(R.drawable.ic_stat_warning);
-    builder.setWhen(System.currentTimeMillis());
     builder.setAutoCancel(true);
     builder.setOnlyAlertOnce(true);
+    final PendingIntent emptyIntent = PendingIntent.getActivity(context, 0, new Intent(), 0);
     builder.setContentIntent(emptyIntent);
 
-    if (url != null)
+    if (StringUtils.isNotEmpty(error))
+    {
+      builder.setContentText(context.getString(R.string.msg_update_fail));
+    }
+    else if (StringUtils.isNotEmpty(url))
     {
       builder.setSmallIcon(R.drawable.ic_stat_download);
-
-      final Intent intent = new Intent(context, UpdaterActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+      final Intent intent = new Intent(context, UpdaterActivity.class)
+          .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
       intent.setAction("download");
       intent.putExtra("url", url);
-      final PendingIntent updateIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+      final PendingIntent updateIntent =
+          PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
       builder.setContentIntent(updateIntent);
       builder.setContentText(context.getString(R.string.msg_update_available));
-    }
-    else if (error != null)
-    {
-      // TODO Should we show error message to the user?
-      builder.setContentText(context.getString(R.string.msg_update_fail));
     }
     else
     {
@@ -86,7 +86,10 @@ public final class Utils
     }
 
     final Notification notification = builder.getNotification();
-    return notification;
+    final NotificationManager notificationManager =
+        (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    final int updateNotificationId = R.string.app_name + 1;
+    notificationManager.notify(updateNotificationId, notification);
   }
 
   protected static void updateSubscriptionStatus(final Context context, final Subscription sub)

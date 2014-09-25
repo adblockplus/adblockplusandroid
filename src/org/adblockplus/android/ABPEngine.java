@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Locale;
 
 import org.adblockplus.libadblockplus.AppInfo;
-import org.adblockplus.libadblockplus.EventCallback;
 import org.adblockplus.libadblockplus.Filter;
 import org.adblockplus.libadblockplus.FilterChangeCallback;
 import org.adblockplus.libadblockplus.FilterEngine;
@@ -29,6 +28,7 @@ import org.adblockplus.libadblockplus.FilterEngine.ContentType;
 import org.adblockplus.libadblockplus.JsEngine;
 import org.adblockplus.libadblockplus.LogSystem;
 import org.adblockplus.libadblockplus.Subscription;
+import org.adblockplus.libadblockplus.UpdateAvailableCallback;
 import org.adblockplus.libadblockplus.UpdateCheckDoneCallback;
 import org.adblockplus.libadblockplus.WebRequest;
 
@@ -59,7 +59,7 @@ public final class ABPEngine
   private volatile FilterEngine filterEngine;
   private volatile LogSystem logSystem;
   private volatile WebRequest webRequest;
-  private volatile EventCallback updateCallback;
+  private volatile UpdateAvailableCallback updateAvailableCallback;
   private volatile UpdateCheckDoneCallback updateCheckDoneCallback;
   private volatile FilterChangeCallback filterChangeCallback;
 
@@ -70,11 +70,14 @@ public final class ABPEngine
 
   public static AppInfo generateAppInfo(final Context context)
   {
+    final boolean developmentBuild = !context.getResources().getBoolean(R.bool.def_release);
     String version = "0";
     try
     {
       final PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-      version = info.versionName + "." + info.versionCode;
+      version = info.versionName;
+      if (developmentBuild)
+        version += "." + info.versionCode;
     }
     catch (final NameNotFoundException e)
     {
@@ -82,7 +85,6 @@ public final class ABPEngine
     }
     final String sdkVersion = String.valueOf(VERSION.SDK_INT);
     final String locale = Locale.getDefault().toString().replace('_', '-');
-    final boolean developmentBuild = !context.getResources().getBoolean(R.bool.def_release);
 
     return AppInfo.builder()
         .setVersion(version)
@@ -105,10 +107,9 @@ public final class ABPEngine
     engine.webRequest = new AndroidWebRequest();
     engine.jsEngine.setWebRequest(engine.webRequest);
 
-    engine.updateCallback = new AndroidUpdateAvailableCallback(context);
-    engine.jsEngine.setEventCallback("updateAvailable", engine.updateCallback);
-
     engine.filterEngine = new FilterEngine(engine.jsEngine);
+    engine.updateAvailableCallback = new AndroidUpdateAvailableCallback(context);
+    engine.filterEngine.setUpdateAvailableCallback(engine.updateAvailableCallback);
     engine.filterChangeCallback = new AndroidFilterChangeCallback(context);
     engine.filterEngine.setFilterChangeCallback(engine.filterChangeCallback);
 
@@ -144,10 +145,10 @@ public final class ABPEngine
       this.webRequest = null;
     }
 
-    if (this.updateCallback != null)
+    if (this.updateAvailableCallback != null)
     {
-      this.updateCallback.dispose();
-      this.updateCallback = null;
+      this.updateAvailableCallback.dispose();
+      this.updateAvailableCallback = null;
     }
 
     if (this.updateCheckDoneCallback != null)

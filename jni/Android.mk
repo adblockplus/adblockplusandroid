@@ -24,9 +24,10 @@ include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := libadblockplus-jni
-LOCAL_SRC_FILES := JniJsEngine.cpp JniFilterEngine.cpp JniJsValue.cpp JniFilter.cpp 
-LOCAL_SRC_FILES += JniSubscription.cpp JniEventCallback.cpp JniLogSystem.cpp 
-LOCAL_SRC_FILES += JniWebRequest.cpp JniUpdateCheckDoneCallback.cpp
+LOCAL_SRC_FILES := JniJsEngine.cpp JniFilterEngine.cpp JniJsValue.cpp
+LOCAL_SRC_FILES += JniFilter.cpp JniSubscription.cpp JniEventCallback.cpp
+LOCAL_SRC_FILES += JniLogSystem.cpp JniWebRequest.cpp
+LOCAL_SRC_FILES += JniUpdateAvailableCallback.cpp JniUpdateCheckDoneCallback.cpp
 LOCAL_SRC_FILES += JniFilterChangeCallback.cpp JniCallbacks.cpp Utils.cpp
 
 LOCAL_CPP_FEATURES := exceptions 

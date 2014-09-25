@@ -72,7 +72,6 @@
                 <data android:scheme="package" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".updater.AlarmReceiver" />
     </application>
 
 </manifest>

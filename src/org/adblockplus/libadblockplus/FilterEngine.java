@@ -72,6 +72,16 @@ public final class FilterEngine implements Disposable
     return fetchAvailableSubscriptions(this.ptr);
   }
 
+  public void removeUpdateAvailableCallback()
+  {
+    removeUpdateAvailableCallback(this.ptr);
+  }
+
+  public void setUpdateAvailableCallback(final UpdateAvailableCallback callback)
+  {
+    setUpdateAvailableCallback(this.ptr, callback.ptr);
+  }
+
   public void removeFilterChangeCallback()
   {
     removeFilterChangeCallback(this.ptr);
@@ -154,6 +164,10 @@ public final class FilterEngine implements Disposable
   private final static native List<Subscription> getListedSubscriptions(long ptr);
 
   private final static native List<Subscription> fetchAvailableSubscriptions(long ptr);
+
+  private final static native void removeUpdateAvailableCallback(long ptr);
+
+  private final static native void setUpdateAvailableCallback(long ptr, long filterPtr);
 
   private final static native void removeFilterChangeCallback(long ptr);
 
