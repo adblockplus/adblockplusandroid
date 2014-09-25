@@ -23,20 +23,15 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Calendar;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.regex.Pattern;
 
-import org.adblockplus.android.updater.AlarmReceiver;
 import org.adblockplus.libadblockplus.FilterEngine.ContentType;
 import org.apache.commons.lang.StringUtils;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
-import android.app.AlarmManager;
 import android.app.Application;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -62,10 +57,6 @@ public class AdblockPlus extends Application
   private static final Pattern RE_FONT = Pattern.compile("\\.(?:ttf|woff)$", Pattern.CASE_INSENSITIVE);
   private static final Pattern RE_HTML = Pattern.compile("\\.html?$", Pattern.CASE_INSENSITIVE);
 
-  /**
-   * Update notification id.
-   */
-  public static final int UPDATE_NOTIFICATION_ID = R.string.app_name + 1;
   /**
    * Broadcasted when filtering is enabled or disabled.
    */
@@ -424,41 +415,6 @@ public class AdblockPlus extends Application
     abpEngine.checkForUpdates();
   }
 
-  /**
-   * Sets Alarm to call updater after specified number of minutes or after one
-   * day if
-   * minutes are set to 0.
-   *
-   * @param minutes
-   *          number of minutes to wait
-   */
-  public void scheduleUpdater(final int minutes)
-  {
-    final Calendar updateTime = Calendar.getInstance();
-
-    if (minutes == 0)
-    {
-      // Start update checks at 10:00 GMT...
-      updateTime.setTimeZone(TimeZone.getTimeZone("GMT"));
-      updateTime.set(Calendar.HOUR_OF_DAY, 10);
-      updateTime.set(Calendar.MINUTE, 0);
-      // ...next day
-      updateTime.add(Calendar.HOUR_OF_DAY, 24);
-      // Spread out the “mass downloading” for 6 hours
-      updateTime.add(Calendar.MINUTE, (int) (Math.random() * 60 * 6));
-    }
-    else
-    {
-      updateTime.add(Calendar.MINUTE, minutes);
-    }
-
-    final Intent updater = new Intent(this, AlarmReceiver.class);
-    final PendingIntent recurringUpdate = PendingIntent.getBroadcast(this, 0, updater, PendingIntent.FLAG_CANCEL_CURRENT);
-    // Set non-waking alarm
-    final AlarmManager alarms = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-    alarms.set(AlarmManager.RTC, updateTime.getTimeInMillis(), recurringUpdate);
-  }
-
   @Override
   public void onCreate()
   {
@@ -499,8 +455,5 @@ public class AdblockPlus extends Application
 
     // Set crash handler
     Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(this));
-
-    // Initiate update check
-    scheduleUpdater(0);
   }
 }

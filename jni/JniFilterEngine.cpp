@@ -142,6 +142,35 @@ static jobject JNICALL JniFetchAvailableSubscriptions(JNIEnv* env, jclass clazz,
   CATCH_THROW_AND_RETURN(env, 0);
 }
 
+static void JNICALL JniRemoveUpdateAvailableCallback(JNIEnv* env, jclass clazz,
+                                                     jlong ptr)
+{
+  AdblockPlus::FilterEngine* const engine =
+      JniLongToTypePtr<AdblockPlus::FilterEngine>(ptr);
+  try
+  {
+    engine->RemoveUpdateAvailableCallback();
+  }
+  CATCH_AND_THROW(env)
+}
+
+static void JNICALL JniSetUpdateAvailableCallback(JNIEnv* env, jclass clazz,
+                                                  jlong ptr, jlong callbackPtr)
+{
+  AdblockPlus::FilterEngine* const engine =
+      JniLongToTypePtr<AdblockPlus::FilterEngine>(ptr);
+  JniUpdateAvailableCallback* const callback =
+      JniLongToTypePtr<JniUpdateAvailableCallback>(callbackPtr);
+  AdblockPlus::FilterEngine::UpdateAvailableCallback updateAvailableCallback =
+      std::tr1::bind(&JniUpdateAvailableCallback::Callback, callback,
+                     std::tr1::placeholders::_1);
+  try
+  {
+    engine->SetUpdateAvailableCallback(updateAvailableCallback);
+  }
+  CATCH_AND_THROW(env)
+}
+
 static void JNICALL JniRemoveFilterChangeCallback(JNIEnv* env, jclass clazz, jlong ptr)
 {
   AdblockPlus::FilterEngine* engine = JniLongToTypePtr<AdblockPlus::FilterEngine>(ptr);
@@ -295,6 +324,8 @@ static JNINativeMethod methods[] =
   { (char*)"getSubscription", (char*)"(JLjava/lang/String;)" TYP("Subscription"), (void*)JniGetSubscription },
   { (char*)"getListedSubscriptions", (char*)"(J)Ljava/util/List;", (void*)JniGetListedSubscriptions },
   { (char*)"fetchAvailableSubscriptions", (char*)"(J)Ljava/util/List;", (void*)JniFetchAvailableSubscriptions },
+  { (char*)"setUpdateAvailableCallback", (char*)"(JJ)V", (void*)JniSetUpdateAvailableCallback },
+  { (char*)"removeUpdateAvailableCallback", (char*)"(J)V", (void*)JniRemoveUpdateAvailableCallback },
   { (char*)"setFilterChangeCallback", (char*)"(JJ)V", (void*)JniSetFilterChangeCallback },
   { (char*)"removeFilterChangeCallback", (char*)"(J)V", (void*)JniRemoveFilterChangeCallback },
   { (char*)"forceUpdateCheck", (char*)"(JJ)V", (void*)JniForceUpdateCheck },

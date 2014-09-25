@@ -17,17 +17,11 @@
 
 package org.adblockplus.android;
 
-import java.util.List;
+import org.adblockplus.libadblockplus.UpdateAvailableCallback;
 
-import org.adblockplus.libadblockplus.EventCallback;
-import org.adblockplus.libadblockplus.JsValue;
-import org.apache.commons.lang.StringUtils;
-
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.content.Context;
 
-public class AndroidUpdateAvailableCallback extends EventCallback
+public class AndroidUpdateAvailableCallback extends UpdateAvailableCallback
 {
   private final Context context;
 
@@ -37,14 +31,8 @@ public class AndroidUpdateAvailableCallback extends EventCallback
   }
 
   @Override
-  public void eventCallback(final List<JsValue> params)
+  public void updateAvailableCallback(String url)
   {
-    final String updateUrl = params.size() > 0 && !params.get(0).isNull() ? params.get(0).toString() : "";
-    if (StringUtils.isNotEmpty(updateUrl))
-    {
-      final Notification notification = Utils.createUpdateNotification(this.context, updateUrl, null);
-      final NotificationManager notificationManager = (NotificationManager)this.context.getSystemService(Context.NOTIFICATION_SERVICE);
-      notificationManager.notify(AdblockPlus.UPDATE_NOTIFICATION_ID, notification);
-    }
+    Utils.showUpdateNotification(this.context, url, null);
   }
 }
