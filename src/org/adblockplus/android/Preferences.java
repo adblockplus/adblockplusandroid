@@ -441,7 +441,10 @@ public class Preferences extends SummarizedPreferences
     {
       final String url = sharedPreferences.getString(key, null);
       if (url != null)
+      {
         application.setSubscription(url);
+        application.updateSubscriptionStatus(url);
+      }
     }
     else if (getString(R.string.pref_hideicon).equals(key))
     {
