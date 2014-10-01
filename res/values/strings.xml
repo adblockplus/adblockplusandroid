@@ -87,8 +87,8 @@
   <string name="pref_crashreport_title">Crash report</string>
   <string name="pref_crashreport_summary_on">Application will generate report if crashed and will ask to send it on next start</string>
   <string name="pref_crashreport_summary_off">Report will not be generated on application crash</string>
+  <string name="pref_checkupdate_title">Check for update</string>
   <string name="pref_configuration_title">Show configuration</string>
   <string name="menu_advanced">Advanced settings</string>
-  <string name="menu_update">Check for updates</string>
 
 </resources>
