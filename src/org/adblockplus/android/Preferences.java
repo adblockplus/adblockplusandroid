@@ -284,9 +284,6 @@ public class Preferences extends SummarizedPreferences
       case R.id.menu_advanced:
         startActivity(new Intent(this, AdvancedPreferences.class));
         return true;
-      case R.id.menu_update:
-        AdblockPlus.getApplication().checkUpdates();
-        return true;
       default:
         return super.onOptionsItemSelected(item);
     }
