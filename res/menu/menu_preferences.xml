@@ -18,10 +18,5 @@
         android:icon="@drawable/ic_menu_preferences"
         android:title="@string/menu_advanced">
     </item>
-    <item
-        android:id="@+id/menu_update"
-        android:icon="@drawable/ic_menu_refresh"
-        android:title="@string/menu_update">
-    </item>
 
 </menu>
