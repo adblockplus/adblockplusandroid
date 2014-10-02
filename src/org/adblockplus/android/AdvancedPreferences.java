@@ -145,12 +145,12 @@ public class AdvancedPreferences extends SummarizedPreferences
         application.setFilteringEnabled(false);
       }
     }
-    if (getString(R.string.pref_refresh).equals(key))
+    else if (getString(R.string.pref_refresh).equals(key))
     {
       final int refresh = Integer.valueOf(sharedPreferences.getString(key, "0"));
       findPreference(getString(R.string.pref_wifirefresh)).setEnabled(refresh > 0);
     }
-    if (getString(R.string.pref_crashreport).equals(key))
+    else if (getString(R.string.pref_crashreport).equals(key))
     {
       final boolean report = sharedPreferences.getBoolean(key, getResources().getBoolean(R.bool.def_crashreport));
       try
