@@ -105,6 +105,9 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
         .penaltyLog()
         .build());
 
+    // Reset the logging status in case the service was previously killed for some reason
+    AdblockPlus.getApplication().setLoggingEnabled(false);
+
     final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
     // Try to read user proxy settings
@@ -263,6 +266,11 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 
     // Release service lock
     stopForeground(true);
+
+    // Stop logging
+    final AdblockPlus application = AdblockPlus.getApplication();
+    if (application.isLoggingEnabled())
+      application.setLoggingEnabled(false);
 
     Log.i(TAG, "Service stopped");
   }

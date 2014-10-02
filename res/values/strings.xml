@@ -7,6 +7,7 @@
   <string name="proxysettings_name">Proxy configuration</string>
   <string name="install_name">Adblock Plus has been installed</string>
   <string name="acceptableads_name">Acceptable Ads in Adblock Plus</string>
+  <string name="logviewer_name">Logs</string>
   
   <string name="notif_wifi">Ads are blocked on WiFi connection</string>
   <string name="notif_wifi_nofiltering">Allowing ads on WiFi connection</string>
@@ -48,6 +49,8 @@
   <string name="showme">Show me</string>
   <string name="configure">Configure</string>
   <string name="opensettings">Open wireless settings</string>
+  <string name="filter">Filter:</string>
+  <string name="subscriptions">In subscription(s):</string>
 
   <string name="synchronize_in_progress">downloading&#8230;</string>
   <string name="synchronize_invalid_url">invalid url</string>
@@ -90,5 +93,9 @@
   <string name="pref_checkupdate_title">Check for update</string>
   <string name="pref_configuration_title">Show configuration</string>
   <string name="menu_advanced">Advanced settings</string>
+  <string name="pref_logging_title">Logging</string>
+  <string name="pref_logging_enabled_summary_off">Logging is disabled</string>
+  <string name="pref_logging_enabled_summary_on">Logging is enabled</string>
+  <string name="pref_viewlogs_title">View logs</string>
 
 </resources>

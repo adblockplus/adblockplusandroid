@@ -24,6 +24,8 @@ import org.adblockplus.android.compat.ProxyProperties;
 import org.adblockplus.android.configurators.IptablesProxyConfigurator;
 import org.apache.commons.lang.StringUtils;
 
+import org.jraf.android.backport.switchwidget.SwitchPreference;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -64,12 +66,18 @@ public class AdvancedPreferences extends SummarizedPreferences
 
     this.serviceBinder = new ServiceBinder(this);
 
+    final AdblockPlus application = AdblockPlus.getApplication();
     final PreferenceScreen screen = getPreferenceScreen();
     if (ProxyService.GLOBAL_PROXY_USER_CONFIGURABLE)
     {
       screen.removePreference(findPreference(getString(R.string.pref_proxy)));
       if (prefs.getBoolean(getString(R.string.pref_proxyautoconfigured), false))
       {
+        final Preference loggingPreferenceCategory = findPreference(getString(R.string.pref_logging));
+        // Remove dependency on pref_proxyenabled
+        loggingPreferenceCategory.setDependency(null);
+        loggingPreferenceCategory.setEnabled(application.isServiceRunning());
+
         screen.removePreference(findPreference(getString(R.string.pref_proxyenabled)));
       }
     }
@@ -102,6 +110,8 @@ public class AdvancedPreferences extends SummarizedPreferences
         }
       });
     }
+    ((SwitchPreference) findPreference(getString(R.string.pref_loggingenabled))).
+        setChecked(application.isLoggingEnabled());
   }
 
   @Override
@@ -143,6 +153,8 @@ public class AdvancedPreferences extends SummarizedPreferences
         editor.putBoolean(getString(R.string.pref_enabled), false);
         editor.commit();
         application.setFilteringEnabled(false);
+
+        ((SwitchPreference) findPreference(getString(R.string.pref_loggingenabled))).setChecked(false);
       }
     }
     else if (getString(R.string.pref_refresh).equals(key))
@@ -162,6 +174,11 @@ public class AdvancedPreferences extends SummarizedPreferences
       {
         // ignore - default handler in use
       }
+    }
+    else if (getString(R.string.pref_loggingenabled).equals(key))
+    {
+      final boolean enabled = sharedPreferences.getBoolean(key, false);
+      AdblockPlus.getApplication().setLoggingEnabled(enabled);
     }
     super.onSharedPreferenceChanged(sharedPreferences, key);
   }

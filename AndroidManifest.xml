@@ -37,6 +37,9 @@
             android:name=".AdvancedPreferences"
             android:label="@string/app_name" />
         <activity
+            android:name=".logging.LogViewer"
+            android:label="@string/logviewer_name" />
+        <activity
             android:name=".ConfigurationActivity"
             android:excludeFromRecents="true"
             android:label="@string/app_name"

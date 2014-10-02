@@ -74,5 +74,23 @@
             android:key="@string/pref_configuration"
             android:title="@string/pref_configuration_title" />
     </PreferenceCategory>
+    <PreferenceCategory
+        android:key="@string/pref_logging"
+        android:title="@string/pref_logging_title"
+        android:dependency="@string/pref_proxyenabled" >
+        <org.jraf.android.backport.switchwidget.SwitchPreference
+            android:key="@string/pref_loggingenabled"
+            android:title="@string/pref_logging_title"
+            switchpref:summaryOff="@string/pref_logging_enabled_summary_off"
+            switchpref:summaryOn="@string/pref_logging_enabled_summary_on" />
+        <Preference
+            android:key="@string/pref_viewlogs"
+            android:title="@string/pref_viewlogs_title"
+            android:dependency="@string/pref_loggingenabled">
+            <intent
+                android:targetPackage="org.adblockplus.android"
+                android:targetClass="org.adblockplus.android.logging.LogViewer" />
+        </Preference>
+    </PreferenceCategory>
 
 </PreferenceScreen>

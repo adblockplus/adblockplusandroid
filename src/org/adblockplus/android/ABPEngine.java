@@ -17,15 +17,18 @@
 
 package org.adblockplus.android;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.adblockplus.android.logging.LogEntry;
 import org.adblockplus.libadblockplus.AppInfo;
 import org.adblockplus.libadblockplus.Filter;
 import org.adblockplus.libadblockplus.FilterChangeCallback;
 import org.adblockplus.libadblockplus.FilterEngine;
 import org.adblockplus.libadblockplus.FilterEngine.ContentType;
 import org.adblockplus.libadblockplus.JsEngine;
+import org.adblockplus.libadblockplus.JsValue;
 import org.adblockplus.libadblockplus.LogSystem;
 import org.adblockplus.libadblockplus.Notification;
 import org.adblockplus.libadblockplus.Subscription;
@@ -254,6 +257,7 @@ public final class ABPEngine
 
     if (filter == null)
     {
+      pushLog(false, fullUrl, null);
       return false;
     }
 
@@ -262,10 +266,35 @@ public final class ABPEngine
     // (documentUrls contains the referrers on Android)
     if (referrerChainArray.length == 0 && (filter.getProperty("text").toString()).contains("||"))
     {
+      pushLog(false, fullUrl, null);
       return false;
     }
 
-    return filter.getType() != Filter.Type.EXCEPTION;
+    final boolean blocked = filter.getType() != Filter.Type.EXCEPTION;
+    pushLog(blocked, fullUrl, filter);
+    return blocked;
+  }
+
+  private void pushLog(final boolean blocked, final String url, final Filter filter)
+  {
+    final AdblockPlus application = AdblockPlus.getApplication();
+    if (!application.isLoggingEnabled())
+      return;
+
+    String filterText = null;
+    List<String> subscriptions = null;
+    if (filter != null)
+    {
+      filterText = filter.getProperty("text").asString();
+      subscriptions = new ArrayList<String>();
+      final JsValue jsSubscriptions = filter.getProperty("subscriptions");
+      if (jsSubscriptions.isArray())
+      {
+        for (final JsValue jsSubscription : jsSubscriptions.asList())
+          subscriptions.add(jsSubscription.getProperty("title").asString());
+      }
+    }
+    application.pushLog(new LogEntry(blocked, url, filterText, subscriptions));
   }
 
   public void checkForUpdates()

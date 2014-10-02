@@ -21,14 +21,21 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.adblockplus.android.logging.LogEntry;
+import org.adblockplus.android.logging.LogEntryAdapter;
+import org.adblockplus.android.logging.LogViewer;
 import org.adblockplus.libadblockplus.FilterEngine.ContentType;
 import org.adblockplus.libadblockplus.Notification;
 import org.apache.commons.lang.StringUtils;
 
 import android.app.ActivityManager;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.app.Application;
 import android.content.Context;
@@ -44,6 +51,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 public class AdblockPlus extends Application
@@ -76,6 +84,18 @@ public class AdblockPlus extends Application
    * Indicates whether filtering is enabled or not.
    */
   private boolean filteringEnabled = false;
+  /**
+   * Indicates whether logging is enabled.
+   */
+  private volatile boolean loggingEnabled = false;
+
+  private final Object logLock = new Object();
+
+  private List<LogEntry> logEntries;
+
+  private LogEntryAdapter logEntryAdapter;
+
+  private static final int LOGGING_NOTIFICATION_ID = R.string.logviewer_name;
 
   private ABPEngine abpEngine;
 
@@ -414,6 +434,98 @@ public class AdblockPlus extends Application
   public void checkUpdates()
   {
     abpEngine.checkForUpdates();
+  }
+
+  private android.app.Notification getLoggingNotification()
+  {
+    final NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+
+    builder.setWhen(1);
+    builder.setSmallIcon(R.drawable.ic_stat_blocking);
+
+    final PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
+        new Intent(this, LogViewer.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK), 0);
+
+    builder.setContentIntent(contentIntent);
+    builder.setContentTitle(getText(R.string.app_name));
+    builder.setContentText(getString(R.string.pref_logging_enabled_summary_on));
+    builder.setOngoing(true);
+
+    return builder.getNotification();
+  }
+
+  /**
+   * Checks if logging is enabled.
+   */
+  public boolean isLoggingEnabled()
+  {
+    return loggingEnabled;
+  }
+
+  /**
+   * Enables or disables logging.
+   */
+  public void setLoggingEnabled(final boolean enabled)
+  {
+    loggingEnabled = enabled;
+    final NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+    if (enabled)
+    {
+      synchronized (logLock)
+      {
+        logEntries = new LinkedList<LogEntry>();
+      }
+      notificationManager.notify(LOGGING_NOTIFICATION_ID, getLoggingNotification());
+    }
+    else
+    {
+      synchronized (logLock)
+      {
+        logEntries = null; // GC hint
+      }
+      notificationManager.cancel(LOGGING_NOTIFICATION_ID);
+    }
+  }
+
+  /**
+   * Processes a log entry.
+   */
+  public void pushLog(final LogEntry logEntry)
+  {
+    synchronized (logLock)
+    {
+      if (logEntries == null)
+        return;
+
+      logEntries.add(logEntry);
+      // Keep at the most 1000 records in memory
+      if (logEntries.size() > 1000)
+        logEntries.subList(0, 100).clear();
+
+      // Push to the LogViewer activity
+      if (logEntryAdapter != null)
+        logEntryAdapter.pushLog(logEntry);
+    }
+  }
+
+  /**
+   * Retrieves the list of logs so far.
+   */
+  public List<LogEntry> getLogs(final LogEntryAdapter logEntryAdapter)
+  {
+    synchronized (logLock)
+    {
+      this.logEntryAdapter = logEntryAdapter;
+      return logEntries != null ? new ArrayList<LogEntry>(logEntries) : new ArrayList<LogEntry>();
+    }
+  }
+
+  public void clearLogAdapter()
+  {
+    synchronized (logLock)
+    {
+      logEntryAdapter = null;
+    }
   }
 
   @Override
