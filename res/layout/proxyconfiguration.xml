@@ -1,38 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingTop="8dip"
-    android:paddingLeft="16dip"
-    android:paddingRight="16dip" >
-
-    <TextView
-        android:id="@+id/message_text"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
 
     <LinearLayout
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:paddingBottom="16dip">
+        android:orientation="vertical"
+        android:paddingTop="8dip"
+        android:paddingLeft="16dip"
+        android:paddingRight="16dip" >
 
-        <Button
-            android:id="@+id/gotit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onGotit"
-            android:paddingRight="8dip"
-            android:text="@string/gotit" />
+        <TextView
+            android:id="@+id/message_text"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
 
-        <Button
-            android:id="@+id/opensettings"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:onClick="onSettings"
-            android:text="@string/opensettings" />
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingBottom="16dip">
+
+            <Button
+                android:id="@+id/gotit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onGotit"
+                android:paddingRight="8dip"
+                android:text="@string/gotit" />
+
+            <Button
+                android:id="@+id/opensettings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onSettings"
+                android:text="@string/opensettings" />
+        </LinearLayout>
+
     </LinearLayout>
 
-</LinearLayout>
+</ScrollView>
