@@ -80,6 +80,8 @@ public class AdblockPlus extends Application
 
   private final ReferrerMapping referrerMapping = new ReferrerMapping();
 
+  private String currentActivity;
+
   /**
    * Returns pointer to itself (singleton pattern).
    */
@@ -174,6 +176,16 @@ public class AdblockPlus extends Application
       networkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
     }
     return networkInfo == null ? false : networkInfo.isConnected();
+  }
+
+  public void setCurrentActivity(final String currentActivity)
+  {
+    this.currentActivity = currentActivity;
+  }
+
+  public String getCurrentActivity()
+  {
+    return currentActivity;
   }
 
   /**

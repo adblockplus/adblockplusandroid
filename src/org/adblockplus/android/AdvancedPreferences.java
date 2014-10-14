@@ -105,6 +105,15 @@ public class AdvancedPreferences extends SummarizedPreferences
   }
 
   @Override
+  protected void onStart()
+  {
+    super.onStart();
+    final AdblockPlus application = AdblockPlus.getApplication();
+    application.setCurrentActivity(TAG);
+    application.startEngine();
+  }
+
+  @Override
   public void onResume()
   {
     super.onResume();
@@ -119,6 +128,15 @@ public class AdvancedPreferences extends SummarizedPreferences
   {
     super.onPause();
     this.serviceBinder.unbind();
+  }
+
+  @Override
+  protected void onStop()
+  {
+    super.onStop();
+    final AdblockPlus application = AdblockPlus.getApplication();
+    if (TAG.equals(application.getCurrentActivity()) && !application.isFilteringEnabled())
+      application.stopEngine();
   }
 
   @Override

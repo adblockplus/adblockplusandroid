@@ -118,6 +118,7 @@ public class Preferences extends SummarizedPreferences
   {
     super.onStart();
     final AdblockPlus application = AdblockPlus.getApplication();
+    application.setCurrentActivity(TAG);
     application.startEngine();
 
     // Initialize subscription list
@@ -256,7 +257,7 @@ public class Preferences extends SummarizedPreferences
   {
     super.onStop();
     final AdblockPlus application = AdblockPlus.getApplication();
-    if (!application.isFilteringEnabled())
+    if (TAG.equals(application.getCurrentActivity()) && !application.isFilteringEnabled())
       application.stopEngine();
   }
 
