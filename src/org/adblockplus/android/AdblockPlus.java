@@ -421,37 +421,48 @@ public class AdblockPlus extends Application
     super.onCreate();
     instance = this;
 
-    // Check for crash report
-    try
-    {
-      final InputStreamReader reportFile = new InputStreamReader(openFileInput(CrashHandler.REPORT_FILE));
-      final char[] buffer = new char[0x1000];
-      final StringBuilder out = new StringBuilder();
-      int read;
-      do
-      {
-        read = reportFile.read(buffer, 0, buffer.length);
-        if (read > 0)
-          out.append(buffer, 0, read);
+    new AsyncTask<Void, Void, StringBuilder>() {
+      protected StringBuilder doInBackground(Void... asyncTaskArgs) {
+        // Check for crash report
+        try
+        {
+          final InputStreamReader reportFile = new InputStreamReader(openFileInput(CrashHandler.REPORT_FILE));
+          final char[] buffer = new char[0x1000];
+          final StringBuilder out = new StringBuilder();
+          int read;
+          do
+          {
+            read = reportFile.read(buffer, 0, buffer.length);
+            if (read > 0)
+              out.append(buffer, 0, read);
+            }
+            while (read >= 0);
+          return out;
+        } 
+        catch (final FileNotFoundException e)
+        {
+          // ignore
+        }
+        catch (final IOException e)
+        {
+          Log.e(TAG, e.getMessage(), e);
+        }
+        return null;
       }
-      while (read >= 0);
-      final String report = out.toString();
-      if (StringUtils.isNotEmpty(report))
-      {
-        final Intent intent = new Intent(this, CrashReportDialog.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra("report", report);
-        startActivity(intent);
+
+      protected void onPostExecute(final StringBuilder out) {
+        if (out == null)
+          return;
+        final String report = out.toString();
+        if (StringUtils.isNotEmpty(report))
+        {
+          final Intent intent = new Intent(AdblockPlus.this, CrashReportDialog.class);
+          intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+          intent.putExtra("report", report);
+          startActivity(intent);
+        }
       }
-    }
-    catch (final FileNotFoundException e)
-    {
-      // ignore
-    }
-    catch (final IOException e)
-    {
-      Log.e(TAG, e.getMessage(), e);
-    }
+    }.execute();
 
     // Set crash handler
     Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(this));
