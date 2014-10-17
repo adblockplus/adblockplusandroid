@@ -36,6 +36,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -92,25 +93,30 @@ public class Preferences extends SummarizedPreferences
     setContentView(R.layout.preferences);
     addPreferencesFromResource(R.xml.preferences);
 
-    final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+    new AsyncTask<Void, Void, Void>() {
+      protected Void doInBackground(Void... args) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(Preferences.this);
 
-    // Check if we need to update assets
-    final int lastVersion = prefs.getInt(getString(R.string.pref_version), 0);
-    try
-    {
-      final int thisVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
-      if (lastVersion != thisVersion)
-      {
-        copyAssets();
-        final SharedPreferences.Editor editor = prefs.edit();
-        editor.putInt(getString(R.string.pref_version), thisVersion);
-        editor.commit();
+        // Check if we need to update assets
+        int lastVersion = prefs.getInt(getString(R.string.pref_version), 0);
+        try
+        {
+          int thisVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+          if (lastVersion != thisVersion)
+          {
+            copyAssets();
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putInt(getString(R.string.pref_version), thisVersion);
+            editor.commit();
+          }
+        }
+        catch (NameNotFoundException e)
+        {
+          copyAssets();
+        }
+        return null;
       }
-    }
-    catch (final NameNotFoundException e)
-    {
-      copyAssets();
-    }
+    }.execute();
   }
 
   @Override
