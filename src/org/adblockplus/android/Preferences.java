@@ -97,22 +97,22 @@ public class Preferences extends SummarizedPreferences
     {
       protected Void doInBackground(Void... args)
       {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(Preferences.this);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(Preferences.this);
 
         // Check if we need to update assets
-        int lastVersion = prefs.getInt(getString(R.string.pref_version), 0);
+        final int lastVersion = prefs.getInt(getString(R.string.pref_version), 0);
         try
         {
-          int thisVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+          final int thisVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
           if (lastVersion != thisVersion)
           {
             copyAssets();
-            SharedPreferences.Editor editor = prefs.edit();
+            final SharedPreferences.Editor editor = prefs.edit();
             editor.putInt(getString(R.string.pref_version), thisVersion);
             editor.commit();
           }
         }
-        catch (NameNotFoundException e)
+        catch (final NameNotFoundException e)
         {
           copyAssets();
         }
