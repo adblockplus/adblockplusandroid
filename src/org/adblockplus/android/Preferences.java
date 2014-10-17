@@ -93,8 +93,10 @@ public class Preferences extends SummarizedPreferences
     setContentView(R.layout.preferences);
     addPreferencesFromResource(R.xml.preferences);
 
-    new AsyncTask<Void, Void, Void>() {
-      protected Void doInBackground(Void... args) {
+    new AsyncTask<Void, Void, Void>()
+    {
+      protected Void doInBackground(Void... args)
+      {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(Preferences.this);
 
         // Check if we need to update assets
