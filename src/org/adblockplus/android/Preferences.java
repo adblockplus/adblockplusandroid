@@ -36,7 +36,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -93,32 +92,25 @@ public class Preferences extends SummarizedPreferences
     setContentView(R.layout.preferences);
     addPreferencesFromResource(R.xml.preferences);
 
-    new AsyncTask<Void, Void, Void>()
-    {
-      protected Void doInBackground(Void... args)
-      {
-        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(Preferences.this);
+    final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        // Check if we need to update assets
-        final int lastVersion = prefs.getInt(getString(R.string.pref_version), 0);
-        try
-        {
-          final int thisVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
-          if (lastVersion != thisVersion)
-          {
-            copyAssets();
-            final SharedPreferences.Editor editor = prefs.edit();
-            editor.putInt(getString(R.string.pref_version), thisVersion);
-            editor.commit();
-          }
-        }
-        catch (final NameNotFoundException e)
-        {
-          copyAssets();
-        }
-        return null;
+    // Check if we need to update assets
+    final int lastVersion = prefs.getInt(getString(R.string.pref_version), 0);
+    try
+    {
+      final int thisVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+      if (lastVersion != thisVersion)
+      {
+        copyAssets();
+        final SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(getString(R.string.pref_version), thisVersion);
+        editor.commit();
       }
-    }.execute();
+    }
+    catch (final NameNotFoundException e)
+    {
+      copyAssets();
+    }
   }
 
   @Override
