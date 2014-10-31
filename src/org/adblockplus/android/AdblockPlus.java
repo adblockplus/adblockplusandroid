@@ -436,8 +436,8 @@ public class AdblockPlus extends Application
             read = reportFile.read(buffer, 0, buffer.length);
             if (read > 0)
               out.append(buffer, 0, read);
-            }
-            while (read >= 0);
+          }
+          while (read >= 0);
           return out;
         } 
         catch (final FileNotFoundException e)
