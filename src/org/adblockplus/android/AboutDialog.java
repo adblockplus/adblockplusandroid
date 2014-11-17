@@ -31,12 +31,9 @@ import android.widget.TextView;
 
 public class AboutDialog extends Dialog
 {
-  private static Context context = null;
-
   public AboutDialog(final Context context)
   {
     super(context);
-    AboutDialog.context = context;
   }
 
   @Override
@@ -45,6 +42,7 @@ public class AboutDialog extends Dialog
     requestWindowFeature(Window.FEATURE_NO_TITLE);
     setContentView(R.layout.about);
 
+    final Context context = this.getContext();
     // Get package version code and name
     String versionName = "--";
     int versionCode = -1;
