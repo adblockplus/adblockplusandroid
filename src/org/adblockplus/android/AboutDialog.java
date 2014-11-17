@@ -24,7 +24,9 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.TextView;
 
 public class AboutDialog extends Dialog
@@ -78,5 +80,15 @@ public class AboutDialog extends Dialog
     final TextView tv = (TextView) findViewById(R.id.about_text);
     tv.setText(Html.fromHtml(info.toString()));
     tv.setMovementMethod(LinkMovementMethod.getInstance());
+
+    final Button okButton = (Button) findViewById(R.id.close_about);
+    okButton.setOnClickListener(new View.OnClickListener()
+    {
+      @Override
+      public void onClick(View v)
+      {
+        AboutDialog.this.dismiss();
+      }
+    });
   }
 }
