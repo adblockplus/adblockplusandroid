@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.apache.commons.lang.StringUtils;
 import org.jraf.android.backport.switchwidget.SwitchPreference;
 
 import android.app.AlertDialog;
@@ -538,7 +539,7 @@ public class Preferences extends SummarizedPreferences
     if (summary != null)
     {
       builder.append(summary);
-      if (text != "")
+      if (StringUtils.isNotEmpty(text))
       {
         builder.append(" (");
         final int id = getResources().getIdentifier(text, "string", getPackageName());
