@@ -71,8 +71,8 @@ public class AboutDialog extends Dialog
     info.append(" ");
     info.append(versionCode);
     info.append("</p>");
-    AdblockPlus.appendRawTextFile(context, info, R.raw.info);
-    AdblockPlus.appendRawTextFile(context, info, R.raw.legal);
+    Utils.appendRawTextFile(context, info, R.raw.info);
+    Utils.appendRawTextFile(context, info, R.raw.legal);
 
     // Show text
     final TextView tv = (TextView) findViewById(R.id.about_text);
