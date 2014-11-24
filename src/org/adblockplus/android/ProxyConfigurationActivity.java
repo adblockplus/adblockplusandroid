@@ -21,7 +21,7 @@ public class ProxyConfigurationActivity extends Activity
 
     final StringBuilder info = new StringBuilder();
     final int textId = ProxyService.GLOBAL_PROXY_USER_CONFIGURABLE ? R.raw.proxysettings : R.raw.proxysettings_old;
-    AdblockPlus.appendRawTextFile(this, info, textId);
+    Utils.appendRawTextFile(this, info, textId);
     final String msg = String.format(info.toString(), port);
 
     final TextView tv = (TextView) findViewById(R.id.message_text);

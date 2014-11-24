@@ -17,6 +17,9 @@
 
 package org.adblockplus.android;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
 import org.adblockplus.android.updater.UpdaterActivity;
 import org.adblockplus.libadblockplus.JsValue;
 import org.adblockplus.libadblockplus.Subscription;
@@ -119,5 +122,32 @@ public final class Utils
         .putExtra("url", sub.getProperty("url").toString())
         .putExtra("status", status)
         .putExtra("time", time * 1000L));
+  }
+
+  public static void appendRawTextFile(final Context context, final StringBuilder text, final int id)
+  {
+    try
+    {
+      final BufferedReader buf = new BufferedReader(new InputStreamReader(context.getResources().openRawResource(id)));
+
+      try
+      {
+        String line;
+        while ((line = buf.readLine()) != null)
+        {
+          text.append(line);
+          text.append('\n');
+        }
+      }
+      finally
+      {
+        buf.close();
+      }
+
+    }
+    catch (final Exception e)
+    {
+      // Ignored for now
+    }
   }
 }

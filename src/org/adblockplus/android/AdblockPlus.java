@@ -17,11 +17,9 @@
 
 package org.adblockplus.android;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -141,25 +139,6 @@ public class AdblockPlus extends Application
       return Utils.capitalizeString(model);
     else
       return Utils.capitalizeString(manufacturer) + " " + model;
-  }
-
-  public static void appendRawTextFile(final Context context, final StringBuilder text, final int id)
-  {
-    // TODO: What about closing the resources?
-    final InputStream inputStream = context.getResources().openRawResource(id);
-    final InputStreamReader in = new InputStreamReader(inputStream);
-    final BufferedReader buf = new BufferedReader(in);
-    String line;
-    try
-    {
-      while ((line = buf.readLine()) != null)
-        text.append(line);
-    }
-    catch (final IOException e)
-    {
-      // TODO: How about real logging?
-      e.printStackTrace();
-    }
   }
 
   /**
