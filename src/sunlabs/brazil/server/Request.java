@@ -806,7 +806,12 @@ public class Request
 	    StringTokenizer st = new StringTokenizer(line);
 	    method = st.nextToken();
 	    url = st.nextToken();
-	    protocol = st.nextToken();
+        /*compatible for request without protocol such as tieba.baidu.com, if not ,many css files will be lost*/
+        try {
+            protocol = st.nextToken();
+        } catch (NoSuchElementException e) {
+            protocol = "HTTP/1.1";
+        }
 	} catch (NoSuchElementException e) {
 	    sendError(400, line, null);
 	    return false;
