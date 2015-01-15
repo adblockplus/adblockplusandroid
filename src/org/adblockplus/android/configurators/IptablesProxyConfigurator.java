@@ -1,6 +1,6 @@
 /*
- * This file is part of Adblock Plus <http://adblockplus.org/>,
- * Copyright (C) 2006-2014 Eyeo GmbH
+ * This file is part of Adblock Plus <https://adblockplus.org/>,
+ * Copyright (C) 2006-2015 Eyeo GmbH
  *
  * Adblock Plus is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -58,14 +58,7 @@ public class IptablesProxyConfigurator implements ProxyConfigurator
         throw new IllegalStateException("No root access");
       }
 
-      final File ipt = this.context.getFileStreamPath("iptables");
-
-      if (!ipt.exists())
-      {
-        throw new FileNotFoundException("No iptables executable");
-      }
-
-      final String path = ipt.getAbsolutePath();
+      final String path = getIptablesExecutablePath();
 
       RootTools.sendShell("chmod 700 " + path, DEFAULT_TIMEOUT);
 
@@ -101,6 +94,19 @@ public class IptablesProxyConfigurator implements ProxyConfigurator
     {
       return false;
     }
+  }
+
+  private String getIptablesExecutablePath() throws FileNotFoundException
+  {
+    File iptablesExecutable = new File("/system/bin/iptables");
+    if (!iptablesExecutable.exists())
+    {
+      Log.i(TAG, "iptables not found on the system, using embedded binary");
+      iptablesExecutable = context.getFileStreamPath("iptables");
+    }
+    if (!iptablesExecutable.exists())
+      throw new FileNotFoundException("No iptables executable");
+    return iptablesExecutable.getAbsolutePath();
   }
 
   @Override
