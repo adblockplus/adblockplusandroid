@@ -223,11 +223,9 @@ public class Preferences extends SummarizedPreferences
     url = TextUtils.htmlEncode(url);
     message = TextUtils.htmlEncode(message)
         .replaceAll("&lt;a&gt;(.*?)&lt;/a&gt;", "<a href=\"" + url + "\">$1</a>");
-    final TextView messageView = new TextView(this);
+    final TextView messageView = (TextView)View.inflate(this, R.layout.adsoptin_txt, null);
     messageView.setText(Html.fromHtml(message));
     messageView.setMovementMethod(LinkMovementMethod.getInstance());
-    final int padding = 10;
-    messageView.setPadding(padding, padding, padding, padding);
     new AlertDialog.Builder(this).setTitle(title)
         .setView(messageView)
         .setIcon(android.R.drawable.ic_dialog_info)
