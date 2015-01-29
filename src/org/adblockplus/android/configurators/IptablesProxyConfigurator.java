@@ -19,15 +19,22 @@ package org.adblockplus.android.configurators;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeoutException;
 
 import org.adblockplus.android.Utils;
 
-import com.stericson.RootTools.RootTools;
-
 import android.content.Context;
 import android.util.Log;
+
+import com.stericson.RootTools.RootTools;
+import com.stericson.RootTools.exceptions.RootDeniedException;
+import com.stericson.RootTools.execution.Command;
+import com.stericson.RootTools.execution.Shell;
 
 /**
  * Proxy registration using RootTools and iptables.
@@ -48,11 +55,28 @@ public class IptablesProxyConfigurator implements ProxyConfigurator
     this.context = context;
   }
 
+  private static List<String> runRootCommand(final String command, final int timeout) throws IOException, TimeoutException,
+      RootDeniedException
+  {
+    final CapturingOutputCommand cmd = new CapturingOutputCommand(0, DEFAULT_TIMEOUT, command);
+
+    Shell.runRootCommand(cmd);
+
+    cmd.waitForCompletion();
+
+    return cmd.output;
+  }
+
   @Override
   public boolean initialize()
   {
     try
     {
+      // If we don't set `handlerEnabled` to `false`, RootTools uses Handlers
+      // which get executed on the UI thread which in fact renders it useless
+      // for our purpose (as it either finished too late or blocks forever).
+      RootTools.handlerEnabled = false;
+
       if (!RootTools.isAccessGiven())
       {
         throw new IllegalStateException("No root access");
@@ -60,14 +84,14 @@ public class IptablesProxyConfigurator implements ProxyConfigurator
 
       final String path = getIptablesExecutablePath();
 
-      RootTools.sendShell("chmod 700 " + path, DEFAULT_TIMEOUT);
+      runRootCommand("chmod 700 " + path, DEFAULT_TIMEOUT);
 
       boolean compatible = false;
       boolean version = false;
 
       final String command = path + " --version\n" + path + " -L -t nat -n\n";
 
-      final List<String> result = RootTools.sendShell(command, DEFAULT_TIMEOUT);
+      final List<String> result = runRootCommand(command, DEFAULT_TIMEOUT);
 
       for (final String line : result)
       {
@@ -123,7 +147,7 @@ public class IptablesProxyConfigurator implements ProxyConfigurator
       cmd.append(this.iptables);
       cmd.append(IPTABLES_ADD_HTTP.replace("{{PORT}}", String.valueOf(port)));
 
-      RootTools.sendShell(cmd.toString(), DEFAULT_TIMEOUT);
+      runRootCommand(cmd.toString(), DEFAULT_TIMEOUT);
 
       this.isRegistered = true;
 
@@ -142,7 +166,7 @@ public class IptablesProxyConfigurator implements ProxyConfigurator
   {
     try
     {
-      RootTools.sendShell(this.iptables + " -t nat -F OUTPUT", DEFAULT_TIMEOUT);
+      runRootCommand(this.iptables + " -t nat -F OUTPUT", DEFAULT_TIMEOUT);
     }
     catch (final Exception e)
     {
@@ -178,14 +202,14 @@ public class IptablesProxyConfigurator implements ProxyConfigurator
 
       final String path = ipt.getAbsolutePath();
 
-      RootTools.sendShell("chmod 700 " + path, DEFAULT_TIMEOUT);
+      runRootCommand("chmod 700 " + path, DEFAULT_TIMEOUT);
 
       boolean compatible = false;
       boolean version = false;
 
       String command = path + " --version\n" + path + " -L -t nat -n\n";
 
-      final List<String> result = RootTools.sendShell(command, DEFAULT_TIMEOUT);
+      final List<String> result = runRootCommand(command, DEFAULT_TIMEOUT);
 
       for (final String line : result)
       {
@@ -206,7 +230,7 @@ public class IptablesProxyConfigurator implements ProxyConfigurator
 
       command = path + " -L -t nat -n\n";
 
-      return RootTools.sendShell(command, DEFAULT_TIMEOUT);
+      return runRootCommand(command, DEFAULT_TIMEOUT);
     }
     catch (final Throwable t)
     {
@@ -236,5 +260,42 @@ public class IptablesProxyConfigurator implements ProxyConfigurator
   public String toString()
   {
     return "[ProxyConfigurator: " + this.getType() + "]";
+  }
+
+  private final static class CapturingOutputCommand extends Command
+  {
+    private final Semaphore running = new Semaphore(1);
+
+    public List<String> output = new ArrayList<String>();
+
+    public CapturingOutputCommand(final int id, final int timeout, final String command)
+    {
+      super(id, timeout, command);
+
+      this.running.acquireUninterruptibly();
+    }
+
+    @Override
+    public void commandOutput(int id, String line)
+    {
+      this.output.add(line);
+    }
+
+    @Override
+    public void commandCompleted(int id, int exitCode)
+    {
+      this.running.release();
+    }
+
+    @Override
+    public void commandTerminated(int id, String reason)
+    {
+      this.running.release();
+    }
+
+    public void waitForCompletion()
+    {
+      this.running.acquireUninterruptibly();
+    }
   }
 }
