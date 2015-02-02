@@ -26,8 +26,6 @@
 #include <AdblockPlus.h>
 #include <AdblockPlus/tr1_memory.h>
 
-#include "v8/v8stdint.h"
-
 #define PKG(x) "org/adblockplus/libadblockplus/" x
 #define TYP(x) "L" PKG(x) ";"
 
