@@ -37,6 +37,43 @@ void JniThrowException(JNIEnv* env, const std::exception& e);
 
 void JniThrowException(JNIEnv* env);
 
+class JNIEnvAcquire;
+
+/**
+ * This class is _NOT_ thread safe!
+ */
+template<typename T>
+class JniLocalReference
+{
+public:
+  JniLocalReference(JNIEnv* jniEnv, T object)
+      : jniEnv(jniEnv), object(object)
+  {
+
+  }
+
+  JniLocalReference(const JniLocalReference<T>& other);
+
+  ~JniLocalReference()
+  {
+    jniEnv->DeleteLocalRef(object);
+  }
+
+  T operator*()
+  {
+    return object;
+  }
+
+  T Get()
+  {
+    return object;
+  }
+
+private:
+  JNIEnv* jniEnv;
+  T object;
+};
+
 class JNIEnvAcquire
 {
 public:
@@ -143,21 +180,24 @@ inline jobject NewJniFilter(JNIEnv* env, const AdblockPlus::FilterPtr& filter)
     return 0;
   }
 
-  jclass clazz = env->FindClass(PKG("Filter"));
-  jmethodID method = env->GetMethodID(clazz, "<init>", "(J)V");
-  return env->NewObject(clazz, method, JniPtrToLong(new AdblockPlus::FilterPtr(filter)));
+  JniLocalReference<jclass> clazz(env, env->FindClass(PKG("Filter")));
+  jmethodID method = env->GetMethodID(*clazz, "<init>", "(J)V");
+  return env->NewObject(*clazz, method,
+      JniPtrToLong(new AdblockPlus::FilterPtr(filter)));
 }
 
-inline jobject NewJniSubscription(JNIEnv* env, const AdblockPlus::SubscriptionPtr& subscription)
+inline jobject NewJniSubscription(JNIEnv* env,
+    const AdblockPlus::SubscriptionPtr& subscription)
 {
   if (!subscription.get())
   {
     return 0;
   }
 
-  jclass clazz = env->FindClass(PKG("Subscription"));
-  jmethodID method = env->GetMethodID(clazz, "<init>", "(J)V");
-  return env->NewObject(clazz, method, JniPtrToLong(new AdblockPlus::SubscriptionPtr(subscription)));
+  JniLocalReference<jclass> clazz(env, env->FindClass(PKG("Subscription")));
+  jmethodID method = env->GetMethodID(*clazz, "<init>", "(J)V");
+  return env->NewObject(*clazz, method,
+      JniPtrToLong(new AdblockPlus::SubscriptionPtr(subscription)));
 }
 
 #define CATCH_AND_THROW(jEnv) \

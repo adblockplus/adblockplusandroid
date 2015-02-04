@@ -66,9 +66,10 @@ static jobject JNICALL JniGetType(JNIEnv* env, jclass clazz, jlong ptr)
     break;
   }
 
-  jclass enumClass = env->FindClass(PKG("Filter$Type"));
-  jfieldID enumField = env->GetStaticFieldID(enumClass, enumName, TYP("Filter$Type"));
-  return env->GetStaticObjectField(enumClass, enumField);
+  JniLocalReference<jclass> enumClass(env, env->FindClass(PKG("Filter$Type")));
+  jfieldID enumField = env->GetStaticFieldID(*enumClass, enumName,
+      TYP("Filter$Type"));
+  return env->GetStaticObjectField(*enumClass, enumField);
 }
 
 static jboolean JNICALL JniIsListed(JNIEnv* env, jclass clazz, jlong ptr)
