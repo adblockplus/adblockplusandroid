@@ -30,7 +30,6 @@ import org.adblockplus.libadblockplus.LogSystem;
 import org.adblockplus.libadblockplus.Subscription;
 import org.adblockplus.libadblockplus.UpdateAvailableCallback;
 import org.adblockplus.libadblockplus.UpdateCheckDoneCallback;
-import org.adblockplus.libadblockplus.WebRequest;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -58,7 +57,7 @@ public final class ABPEngine
   private volatile JsEngine jsEngine;
   private volatile FilterEngine filterEngine;
   private volatile LogSystem logSystem;
-  private volatile WebRequest webRequest;
+  private volatile AndroidWebRequest webRequest;
   private volatile UpdateAvailableCallback updateAvailableCallback;
   private volatile UpdateCheckDoneCallback updateCheckDoneCallback;
   private volatile FilterChangeCallback filterChangeCallback;
@@ -108,6 +107,9 @@ public final class ABPEngine
     engine.jsEngine.setWebRequest(engine.webRequest);
 
     engine.filterEngine = new FilterEngine(engine.jsEngine);
+
+    engine.webRequest.updateSubscriptionURLs(engine.filterEngine);
+
     engine.updateAvailableCallback = new AndroidUpdateAvailableCallback(context);
     engine.filterEngine.setUpdateAvailableCallback(engine.updateAvailableCallback);
     engine.filterChangeCallback = new AndroidFilterChangeCallback(context);

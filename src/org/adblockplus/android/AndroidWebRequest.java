@@ -17,25 +17,49 @@
 
 package org.adblockplus.android;
 
-import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashSet;
 import java.util.List;
 
 import org.adblockplus.libadblockplus.AdblockPlusException;
+import org.adblockplus.libadblockplus.FilterEngine;
 import org.adblockplus.libadblockplus.HeaderEntry;
 import org.adblockplus.libadblockplus.ServerResponse;
-import org.adblockplus.libadblockplus.WebRequest;
 import org.adblockplus.libadblockplus.ServerResponse.NsStatus;
+import org.adblockplus.libadblockplus.WebRequest;
 
 import android.util.Log;
 
 public class AndroidWebRequest extends WebRequest
 {
-  public final String TAG = Utils.getTag(WebRequest.class);
+  public final static String TAG = Utils.getTag(WebRequest.class);
 
-  private static final int INITIAL_BUFFER_SIZE = 65536;
-  private static final int BUFFER_GROWTH_DELTA = 65536;
+  private final HashSet<String> subscriptionURLs = new HashSet<String>();
+
+  private boolean isListedSubscriptionUrl(final URL url)
+  {
+    String toCheck = url.toString();
+
+    final int idx = toCheck.indexOf('?');
+    if (idx != -1)
+    {
+      toCheck = toCheck.substring(0, idx);
+    }
+
+    return this.subscriptionURLs.contains(toCheck);
+  }
+
+  protected void updateSubscriptionURLs(final FilterEngine engine)
+  {
+    for (final org.adblockplus.libadblockplus.Subscription s : engine.fetchAvailableSubscriptions())
+    {
+      this.subscriptionURLs.add(s.getProperty("url").toString());
+    }
+    this.subscriptionURLs.add(engine.getPref("subscriptions_exceptionsurl").toString());
+  }
 
   @Override
   public ServerResponse httpGET(final String urlStr, final List<HeaderEntry> headers)
@@ -43,7 +67,7 @@ public class AndroidWebRequest extends WebRequest
     try
     {
       final URL url = new URL(urlStr);
-      Log.d(this.TAG, "Downloading from: " + url);
+      Log.d(TAG, "Downloading from: " + url);
 
       final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
       connection.setRequestMethod("GET");
@@ -54,34 +78,45 @@ public class AndroidWebRequest extends WebRequest
 
       if (response.getResponseStatus() == 200)
       {
-        final InputStream in = connection.getInputStream();
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+        final StringBuilder sb = new StringBuilder();
 
-        final byte[] buffer = new byte[4096];
-
-        byte[] out = new byte[INITIAL_BUFFER_SIZE];
-
-        int pos = 0;
-        for (;;)
+        if (isListedSubscriptionUrl(url))
         {
-          final int read = in.read(buffer);
-          if (read < 0)
+          Log.d(TAG, "Removing element hiding rules from: '" + url + "'");
+
+          String line;
+          while ((line = reader.readLine()) != null)
           {
-            break;
+            // We're only appending non-element-hiding filters here.
+            //
+            // See:
+            //      https://issues.adblockplus.org/ticket/303
+            //
+            // Follow-up issue for removing this hack:
+            //      https://issues.adblockplus.org/ticket/1541
+            //
+            if (line.indexOf('#') == -1)
+            {
+              sb.append(line);
+              sb.append('\n');
+            }
           }
-          if (pos + read > out.length)
+        }
+        else
+        {
+          int character;
+
+          while ((character = reader.read()) != -1)
           {
-            final byte[] old = out;
-            out = new byte[out.length + BUFFER_GROWTH_DELTA];
-            System.arraycopy(old, 0, out, 0, pos);
+            sb.append((char) character);
           }
-          System.arraycopy(buffer, 0, out, pos, read);
-          pos += read;
         }
 
         connection.disconnect();
 
         response.setStatus(NsStatus.OK);
-        response.setResponse(new String(out, 0, pos, "utf-8"));
+        response.setResponse(sb.toString());
       }
       else
       {
