@@ -31,23 +31,29 @@ static void JNICALL JniDtor(JNIEnv* env, jclass clazz, jlong ptr)
   delete JniLongToTypePtr<JniFilterChangeCallback>(ptr);
 }
 
-JniFilterChangeCallback::JniFilterChangeCallback(JNIEnv* env, jobject callbackObject)
-  : JniCallbackBase(env, callbackObject), jsValueClass(new JniGlobalReference<jclass>(env, env->FindClass(PKG("JsValue"))))
+JniFilterChangeCallback::JniFilterChangeCallback(JNIEnv* env,
+    jobject callbackObject)
+    : JniCallbackBase(env, callbackObject), jsValueClass(
+        new JniGlobalReference<jclass>(env, env->FindClass(PKG("JsValue"))))
 {
 }
 
-void JniFilterChangeCallback::Callback(const std::string& arg, const AdblockPlus::JsValuePtr jsValue)
+void JniFilterChangeCallback::Callback(const std::string& arg,
+    const AdblockPlus::JsValuePtr jsValue)
 {
   JNIEnvAcquire env(GetJavaVM());
 
-  jclass clazz = env->GetObjectClass(GetCallbackObject());
-  jmethodID method = env->GetMethodID(clazz, "filterChangeCallback", "(Ljava/lang/String;" TYP("JsValue") ")V");
+  jmethodID method = env->GetMethodID(
+      *JniLocalReference<jclass>(*env,
+          env->GetObjectClass(GetCallbackObject())),
+      "filterChangeCallback", "(Ljava/lang/String;" TYP("JsValue") ")V");
 
   if (method)
   {
-    jstring jArg = env->NewStringUTF(arg.c_str());
-    jobject jJsValue = NewJniJsValue(*env, jsValue, jsValueClass->Get());
-    env->CallVoidMethod(GetCallbackObject(), method, jArg, jJsValue);
+    JniLocalReference<jstring> jArg(*env, env->NewStringUTF(arg.c_str()));
+    JniLocalReference<jobject> jJsValue(*env,
+        NewJniJsValue(*env, jsValue, jsValueClass->Get()));
+    env->CallVoidMethod(GetCallbackObject(), method, *jArg, *jJsValue);
   }
 
   CheckAndLogJavaException(*env);

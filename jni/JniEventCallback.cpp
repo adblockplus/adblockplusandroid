@@ -40,8 +40,10 @@ void JniEventCallback::Callback(AdblockPlus::JsValueList& params)
 {
   JNIEnvAcquire env(GetJavaVM());
 
-  jclass clazz = env->GetObjectClass(GetCallbackObject());
-  jmethodID method = env->GetMethodID(clazz, "eventCallback", "(Ljava/util/List;)V");
+  jmethodID method = env->GetMethodID(
+      *JniLocalReference<jclass>(*env,
+          env->GetObjectClass(GetCallbackObject())),
+      "eventCallback", "(Ljava/util/List;)V");
 
   if (method)
   {

@@ -42,8 +42,8 @@ void JniCallbackBase::CheckAndLogJavaException(JNIEnv* env) const
 {
   if (env->ExceptionCheck())
   {
-    jthrowable throwable = env->ExceptionOccurred();
+    JniLocalReference<jthrowable> throwable(env, env->ExceptionOccurred());
     env->ExceptionClear();
-    LogException(env, throwable);
+    LogException(env, *throwable);
   }
 }

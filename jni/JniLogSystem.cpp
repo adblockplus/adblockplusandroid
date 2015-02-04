@@ -36,12 +36,16 @@ JniLogSystemCallback::JniLogSystemCallback(JNIEnv* env, jobject callbackObject)
 {
 }
 
-void JniLogSystemCallback::operator()(AdblockPlus::LogSystem::LogLevel logLevel, const std::string& message, const std::string& source)
+void JniLogSystemCallback::operator()(AdblockPlus::LogSystem::LogLevel logLevel,
+    const std::string& message, const std::string& source)
 {
   JNIEnvAcquire env(GetJavaVM());
 
-  jclass clazz = env->GetObjectClass(GetCallbackObject());
-  jmethodID method = env->GetMethodID(clazz, "logCallback", "(" TYP("LogSystem$LogLevel") "Ljava/lang/String;Ljava/lang/String;)V");
+  jmethodID method = env->GetMethodID(
+      *JniLocalReference<jclass>(*env,
+          env->GetObjectClass(GetCallbackObject())),
+      "logCallback",
+      "(" TYP("LogSystem$LogLevel") "Ljava/lang/String;Ljava/lang/String;)V");
 
   // TODO: Set log level from Java and handle it here (to reduce C++->Java calls)
 
@@ -72,13 +76,18 @@ void JniLogSystemCallback::operator()(AdblockPlus::LogSystem::LogLevel logLevel,
     jclass enumClass = logLevelClass->Get();
     if (enumClass)
     {
-      jfieldID enumField = env->GetStaticFieldID(enumClass, enumName, TYP("LogSystem$LogLevel"));
-      jobject jLogLevel = env->GetStaticObjectField(enumClass, enumField);
+      jfieldID enumField = env->GetStaticFieldID(enumClass, enumName,
+          TYP("LogSystem$LogLevel"));
+      JniLocalReference<jobject> jLogLevel(*env,
+          env->GetStaticObjectField(enumClass, enumField));
 
-      jstring jMessage = env->NewStringUTF(message.c_str());
-      jstring jSource = env->NewStringUTF(source.c_str());
+      JniLocalReference<jstring> jMessage(*env,
+          env->NewStringUTF(message.c_str()));
+      JniLocalReference<jstring> jSource(*env,
+          env->NewStringUTF(source.c_str()));
 
-      env->CallVoidMethod(GetCallbackObject(), method, jLogLevel, jMessage, jSource);
+      env->CallVoidMethod(GetCallbackObject(), method, *jLogLevel, *jMessage,
+          *jSource);
     }
 
     CheckAndLogJavaException(*env);

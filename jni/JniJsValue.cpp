@@ -144,7 +144,14 @@ jobject NewJniJsValue(JNIEnv* env, const AdblockPlus::JsValuePtr& jsValue, jclas
   jclass clazz = jsValueClass ? jsValueClass : env->FindClass(PKG("JsValue"));
   jmethodID ctor = env->GetMethodID(clazz, "<init>", "(J)V");
   jlong ptr = JniPtrToLong(new AdblockPlus::JsValuePtr(jsValue));
-  return env->NewObject(clazz, ctor, ptr);
+  jobject ret = env->NewObject(clazz, ctor, ptr);
+
+  if (!jsValueClass)
+  {
+    env->DeleteLocalRef(clazz);
+  }
+
+  return ret;
 }
 
 AdblockPlus::JsValue* JniGetJsValue(jlong ptr)
@@ -163,7 +170,8 @@ jobject JniJsValueListToArrayList(JNIEnv* env, AdblockPlus::JsValueList& list)
 
   for (AdblockPlus::JsValueList::iterator it = list.begin(), end = list.end(); it != end; ++it)
   {
-    JniAddObjectToList(env, arrayList, NewJniJsValue(env, *it));
+    JniAddObjectToList(env, arrayList,
+        *JniLocalReference<jobject>(env, NewJniJsValue(env, *it)));
   }
 
   return arrayList;

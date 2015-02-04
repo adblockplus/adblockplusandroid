@@ -35,21 +35,23 @@ std::string JniJavaToStdString(JNIEnv* env, jstring str)
 
 jobject NewJniArrayList(JNIEnv* env)
 {
-  jclass clazz = env->FindClass("java/util/ArrayList");
-  jmethodID ctor = env->GetMethodID(clazz, "<init>", "()V");
-  return env->NewObject(clazz, ctor);
+  JniLocalReference<jclass> clazz(env, env->FindClass("java/util/ArrayList"));
+  jmethodID ctor = env->GetMethodID(*clazz, "<init>", "()V");
+  return env->NewObject(*clazz, ctor);
 }
 
 void JniAddObjectToList(JNIEnv* env, jobject list, jobject value)
 {
-  jmethodID add = env->GetMethodID(env->GetObjectClass(list), "add", "(Ljava/lang/Object;)Z");
+  JniLocalReference<jclass> clazz(env, env->GetObjectClass(list));
+  jmethodID add = env->GetMethodID(*clazz, "add", "(Ljava/lang/Object;)Z");
   env->CallBooleanMethod(list, add, value);
 }
 
 void JniThrowException(JNIEnv* env, const std::string& message)
 {
-  jclass clazz = env->FindClass(PKG("AdblockPlusException"));
-  env->ThrowNew(clazz, message.c_str());
+  JniLocalReference<jclass> clazz(env,
+      env->FindClass(PKG("AdblockPlusException")));
+  env->ThrowNew(*clazz, message.c_str());
 }
 
 void JniThrowException(JNIEnv* env, const std::exception& e)

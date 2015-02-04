@@ -38,32 +38,45 @@ JniWebRequest::JniWebRequest(JNIEnv* env, jobject callbackObject)
 {
 }
 
-AdblockPlus::ServerResponse JniWebRequest::GET(const std::string& url, const AdblockPlus::HeaderList& requestHeaders) const
+AdblockPlus::ServerResponse JniWebRequest::GET(const std::string& url,
+    const AdblockPlus::HeaderList& requestHeaders) const
 {
   JNIEnvAcquire env(GetJavaVM());
 
-  jclass clazz = env->GetObjectClass(GetCallbackObject());
-  jmethodID method = env->GetMethodID(clazz, "httpGET", "(Ljava/lang/String;Ljava/util/List;)" TYP("ServerResponse"));
+  jmethodID method = env->GetMethodID(
+      *JniLocalReference<jclass>(*env,
+          env->GetObjectClass(GetCallbackObject())),
+      "httpGET",
+      "(Ljava/lang/String;Ljava/util/List;)" TYP("ServerResponse"));
 
   AdblockPlus::ServerResponse sResponse;
   sResponse.status = AdblockPlus::WebRequest::NS_ERROR_FAILURE;
 
   if (method)
   {
-    jobject arrayList = NewJniArrayList(*env);
+    JniLocalReference<jobject> arrayList(*env, NewJniArrayList(*env));
 
-    for (AdblockPlus::HeaderList::const_iterator it = requestHeaders.begin(), end = requestHeaders.end(); it != end; it++)
+    for (AdblockPlus::HeaderList::const_iterator it = requestHeaders.begin(),
+        end = requestHeaders.end(); it != end; it++)
     {
-      JniAddObjectToList(*env, arrayList, NewTuple(*env, it->first, it->second));
+      JniLocalReference<jobject> tuple(*env,
+          NewTuple(*env, it->first, it->second));
+      JniAddObjectToList(*env, *arrayList, *tuple);
     }
 
-    jobject response = env->CallObjectMethod(GetCallbackObject(), method, env->NewStringUTF(url.c_str()), arrayList);
+    JniLocalReference<jobject> response(*env,
+        env->CallObjectMethod(GetCallbackObject(), method,
+            *JniLocalReference<jstring>(*env, env->NewStringUTF(url.c_str())),
+            *arrayList));
 
     if (!env->ExceptionCheck())
     {
-      sResponse.status = JniGetLongField(*env, serverResponseClass->Get(), response, "status");
-      sResponse.responseStatus = JniGetIntField(*env, serverResponseClass->Get(), response, "responseStatus");
-      sResponse.responseText = JniGetStringField(*env, serverResponseClass->Get(), response, "response");
+      sResponse.status = JniGetLongField(*env, serverResponseClass->Get(),
+          *response, "status");
+      sResponse.responseStatus = JniGetIntField(*env,
+          serverResponseClass->Get(), *response, "responseStatus");
+      sResponse.responseText = JniGetStringField(*env,
+          serverResponseClass->Get(), *response, "response");
       // TODO: transform Headers
     }
   }
@@ -73,10 +86,16 @@ AdblockPlus::ServerResponse JniWebRequest::GET(const std::string& url, const Adb
   return sResponse;
 }
 
-jobject JniWebRequest::NewTuple(JNIEnv* env, const std::string& a, const std::string& b) const
+jobject JniWebRequest::NewTuple(JNIEnv* env, const std::string& a,
+    const std::string& b) const
 {
-  jmethodID factory = env->GetMethodID(tupleClass->Get(), "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
-  return env->NewObject(tupleClass->Get(), factory, env->NewStringUTF(a.c_str()), env->NewStringUTF(b.c_str()));
+  jmethodID factory = env->GetMethodID(tupleClass->Get(), "<init>",
+      "(Ljava/lang/String;Ljava/lang/String;)V");
+
+  JniLocalReference<jstring> strA(env, env->NewStringUTF(a.c_str()));
+  JniLocalReference<jstring> strB(env, env->NewStringUTF(b.c_str()));
+
+  return env->NewObject(tupleClass->Get(), factory, *strA, *strB);
 }
 
 static JNINativeMethod methods[] =
