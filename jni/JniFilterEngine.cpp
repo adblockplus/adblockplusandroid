@@ -118,6 +118,20 @@ static jobject JNICALL JniGetSubscription(JNIEnv* env, jclass clazz, jlong ptr, 
   CATCH_THROW_AND_RETURN(env, 0);
 }
 
+static jobject JNICALL JniGetNextNotificationToShow(JNIEnv* env, jclass clazz, jlong ptr, jstring jUrl)
+{
+  AdblockPlus::FilterEngine* engine = JniLongToTypePtr<AdblockPlus::FilterEngine>(ptr);
+  std::string url = JniJavaToStdString(env, jUrl);
+
+  try
+  {
+    AdblockPlus::NotificationPtr notification = engine->GetNextNotificationToShow(url);
+
+    return NewJniNotification(env, notification);
+  }
+  CATCH_THROW_AND_RETURN(env, 0);
+}
+
 static jobject JNICALL JniGetListedSubscriptions(JNIEnv* env, jclass clazz, jlong ptr)
 {
   AdblockPlus::FilterEngine* engine = JniLongToTypePtr<AdblockPlus::FilterEngine>(ptr);
@@ -340,6 +354,7 @@ static JNINativeMethod methods[] =
   { (char*)"getFilter", (char*)"(JLjava/lang/String;)" TYP("Filter"), (void*)JniGetFilter },
   { (char*)"getListedFilters", (char*)"(J)Ljava/util/List;", (void*)JniGetListedFilters },
   { (char*)"getSubscription", (char*)"(JLjava/lang/String;)" TYP("Subscription"), (void*)JniGetSubscription },
+  { (char*)"getNextNotificationToShow", (char*)"(JLjava/lang/String;)" TYP("Notification"), (void*)JniGetNextNotificationToShow },
   { (char*)"getListedSubscriptions", (char*)"(J)Ljava/util/List;", (void*)JniGetListedSubscriptions },
   { (char*)"fetchAvailableSubscriptions", (char*)"(J)Ljava/util/List;", (void*)JniFetchAvailableSubscriptions },
   { (char*)"setUpdateAvailableCallback", (char*)"(JJ)V", (void*)JniSetUpdateAvailableCallback },

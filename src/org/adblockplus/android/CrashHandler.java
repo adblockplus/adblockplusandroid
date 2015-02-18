@@ -74,7 +74,7 @@ public class CrashHandler implements UncaughtExceptionHandler
     {
       try
       {
-        notificationManager.cancel(ProxyService.ONGOING_NOTIFICATION_ID);
+        notificationManager.cancel(AdblockPlus.ONGOING_NOTIFICATION_ID);
       }
       catch (final Throwable ex)
       {

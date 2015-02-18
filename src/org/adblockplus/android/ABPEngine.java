@@ -27,6 +27,7 @@ import org.adblockplus.libadblockplus.FilterEngine;
 import org.adblockplus.libadblockplus.FilterEngine.ContentType;
 import org.adblockplus.libadblockplus.JsEngine;
 import org.adblockplus.libadblockplus.LogSystem;
+import org.adblockplus.libadblockplus.Notification;
 import org.adblockplus.libadblockplus.Subscription;
 import org.adblockplus.libadblockplus.UpdateAvailableCallback;
 import org.adblockplus.libadblockplus.UpdateCheckDoneCallback;
@@ -279,5 +280,15 @@ public final class ABPEngine
     {
       Utils.updateSubscriptionStatus(this.context, sub);
     }
+  }
+
+  public Notification getNextNotificationToShow(String url)
+  {
+    return this.filterEngine.getNextNotificationToShow(url);
+  }
+
+  public Notification getNextNotificationToShow()
+  {
+    return this.filterEngine.getNextNotificationToShow();
   }
 }

@@ -91,8 +91,7 @@ public final class Utils
     final Notification notification = builder.getNotification();
     final NotificationManager notificationManager =
         (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-    final int updateNotificationId = R.string.app_name + 1;
-    notificationManager.notify(updateNotificationId, notification);
+    notificationManager.notify(AdblockPlus.UPDATE_NOTIFICATION_ID, notification);
   }
 
   protected static void updateSubscriptionStatus(final Context context, final Subscription sub)

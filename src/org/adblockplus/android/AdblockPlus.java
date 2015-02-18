@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.adblockplus.libadblockplus.FilterEngine.ContentType;
+import org.adblockplus.libadblockplus.Notification;
 import org.apache.commons.lang.StringUtils;
 
 import android.app.ActivityManager;
@@ -47,6 +48,10 @@ import android.util.Log;
 
 public class AdblockPlus extends Application
 {
+  public static final int ONGOING_NOTIFICATION_ID = R.string.app_name;
+  public static final int UPDATE_NOTIFICATION_ID = R.string.app_name + 1;
+  public static final int SERVER_NOTIFICATION_ID = R.string.app_name + 2;
+
   private static final String TAG = Utils.getTag(AdblockPlus.class);
 
   private static final Pattern RE_JS = Pattern.compile("\\.js$", Pattern.CASE_INSENSITIVE);
@@ -384,6 +389,23 @@ public class AdblockPlus extends Application
       abpEngine = null;
       Log.i(TAG, "stopEngine");
     }
+  }
+
+  /**
+   * @return Notification to show for the given URL, {@code null} if none
+   *         available
+   */
+  public Notification getNextNotificationToShow(String url)
+  {
+    return this.abpEngine.getNextNotificationToShow(url);
+  }
+
+  /**
+   * @return Notification to show, {@code null} if none available
+   */
+  public Notification getNextNotificationToShow()
+  {
+    return this.abpEngine.getNextNotificationToShow();
   }
 
   /**
