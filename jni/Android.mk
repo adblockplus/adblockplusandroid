@@ -29,6 +29,7 @@ LOCAL_SRC_FILES += JniFilter.cpp JniSubscription.cpp JniEventCallback.cpp
 LOCAL_SRC_FILES += JniLogSystem.cpp JniWebRequest.cpp
 LOCAL_SRC_FILES += JniUpdateAvailableCallback.cpp JniUpdateCheckDoneCallback.cpp
 LOCAL_SRC_FILES += JniFilterChangeCallback.cpp JniCallbacks.cpp Utils.cpp
+LOCAL_SRC_FILES += JniNotification.cpp
 
 LOCAL_CPP_FEATURES := exceptions 
 LOCAL_CFLAGS += -std=gnu++0x

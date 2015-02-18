@@ -122,6 +122,16 @@ public final class FilterEngine implements Disposable
     return getPref(this.ptr, pref);
   }
 
+  public Notification getNextNotificationToShow(String url)
+  {
+    return getNextNotificationToShow(this.ptr, url);
+  }
+
+  public Notification getNextNotificationToShow()
+  {
+    return this.getNextNotificationToShow(null);
+  }
+
   public void setPref(final String pref, final JsValue value)
   {
     setPref(this.ptr, pref, value.ptr);
@@ -182,6 +192,8 @@ public final class FilterEngine implements Disposable
   private final static native Filter matches(long ptr, String url, ContentType contentType, String documentUrl);
 
   private final static native Filter matches(long ptr, String url, ContentType contentType, String[] documentUrls);
+
+  private final static native Notification getNextNotificationToShow(long ptr, String url);
 
   private final static native void setPref(long ptr, String pref, long valuePtr);
 

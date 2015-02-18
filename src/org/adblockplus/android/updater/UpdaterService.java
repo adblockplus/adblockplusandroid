@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.adblockplus.android.AdblockPlus;
 import org.adblockplus.android.R;
 import org.adblockplus.android.Utils;
 
@@ -86,7 +87,6 @@ public class UpdaterService extends Service
     private final Notification notification;
     private final PendingIntent contentIntent;
     private final NotificationManager notificationManager;
-    private final int notificationId = R.string.app_name + 2;
 
     public DownloadTask(final Context context)
     {
@@ -103,7 +103,7 @@ public class UpdaterService extends Service
       notification.when = 0;
       notification.icon = R.drawable.ic_stat_download;
       notification.setLatestEventInfo(context, getString(R.string.app_name), String.format(getString(R.string.msg_update_downloading), 0), contentIntent);
-      notificationManager.notify(notificationId, notification);
+      notificationManager.notify(AdblockPlus.UPDATE_NOTIFICATION_ID, notification);
     }
 
     @Override
@@ -166,13 +166,13 @@ public class UpdaterService extends Service
     protected void onProgressUpdate(final Integer... progress)
     {
       notification.setLatestEventInfo(context, getString(R.string.app_name), String.format(getString(R.string.msg_update_downloading), progress[0]), contentIntent);
-      notificationManager.notify(notificationId, notification);
+      notificationManager.notify(AdblockPlus.UPDATE_NOTIFICATION_ID, notification);
     }
 
     @Override
     protected void onPostExecute(final String result)
     {
-      notificationManager.cancel(notificationId);
+      notificationManager.cancel(AdblockPlus.UPDATE_NOTIFICATION_ID);
       if (result != null)
       {
         final Notification notification = new Notification();
@@ -184,7 +184,7 @@ public class UpdaterService extends Service
         intent.putExtra("path", result);
         final PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         notification.setLatestEventInfo(context, context.getText(R.string.app_name), context.getString(R.string.msg_update_ready), contentIntent);
-        notificationManager.notify(R.string.app_name + 1, notification);
+        notificationManager.notify(AdblockPlus.UPDATE_NOTIFICATION_ID, notification);
       }
     }
   }

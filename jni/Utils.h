@@ -147,8 +147,6 @@ inline T* JniLongToTypePtr(jlong value)
   return reinterpret_cast<T*>((size_t)value);
 }
 
-jobject NewJniArrayList(JNIEnv* env);
-
 std::string JniJavaToStdString(JNIEnv* env, jstring str);
 
 void JniAddObjectToList(JNIEnv* env, jobject list, jobject value);
@@ -173,32 +171,15 @@ inline int64_t JniGetLongField(JNIEnv* env, jclass clazz, jobject jObj, const ch
   return (int64_t)env->GetLongField(jObj, env->GetFieldID(clazz, name, "J"));
 }
 
-inline jobject NewJniFilter(JNIEnv* env, const AdblockPlus::FilterPtr& filter)
-{
-  if (!filter.get())
-  {
-    return 0;
-  }
+jobject NewJniArrayList(JNIEnv* env);
 
-  JniLocalReference<jclass> clazz(env, env->FindClass(PKG("Filter")));
-  jmethodID method = env->GetMethodID(*clazz, "<init>", "(J)V");
-  return env->NewObject(*clazz, method,
-      JniPtrToLong(new AdblockPlus::FilterPtr(filter)));
-}
+jobject NewJniFilter(JNIEnv* env, const AdblockPlus::FilterPtr& filter);
 
-inline jobject NewJniSubscription(JNIEnv* env,
-    const AdblockPlus::SubscriptionPtr& subscription)
-{
-  if (!subscription.get())
-  {
-    return 0;
-  }
+jobject NewJniSubscription(JNIEnv* env,
+    const AdblockPlus::SubscriptionPtr& subscription);
 
-  JniLocalReference<jclass> clazz(env, env->FindClass(PKG("Subscription")));
-  jmethodID method = env->GetMethodID(*clazz, "<init>", "(J)V");
-  return env->NewObject(*clazz, method,
-      JniPtrToLong(new AdblockPlus::SubscriptionPtr(subscription)));
-}
+jobject NewJniNotification(JNIEnv* env,
+    const AdblockPlus::NotificationPtr& notification);
 
 #define CATCH_AND_THROW(jEnv) \
   catch (const std::exception& except) \

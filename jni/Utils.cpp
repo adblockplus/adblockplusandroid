@@ -86,3 +86,39 @@ JNIEnvAcquire::~JNIEnvAcquire()
     javaVM->DetachCurrentThread();
   }
 }
+
+template<typename T>
+static jobject NewJniObject(JNIEnv* env, const T& value, const char* javaClass)
+{
+  if (!value.get())
+  {
+    return 0;
+  }
+
+  JniLocalReference<jclass> clazz(
+      env,
+      env->FindClass(javaClass));
+  jmethodID method = env->GetMethodID(*clazz, "<init>", "(J)V");
+
+  return env->NewObject(
+      *clazz,
+      method,
+      JniPtrToLong(new T(value)));
+}
+
+jobject NewJniFilter(JNIEnv* env, const AdblockPlus::FilterPtr& filter)
+{
+  return NewJniObject(env, filter, PKG("Filter"));
+}
+
+jobject NewJniSubscription(JNIEnv* env,
+    const AdblockPlus::SubscriptionPtr& subscription)
+{
+  return NewJniObject(env, subscription, PKG("Subscription"));
+}
+
+jobject NewJniNotification(JNIEnv* env,
+    const AdblockPlus::NotificationPtr& notification)
+{
+  return NewJniObject(env, notification, PKG("Notification"));
+}
