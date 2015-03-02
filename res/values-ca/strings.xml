@@ -15,7 +15,7 @@
   <string name="crash_dialog_text">Sembla que l\'aplicació ha trobat un problema i s\'ha aturat per força en el llançament anterior. Ens podeu ajudar a adobar-ho si ens envieu un report d\'error fent clic a \"OK\".</string>
   <string name="crash_dialog_comment_prompt">Podeu afegir els vostres comentaris sobre el problema següent:</string>
   <string name="msg_crash_submission_failure">Ha fallat l\'enviament del report de fallada, es provarà una altra vegada més tard.</string>
-  <string name="msg_subscription_offer">S\'ha seleccionat una subscripció  basant-se en la vostra llengua: \"%s\". Les publicitats \'%s\'. &lt;a&gt; acceptables&lt;/a&gt; s\'han habilitat. Ho podeu canviar en les opcions.</string>
+  <string name="msg_subscription_offer">S\'ha seleccionat una subscripció  basant-se en la vostra llengua: \"%s\". &lt;a&gt;Les publicitats acceptables&lt;/a&gt; s\'han habilitat. Ho podeu canviar en les opcions.</string>
   <string name="msg_acceptable_ads">Adblock Plus ara suporta publicitats&lt;/a&gt; acceptables&lt;a&gt; i les ha autoritzat automàticament. Podeu desactivar-ho en les opcions.</string>
   <string name="msg_notraffic">Sembla que no hi ha trànsit que passi per l\'aplicació.</string>
   <string name="msg_configuration">Adblock Plus no pot canviar les opcions del servidor intermediari al vostre dispositiu, configureu-les manualment.</string>
