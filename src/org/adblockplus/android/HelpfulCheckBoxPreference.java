@@ -24,9 +24,7 @@ import android.preference.CheckBoxPreference;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import org.adblockplus.android.R;
 
@@ -39,26 +37,14 @@ public class HelpfulCheckBoxPreference extends CheckBoxPreference
   {
     super(context, attrs);
   }
-
+  
   @Override
   protected void onBindView(final View view)
   {
     super.onBindView(view);
-
-    final ImageView helpImage = new ImageView(getContext());
-    final ViewGroup widgetFrameView = ((ViewGroup) view.findViewById(android.R.id.widget_frame));
-    if (widgetFrameView == null)
-      return;
-    widgetFrameView.setVisibility(View.VISIBLE);
-    final int rightPaddingDip = android.os.Build.VERSION.SDK_INT < 14 ? 8 : 5;
-    final float mDensity = getContext().getResources().getDisplayMetrics().density;
-    if (widgetFrameView instanceof LinearLayout)
-    {
-      ((LinearLayout) widgetFrameView).setOrientation(LinearLayout.HORIZONTAL);
-    }
-    widgetFrameView.addView(helpImage, 0);
-    helpImage.setImageResource(R.drawable.ic_menu_help);
-    helpImage.setPadding(helpImage.getPaddingLeft(), helpImage.getPaddingTop(), (int) (mDensity * rightPaddingDip), helpImage.getPaddingBottom());
+    
+    final ImageView helpImage = (ImageView) view.findViewById(R.id.menu_help);
+    
     helpImage.setOnClickListener(new OnClickListener()
     {
       @Override

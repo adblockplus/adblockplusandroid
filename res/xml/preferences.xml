@@ -15,12 +15,14 @@
         android:key="@string/pref_acceptableads"
         android:summaryOff="@string/pref_acceptableads_summary_off"
         android:summaryOn="@string/pref_acceptableads_summary_on"
-        android:title="@string/pref_acceptableads_title" />
+        android:title="@string/pref_acceptableads_title"
+        android:widgetLayout="@layout/helpfulcheckbox_layout" />
 
     <CheckBoxPreference
         android:key="@string/pref_hideicon"
         android:summaryOff="@string/pref_hideicon_summary_off"
         android:summaryOn="@string/pref_hideicon_summary_on"
-        android:title="@string/pref_hideicon_title" />
+        android:title="@string/pref_hideicon_title"
+        android:widgetLayout="@layout/hideicon_layout" />
 
 </PreferenceScreen>

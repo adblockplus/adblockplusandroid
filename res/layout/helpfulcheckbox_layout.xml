@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content"
+    android:minHeight="?android:attr/listPreferredItemHeight"
+    android:gravity="center_vertical" 
+    android:paddingRight="?android:attr/scrollbarSize"
+    android:orientation="horizontal">
+
+    <RelativeLayout 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" 
+        android:layout_marginLeft="15dip"
+        android:layout_marginRight="6dip" 
+        android:layout_marginTop="6dip"
+        android:layout_marginBottom="6dip" 
+        android:layout_weight="1">
+        
+        <ImageView
+        	android:id="@+id/menu_help"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:src="@drawable/ic_menu_help"
+        	android:layout_toRightOf="@+android:id/summary"
+        	android:layout_centerVertical="true" />
+
+    </RelativeLayout>
+    
+    <CheckBox android:id="@+android:id/checkbox"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:focusable="false"
+		android:clickable="false"/>
+
+</LinearLayout>
+    
+    
+
+
+    
+        
