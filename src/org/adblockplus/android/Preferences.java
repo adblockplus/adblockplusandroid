@@ -41,6 +41,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
+import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.TextUtils;
@@ -70,6 +71,8 @@ public class Preferences extends SummarizedPreferences
   private String subscriptionSummary;
 
   private ServiceBinder serviceBinder = null;
+  
+  static boolean appStart = true;
 
   @Override
   public void onCreate(final Bundle savedInstanceState)
@@ -140,6 +143,13 @@ public class Preferences extends SummarizedPreferences
     final HelpfulCheckBoxPreference acceptableAdsCheckBox =
         (HelpfulCheckBoxPreference) findPreference(getString(R.string.pref_acceptableads));
     acceptableAdsCheckBox.setHelpUrl(AdblockPlus.getApplication().getAcceptableAdsUrl());
+    
+    final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+    final String refresh = prefs.getString(getString(R.string.pref_refresh), "0");
+    
+    if (refresh.equals("1") && appStart) application.refreshSubscriptions();
+	appStart = false;	
+    	
   }
 
   @Override
