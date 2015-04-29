@@ -3,6 +3,14 @@ Adblock Plus for Android
 
 An Android app that runs a proxy to block ads.
 
+Updating the dependencies
+-------------------------
+
+Adblock Plus for Android has dependencies that aren't in this repository.
+To update those, call:
+
+    ./ensure_dependencies.py
+
 Buildling with Ant
 ------------------
 
