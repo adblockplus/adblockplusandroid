@@ -3,4 +3,4 @@ _self = buildtools/ensure_dependencies.py
 buildtools = buildtools hg:2f744887c675 git:96b22c9
 jni/libadblockplus-binaries = libadblockplus-binaries hg:654b9d64b923 git:a549d9b
 submodules/actionbarsherlock = actionbarsherlock hg:eb60aebf769e git:0318374
-submodules/android-switch-backport = android-switch-backport hg:6f2ec8c2269f git:49f080f
+submodules/android-switch-backport = android-switch-backport hg:6f2ec8c2269f git:ed308af
