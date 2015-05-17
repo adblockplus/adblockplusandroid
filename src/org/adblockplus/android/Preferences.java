@@ -70,7 +70,7 @@ public class Preferences extends SummarizedPreferences
   private String subscriptionSummary;
 
   private ServiceBinder serviceBinder = null;
-  
+
   @Override
   public void onCreate(final Bundle savedInstanceState)
   {
@@ -141,7 +141,7 @@ public class Preferences extends SummarizedPreferences
         (HelpfulCheckBoxPreference) findPreference(getString(R.string.pref_acceptableads));
     acceptableAdsCheckBox.setHelpUrl(AdblockPlus.getApplication().getAcceptableAdsUrl());
   }
-    
+  
   @Override
   public void onResume()
   {
