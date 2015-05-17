@@ -483,7 +483,7 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
     final NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
     if (hideIcon && msgId != R.string.notif_waiting)
     {
-      builder.setWhen(POSITION_RIGHT);
+      builder.setWhen(0);
       builder.setSmallIcon(R.drawable.transparent);
     }
     else
