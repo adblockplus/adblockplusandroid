@@ -51,7 +51,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
@@ -225,34 +224,34 @@ public class Preferences extends SummarizedPreferences
 
   private void showNotificationDialog(final String title, String message, String url)
   {
-	  notifTitle = title;
-	  notifMessage = message;
-	  notifUrl = url;
+    notifTitle = title;
+    notifMessage = message;
+    notifUrl = url;
 	  
-	if (!NotifShown){
-		url = TextUtils.htmlEncode(url);
-		message = TextUtils.htmlEncode(message)
-				.replaceAll("&lt;a&gt;(.*?)&lt;/a&gt;", "<a href=\"" + url + "\">$1</a>");
-		final TextView messageView = new TextView(this);
-		messageView.setText(Html.fromHtml(message));
-		messageView.setMovementMethod(LinkMovementMethod.getInstance());
-		final int padding = 10;
-		messageView.setPadding(padding, padding, padding, padding);
-		AlertDialog.Builder b = new AlertDialog.Builder(this);
-		b.setTitle(title)
-		.setView(messageView)
-		.setIcon(android.R.drawable.ic_dialog_info)
-		.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				NotifShown = false;
-				firstRunActionsPending = false;
-			}
-		});
-		b.create().show();
-		NotifShown = true;
+    if (!NotifShown)
+    {
+      url = TextUtils.htmlEncode(url);
+      message = TextUtils.htmlEncode(message)
+        .replaceAll("&lt;a&gt;(.*?)&lt;/a&gt;", "<a href=\"" + url + "\">$1</a>");
+      final TextView messageView = new TextView(this);
+      messageView.setText(Html.fromHtml(message));
+      messageView.setMovementMethod(LinkMovementMethod.getInstance());
+      final int padding = 10;
+      messageView.setPadding(padding, padding, padding, padding);
+      AlertDialog.Builder b = new AlertDialog.Builder(this);
+      b.setTitle(title)
+        .setView(messageView)
+	.setIcon(android.R.drawable.ic_dialog_info)
+	.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+	  public void onClick(DialogInterface dialog, int id) {
+	    NotifShown = false;
+	    firstRunActionsPending = false;
 	  }
+	});
+      b.create().show();
+      NotifShown = true;
+    }
   }
-
 
   @Override
   public void onPause()
@@ -587,17 +586,17 @@ public class Preferences extends SummarizedPreferences
   @Override
   protected void onRestoreInstanceState(final Bundle state)
   {
-	  super.onRestoreInstanceState(state);
-	  subscriptionSummary = state.getString("subscriptionSummary");
+    super.onRestoreInstanceState(state);
+    subscriptionSummary = state.getString("subscriptionSummary");
     
     NotifShown = state.getBoolean("NotifShown");
-    if (NotifShown){
-    	NotifShown = false;
-    	notifTitle = state.getString("notifTitle");
-    	notifMessage = state.getString("notifMessage");
-    	notifUrl = state.getString("notifUrl");
-    	
-    	showNotificationDialog(notifTitle,notifMessage,notifUrl);
+    if (NotifShown)
+    {
+      NotifShown = false;
+      notifTitle = state.getString("notifTitle");
+      notifMessage = state.getString("notifMessage");
+      notifUrl = state.getString("notifUrl");
+      showNotificationDialog(notifTitle,notifMessage,notifUrl);
     }
   }
 
@@ -605,11 +604,12 @@ public class Preferences extends SummarizedPreferences
   protected void onSaveInstanceState(final Bundle outState)
   {
     outState.putString("subscriptionSummary", subscriptionSummary);
-    if (NotifShown){
-    	outState.putBoolean("NotifShown", NotifShown);
-    	outState.putString("notifTitle",notifTitle);
-    	outState.putString("notifMessage",notifMessage);
-    	outState.putString("notifUrl",notifUrl);
+    if (NotifShown)
+    {
+      outState.putBoolean("NotifShown", NotifShown);
+      outState.putString("notifTitle",notifTitle);
+      outState.putString("notifMessage",notifMessage);
+      outState.putString("notifUrl",notifUrl);
     }
     super.onSaveInstanceState(outState);
   }
