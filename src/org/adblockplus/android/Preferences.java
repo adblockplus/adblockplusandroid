@@ -72,7 +72,7 @@ public class Preferences extends SummarizedPreferences
 
   private ServiceBinder serviceBinder = null;
   
-  static boolean appStart = true;
+  static boolean firstApplicationStart = true;
 
   @Override
   public void onCreate(final Bundle savedInstanceState)
@@ -147,8 +147,11 @@ public class Preferences extends SummarizedPreferences
     final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
     final String refresh = prefs.getString(getString(R.string.pref_refresh), "0");
     
-    if (refresh.equals("1") && appStart) application.refreshSubscriptions();
-	appStart = false;	
+    if (refresh.equals("1") && firstApplicationStart)
+    {
+      application.refreshSubscriptions();
+    }
+    firstApplicationStart = false;	
     	
   }
 
