@@ -39,11 +39,10 @@ public class TransparentProxyHandler implements Handler
   @Override
   public boolean respond(final Request request) throws IOException
   {
-    if (!request.url.contains("://"))
+    if (!RequestHandler.RE_HTTP.matcher(request.url).find())
     {
       request.url = "http://" + request.headers.get("host") + request.url;
     }
     return false;
   }
-
 }

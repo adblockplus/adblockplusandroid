@@ -85,7 +85,7 @@ public class RequestHandler extends BaseRequestHandler
 {
   private AdblockPlus application;
   private String via;
-  private static final Pattern RE_HTTP = Pattern.compile("^https?:");
+  static final Pattern RE_HTTP = Pattern.compile("^https?:");
 
   private static final AtomicLong BLOCKED_REQUESTS = new AtomicLong();
   private static final AtomicLong UNBLOCKED_REQUESTS = new AtomicLong();
