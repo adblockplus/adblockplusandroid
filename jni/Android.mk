@@ -3,21 +3,21 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := libadblockplus
-LOCAL_SRC_FILES := ./libadblockplus-binaries/android_armeabi-v7a/libadblockplus.a
+LOCAL_SRC_FILES := ./libadblockplus-binaries/android_$(TARGET_ARCH_ABI)/libadblockplus.a
 
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := v8-base
-LOCAL_SRC_FILES := ./libadblockplus-binaries/android_armeabi-v7a/libv8_base.a
+LOCAL_SRC_FILES := ./libadblockplus-binaries/android_$(TARGET_ARCH_ABI)/libv8_base.a
 
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := v8-snapshot
-LOCAL_SRC_FILES := ./libadblockplus-binaries/android_armeabi-v7a/libv8_snapshot.a
+LOCAL_SRC_FILES := ./libadblockplus-binaries/android_$(TARGET_ARCH_ABI)/libv8_snapshot.a
 
 include $(PREBUILT_STATIC_LIBRARY)
 
