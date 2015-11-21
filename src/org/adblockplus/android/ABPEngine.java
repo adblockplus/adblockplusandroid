@@ -27,7 +27,7 @@ import org.adblockplus.libadblockplus.FilterEngine;
 import org.adblockplus.libadblockplus.FilterEngine.ContentType;
 import org.adblockplus.libadblockplus.JsEngine;
 import org.adblockplus.libadblockplus.LogSystem;
-import org.adblockplus.libadblockplus.Notification;
+import org.adblockplus.libadblockplus.ShowNotificationCallback;
 import org.adblockplus.libadblockplus.Subscription;
 import org.adblockplus.libadblockplus.UpdateAvailableCallback;
 import org.adblockplus.libadblockplus.UpdateCheckDoneCallback;
@@ -62,6 +62,7 @@ public final class ABPEngine
   private volatile UpdateAvailableCallback updateAvailableCallback;
   private volatile UpdateCheckDoneCallback updateCheckDoneCallback;
   private volatile FilterChangeCallback filterChangeCallback;
+  private volatile ShowNotificationCallback showNotificationCallback;
 
   private ABPEngine(final Context context)
   {
@@ -118,6 +119,9 @@ public final class ABPEngine
 
     engine.updateCheckDoneCallback = new AndroidUpdateCheckDoneCallback(context);
 
+    engine.showNotificationCallback = new AndroidShowNotificationCallback(context);
+    engine.filterEngine.setShowNotificationCallback(engine.showNotificationCallback);
+
     return engine;
   }
 
@@ -164,6 +168,12 @@ public final class ABPEngine
     {
       this.filterChangeCallback.dispose();
       this.filterChangeCallback = null;
+    }
+
+    if (this.showNotificationCallback != null)
+    {
+      this.showNotificationCallback.dispose();
+      this.showNotificationCallback = null;
     }
   }
 
@@ -280,15 +290,5 @@ public final class ABPEngine
     {
       Utils.updateSubscriptionStatus(this.context, sub);
     }
-  }
-
-  public Notification getNextNotificationToShow(String url)
-  {
-    return this.filterEngine.getNextNotificationToShow(url);
-  }
-
-  public Notification getNextNotificationToShow()
-  {
-    return this.filterEngine.getNextNotificationToShow();
   }
 }

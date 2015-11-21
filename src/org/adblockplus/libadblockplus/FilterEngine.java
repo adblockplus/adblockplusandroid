@@ -107,6 +107,26 @@ public final class FilterEngine implements Disposable
     return getElementHidingSelectors(this.ptr, domain);
   }
 
+  public void showNextNotification(final String url)
+  {
+    showNextNotification(this.ptr, url);
+  }
+
+  public void showNextNotification()
+  {
+    showNextNotification(this.ptr, null);
+  }
+
+  public void setShowNotificationCallback(final ShowNotificationCallback callback)
+  {
+    setShowNotificationCallback(this.ptr, callback.ptr);
+  }
+
+  public void removeShowNotificationCallback()
+  {
+    removeShowNotificationCallback(this.ptr);
+  }
+
   public Filter matches(final String url, final ContentType contentType, final String documentUrl)
   {
     return matches(this.ptr, url, contentType, documentUrl);
@@ -120,16 +140,6 @@ public final class FilterEngine implements Disposable
   public JsValue getPref(final String pref)
   {
     return getPref(this.ptr, pref);
-  }
-
-  public Notification getNextNotificationToShow(String url)
-  {
-    return getNextNotificationToShow(this.ptr, url);
-  }
-
-  public Notification getNextNotificationToShow()
-  {
-    return this.getNextNotificationToShow(null);
   }
 
   public void setPref(final String pref, final JsValue value)
@@ -187,13 +197,17 @@ public final class FilterEngine implements Disposable
 
   private final static native List<String> getElementHidingSelectors(long ptr, String domain);
 
+  private final static native void showNextNotification(long ptr, String url);
+
+  private final static native void setShowNotificationCallback(long ptr, long callbackPtr);
+
+  private final static native void removeShowNotificationCallback(long ptr);
+
   private final static native JsValue getPref(long ptr, String pref);
 
   private final static native Filter matches(long ptr, String url, ContentType contentType, String documentUrl);
 
   private final static native Filter matches(long ptr, String url, ContentType contentType, String[] documentUrls);
-
-  private final static native Notification getNextNotificationToShow(long ptr, String url);
 
   private final static native void setPref(long ptr, String pref, long valuePtr);
 

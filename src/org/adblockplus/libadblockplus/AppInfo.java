@@ -19,7 +19,6 @@ package org.adblockplus.libadblockplus;
 
 public class AppInfo
 {
-  public final String id;
   public final String version;
   public final String name;
   public final String application;
@@ -27,10 +26,9 @@ public class AppInfo
   public final String locale;
   public final boolean developmentBuild;
 
-  private AppInfo(final String id, final String version, final String name, final String application, final String applicationVersion,
+  private AppInfo(final String version, final String name, final String application, final String applicationVersion,
       final String locale, final boolean developmentBuild)
   {
-    this.id = id;
     this.version = version;
     this.name = name;
     this.application = application;
@@ -46,7 +44,6 @@ public class AppInfo
 
   public static class Builder
   {
-    private String id = "";
     private String version = "0";
     private String name = "adblockplusandroid";
     private String application = "android";
@@ -57,12 +54,6 @@ public class AppInfo
     private Builder()
     {
 
-    }
-
-    public Builder setId(final String id)
-    {
-      this.id = id;
-      return this;
     }
 
     public Builder setVersion(final String version)
@@ -103,7 +94,7 @@ public class AppInfo
 
     public AppInfo build()
     {
-      return new AppInfo(this.id, this.version, this.name, this.application, this.applicationVersion, this.locale, this.developmentBuild);
+      return new AppInfo(this.version, this.name, this.application, this.applicationVersion, this.locale, this.developmentBuild);
     }
   }
 }

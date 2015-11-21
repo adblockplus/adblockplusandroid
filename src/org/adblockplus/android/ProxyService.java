@@ -26,7 +26,6 @@ import java.util.Properties;
 import org.adblockplus.android.configurators.ProxyConfigurator;
 import org.adblockplus.android.configurators.ProxyConfigurators;
 import org.adblockplus.android.configurators.ProxyRegistrationType;
-import org.adblockplus.libadblockplus.Notification.Type;
 import org.apache.commons.lang.StringUtils;
 
 import sunlabs.brazil.server.Server;
@@ -91,8 +90,6 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   private final Properties proxyConfiguration = new Properties();
 
   private ProxyConfigurator proxyConfigurator = null;
-
-  private NotificationWatcher notificationWatcher = null;
 
   @SuppressLint("NewApi")
   @Override
@@ -225,8 +222,6 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
 
     sendStateChangedBroadcast();
 
-    this.startNotificationWatcher();
-
     Log.i(TAG, "Service started");
   }
 
@@ -240,8 +235,6 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
   public void onDestroy()
   {
     super.onDestroy();
-
-    this.stopNotificationWatcher();
 
     unregisterReceiver(this.proxyReceiver);
     unregisterReceiver(this.proxyStateChangedReceiver);
@@ -599,122 +592,6 @@ public class ProxyService extends Service implements OnSharedPreferenceChangeLis
       if (level <= logLevel)
       {
         Log.println(7 - level, obj != null ? obj.toString() : TAG, message);
-      }
-    }
-  }
-
-  private void startNotificationWatcher()
-  {
-    this.stopNotificationWatcher();
-
-    this.notificationWatcher = new NotificationWatcher(this);
-
-    final Thread thread = new Thread(this.notificationWatcher);
-    thread.setDaemon(true);
-    thread.start();
-  }
-
-  private void stopNotificationWatcher()
-  {
-    if (this.notificationWatcher != null)
-    {
-      this.notificationWatcher.stop();
-      this.notificationWatcher = null;
-    }
-  }
-
-  private static class NotificationWatcher implements Runnable
-  {
-    public static final int DEFAULT_POLL_DELAY = 3 * 60; /* seconds */
-    public static final int DEFAULT_POLL_INTERVAL = 0; /* seconds */
-
-    private final ProxyService proxyService;
-    private final int pollDelay;
-    private final int pollInterval;
-
-    volatile boolean running = true;
-
-    public NotificationWatcher(final ProxyService proxyService, final int pollDelay,
-        final int pollInterval)
-    {
-      this.proxyService = proxyService;
-      this.pollDelay = Math.max(0, pollDelay);
-      this.pollInterval = Math.max(0, pollInterval);
-    }
-
-    public NotificationWatcher(final ProxyService proxyService)
-    {
-      this(proxyService, DEFAULT_POLL_DELAY, DEFAULT_POLL_INTERVAL);
-    }
-
-    protected void stop()
-    {
-      this.running = false;
-    }
-
-    @Override
-    public void run()
-    {
-      if (this.pollDelay == 0)
-      {
-        this.running = false;
-        return;
-      }
-
-      long nextPoll = System.currentTimeMillis() + 1000L * this.pollDelay;
-
-      while (this.running)
-      {
-        try
-        {
-          Thread.sleep(250);
-        }
-        catch (InterruptedException ex)
-        {
-          break;
-        }
-
-        if (System.currentTimeMillis() >= nextPoll && this.running)
-        {
-          try
-          {
-            Log.d(TAG, "Polling for notifications");
-            org.adblockplus.libadblockplus.Notification notification =
-                AdblockPlus.getApplication().getNextNotificationToShow();
-
-            while (notification != null
-                && (notification.getType() == Type.INVALID || notification.getType() == Type.QUESTION))
-            {
-              notification = AdblockPlus.getApplication().getNextNotificationToShow();
-            }
-
-            if (notification != null)
-            {
-              final NotificationManager notificationManager = (NotificationManager) this.proxyService
-                  .getSystemService(NOTIFICATION_SERVICE);
-
-              notificationManager.notify(AdblockPlus.SERVER_NOTIFICATION_ID,
-                  new NotificationCompat.Builder(this.proxyService.getApplicationContext())
-                      .setSmallIcon(R.drawable.ic_stat_blocking)
-                      .setContentTitle(notification.getTitle())
-                      .setContentText(notification.getMessageString())
-                      .getNotification());
-            }
-          }
-          catch (Exception ex)
-          {
-            Log.e(TAG, "Polling for notifications failed: " + ex.getMessage(), ex);
-          }
-
-          if (this.pollInterval == 0)
-          {
-            this.running = false;
-          }
-          else
-          {
-            nextPoll = System.currentTimeMillis() + 1000L * this.pollInterval;
-          }
-        }
       }
     }
   }

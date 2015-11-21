@@ -392,23 +392,6 @@ public class AdblockPlus extends Application
   }
 
   /**
-   * @return Notification to show for the given URL, {@code null} if none
-   *         available
-   */
-  public Notification getNextNotificationToShow(String url)
-  {
-    return this.abpEngine.getNextNotificationToShow(url);
-  }
-
-  /**
-   * @return Notification to show, {@code null} if none available
-   */
-  public Notification getNextNotificationToShow()
-  {
-    return this.abpEngine.getNextNotificationToShow();
-  }
-
-  /**
    * Initiates immediate interactive check for available update.
    */
   public void checkUpdates()

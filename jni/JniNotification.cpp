@@ -67,7 +67,7 @@ static jstring JniGetTitle(JNIEnv* env, jclass clazz, jlong ptr)
 {
   try
   {
-    return env->NewStringUTF(GetNotificationPtr(ptr)->GetTitle().c_str());
+    return env->NewStringUTF(GetNotificationPtr(ptr)->GetTexts().title.c_str());
   }
   CATCH_THROW_AND_RETURN(env, 0)
 }
@@ -76,7 +76,7 @@ static jstring JniGetMessageString(JNIEnv* env, jclass clazz, jlong ptr)
 {
   try
   {
-    return env->NewStringUTF(GetNotificationPtr(ptr)->GetMessageString().c_str());
+    return env->NewStringUTF(GetNotificationPtr(ptr)->GetTexts().message.c_str());
   }
   CATCH_THROW_AND_RETURN(env, 0)
 }

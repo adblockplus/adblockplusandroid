@@ -87,6 +87,16 @@ private:
   const JniGlobalReference<jclass>::Ptr logLevelClass;
 };
 
+class JniShowNotificationCallback : public JniCallbackBase
+{
+public:
+  JniShowNotificationCallback(JNIEnv* env, jobject callbackObject);
+  void Callback(const AdblockPlus::NotificationPtr&);
+
+private:
+  const JniGlobalReference<jclass>::Ptr notificationClass;
+};
+
 class JniWebRequest : public JniCallbackBase, public AdblockPlus::WebRequest
 {
 public:

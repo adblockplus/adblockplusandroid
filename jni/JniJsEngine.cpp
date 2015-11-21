@@ -25,7 +25,6 @@ static void TransformAppInfo(JNIEnv* env, jobject jAppInfo, AdblockPlus::AppInfo
 
   appInfo.application = JniGetStringField(env, clazz, jAppInfo, "application");
   appInfo.applicationVersion = JniGetStringField(env, clazz, jAppInfo, "applicationVersion");
-  appInfo.id = JniGetStringField(env, clazz, jAppInfo, "id");
   appInfo.locale = JniGetStringField(env, clazz, jAppInfo, "locale");
   appInfo.name = JniGetStringField(env, clazz, jAppInfo, "name");
   appInfo.version = JniGetStringField(env, clazz, jAppInfo, "version");
@@ -57,7 +56,7 @@ static void JNICALL JniSetEventCallback(JNIEnv* env, jclass clazz, jlong ptr, js
 
   JniEventCallback* callback = JniLongToTypePtr<JniEventCallback>(jCallbackPtr);
   std::string eventName = JniJavaToStdString(env, jEventName);
-  AdblockPlus::JsEngine::EventCallback eCallback = std::tr1::bind(&JniEventCallback::Callback, callback, std::tr1::placeholders::_1);
+  AdblockPlus::JsEngine::EventCallback eCallback = std::bind(&JniEventCallback::Callback, callback, std::placeholders::_1);
 
   try
   {

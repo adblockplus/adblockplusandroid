@@ -22,9 +22,9 @@
 #include <algorithm>
 #include <jni.h>
 #include <stdexcept>
+#include <memory>
 
 #include <AdblockPlus.h>
-#include <AdblockPlus/tr1_memory.h>
 
 #define PKG(x) "org/adblockplus/libadblockplus/" x
 #define TYP(x) "L" PKG(x) ";"
@@ -120,7 +120,7 @@ public:
     return reference;
   }
 
-  typedef std::tr1::shared_ptr<JniGlobalReference<T> > Ptr;
+  typedef std::shared_ptr<JniGlobalReference<T> > Ptr;
 
 private:
   T reference;
