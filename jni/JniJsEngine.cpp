@@ -248,9 +248,9 @@ static JNINativeMethod methods[] =
   { (char*)"setWebRequest", (char*)"(JJ)V", (void*)JniSetWebRequest },
   { (char*)"setDefaultWebRequest", (char*)"(J)V", (void*)JniSetDefaultWebRequest },
 
-  { (char*)"newValue", (char*)"(JJ)"TYP("JsValue"), (void*)JniNewLongValue },
-  { (char*)"newValue", (char*)"(JZ)"TYP("JsValue"), (void*)JniNewBooleanValue },
-  { (char*)"newValue", (char*)"(JLjava/lang/String;)"TYP("JsValue"), (void*)JniNewStringValue }
+  { (char*)"newValue", (char*)"(JJ)" TYP("JsValue"), (void*)JniNewLongValue },
+  { (char*)"newValue", (char*)"(JZ)" TYP("JsValue"), (void*)JniNewBooleanValue },
+  { (char*)"newValue", (char*)"(JLjava/lang/String;)" TYP("JsValue"), (void*)JniNewStringValue }
 };
 
 extern "C" JNIEXPORT void JNICALL Java_org_adblockplus_libadblockplus_JsEngine_registerNatives(JNIEnv *env, jclass clazz)
