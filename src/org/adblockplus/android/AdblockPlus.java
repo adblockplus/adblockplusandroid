@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.adblockplus.libadblockplus.FilterEngine.ContentType;
-import org.adblockplus.libadblockplus.Notification;
 import org.apache.commons.lang.StringUtils;
 
 import android.app.ActivityManager;
