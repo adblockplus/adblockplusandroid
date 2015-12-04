@@ -311,6 +311,24 @@ static jobject JNICALL JniMatches(JNIEnv* env, jclass clazz, jlong ptr, jstring 
   CATCH_THROW_AND_RETURN(env, 0)
 }
 
+static void JavaStringArrayToStringVector(JNIEnv* env, jobjectArray jArray,
+    std::vector<std::string>& out)
+{
+  if (jArray)
+  {
+    jsize len = env->GetArrayLength(jArray);
+
+    for (jsize i = 0; i < len; i++)
+    {
+      out.push_back(
+          JniJavaToStdString(env,
+              *JniLocalReference<jstring>(env,
+                  static_cast<jstring>(
+                      env->GetObjectArrayElement(jArray, i)))));
+    }
+  }
+}
+
 static jobject JNICALL JniMatchesMany(JNIEnv* env, jclass clazz, jlong ptr,
     jstring jUrl, jobject jContentType, jobjectArray jDocumentUrls)
 {
@@ -322,17 +340,7 @@ static jobject JNICALL JniMatchesMany(JNIEnv* env, jclass clazz, jlong ptr,
       ConvertContentType(env, jContentType);
 
   std::vector<std::string> documentUrls;
-
-  jsize len = env->GetArrayLength(jDocumentUrls);
-
-  for (jsize i = 0; i < len; i++)
-  {
-    documentUrls.push_back(
-        JniJavaToStdString(env,
-            *JniLocalReference<jstring>(env,
-                static_cast<jstring>(env->GetObjectArrayElement(jDocumentUrls,
-                    i)))));
-  }
+  JavaStringArrayToStringVector(env, jDocumentUrls, documentUrls);
 
   try
   {
@@ -342,6 +350,40 @@ static jobject JNICALL JniMatchesMany(JNIEnv* env, jclass clazz, jlong ptr,
     return NewJniFilter(env, filter);
   }
   CATCH_THROW_AND_RETURN(env, 0)
+}
+
+static jboolean JNICALL JniIsDocumentWhitelisted(JNIEnv* env, jclass clazz, jlong ptr,
+    jstring jUrl, jobjectArray jDocumentUrls)
+{
+  AdblockPlus::FilterEngine* engine =
+      JniLongToTypePtr<AdblockPlus::FilterEngine>(ptr);
+
+  std::string url = JniJavaToStdString(env, jUrl);
+  std::vector<std::string> documentUrls;
+  JavaStringArrayToStringVector(env, jDocumentUrls, documentUrls);
+  try
+  {
+    return engine->IsDocumentWhitelisted(url, documentUrls) ?
+        JNI_TRUE : JNI_FALSE;
+  }
+  CATCH_THROW_AND_RETURN(env, JNI_FALSE)
+}
+
+static jboolean JNICALL JniIsElemhideWhitelisted(JNIEnv* env, jclass clazz, jlong ptr,
+    jstring jUrl, jobjectArray jDocumentUrls)
+{
+  AdblockPlus::FilterEngine* engine =
+      JniLongToTypePtr<AdblockPlus::FilterEngine>(ptr);
+
+  std::string url = JniJavaToStdString(env, jUrl);
+  std::vector<std::string> documentUrls;
+  JavaStringArrayToStringVector(env, jDocumentUrls, documentUrls);
+  try
+  {
+    return engine->IsElemhideWhitelisted(url, documentUrls) ?
+        JNI_TRUE : JNI_FALSE;
+  }
+  CATCH_THROW_AND_RETURN(env, JNI_FALSE)
 }
 
 static jobject JNICALL JniGetPref(JNIEnv* env, jclass clazz, jlong ptr, jstring jPref)
@@ -393,6 +435,8 @@ static JNINativeMethod methods[] =
   { (char*)"getElementHidingSelectors", (char*)"(JLjava/lang/String;)Ljava/util/List;", (void*)JniGetElementHidingSelectors },
   { (char*)"matches", (char*)"(JLjava/lang/String;" TYP("FilterEngine$ContentType") "Ljava/lang/String;)" TYP("Filter"), (void*)JniMatches },
   { (char*)"matches", (char*)"(JLjava/lang/String;" TYP("FilterEngine$ContentType") "[Ljava/lang/String;)" TYP("Filter"), (void*)JniMatchesMany },
+  { (char*)"isDocumentWhitelisted", (char*)"(JLjava/lang/String;[Ljava/lang/String;)Z", (void*)JniIsDocumentWhitelisted },
+  { (char*)"isElemhideWhitelisted", (char*)"(JLjava/lang/String;[Ljava/lang/String;)Z", (void*)JniIsElemhideWhitelisted },
   { (char*)"getPref", (char*)"(JLjava/lang/String;)" TYP("JsValue"), (void*)JniGetPref },
   { (char*)"setPref", (char*)"(JLjava/lang/String;J)V", (void*)JniSetPref },
   { (char*)"dtor", (char*)"(J)V", (void*)JniDtor }

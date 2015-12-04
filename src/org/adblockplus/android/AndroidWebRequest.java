@@ -38,6 +38,17 @@ public class AndroidWebRequest extends WebRequest
   public final static String TAG = Utils.getTag(WebRequest.class);
 
   private final HashSet<String> subscriptionURLs = new HashSet<String>();
+  private final boolean elemhideEnabled;
+
+  AndroidWebRequest(boolean enableElemhide)
+  {
+    this.elemhideEnabled = enableElemhide;
+  }
+
+  AndroidWebRequest()
+  {
+    this(false);
+  }
 
   private boolean isListedSubscriptionUrl(final URL url)
   {
@@ -81,7 +92,7 @@ public class AndroidWebRequest extends WebRequest
         final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
         final StringBuilder sb = new StringBuilder();
 
-        if (isListedSubscriptionUrl(url))
+        if (!this.elemhideEnabled && isListedSubscriptionUrl(url))
         {
           Log.d(TAG, "Removing element hiding rules from: '" + url + "'");
 

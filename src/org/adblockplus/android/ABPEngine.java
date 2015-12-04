@@ -17,6 +17,7 @@
 
 package org.adblockplus.android;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -63,10 +64,12 @@ public final class ABPEngine
   private volatile UpdateCheckDoneCallback updateCheckDoneCallback;
   private volatile FilterChangeCallback filterChangeCallback;
   private volatile ShowNotificationCallback showNotificationCallback;
+  private final boolean elemhideEnabled;
 
-  private ABPEngine(final Context context)
+  private ABPEngine(final Context context, final boolean enableElemhide)
   {
     this.context = context;
+    this.elemhideEnabled = enableElemhide;
   }
 
   public static AppInfo generateAppInfo(final Context context)
@@ -97,7 +100,12 @@ public final class ABPEngine
 
   public static ABPEngine create(final Context context, final AppInfo appInfo, final String basePath)
   {
-    final ABPEngine engine = new ABPEngine(context);
+    return create(context, appInfo, basePath, false);
+  }
+
+  public static ABPEngine create(final Context context, final AppInfo appInfo, final String basePath, boolean enableElemhide)
+  {
+    final ABPEngine engine = new ABPEngine(context, enableElemhide);
 
     engine.jsEngine = new JsEngine(appInfo);
     engine.jsEngine.setDefaultFileSystem(basePath);
@@ -105,7 +113,7 @@ public final class ABPEngine
     engine.logSystem = new AndroidLogSystem();
     engine.jsEngine.setLogSystem(engine.logSystem);
 
-    engine.webRequest = new AndroidWebRequest();
+    engine.webRequest = new AndroidWebRequest(enableElemhide);
     engine.jsEngine.setWebRequest(engine.webRequest);
 
     engine.filterEngine = new FilterEngine(engine.jsEngine);
@@ -180,6 +188,11 @@ public final class ABPEngine
   public boolean isFirstRun()
   {
     return this.filterEngine.isFirstRun();
+  }
+
+  public boolean isElemhideEnabled()
+  {
+    return this.elemhideEnabled;
   }
 
   private static org.adblockplus.android.Subscription convertJsSubscription(final Subscription jsSubscription)
@@ -278,6 +291,41 @@ public final class ABPEngine
     return filter.getType() != Filter.Type.EXCEPTION;
   }
 
+  public boolean isDocumentWhitelisted(final String url, final String[] referrerChainArray)
+  {
+    return this.filterEngine.isDocumentWhitelisted(url, referrerChainArray);
+  }
+
+  public boolean isElemhideWhitelisted(final String url, final String[] referrerChainArray)
+  {
+    return this.filterEngine.isElemhideWhitelisted(url, referrerChainArray);
+  }
+
+  public List<String> getElementHidingSelectors(final String url, final String[] referrerChainArray)
+  {
+    /*
+     * Issue 3364 (https://issues.adblockplus.org/ticket/3364) introduced the
+     * feature to re-enabled element hiding.
+     *
+     * Nothing changes for Adblock Plus for Android, as `this.elemhideEnabled`
+     * is `false`, which results in an empty list being returned and converted
+     * into a `(String[])null` in AdblockPlus.java, which is the only place
+     * this function here is called from Adblock Plus for Android.
+     *
+     * If element hiding is enabled, then this function now first checks for
+     * possible whitelisting of either the document or element hiding for
+     * the given URL and returns an empty list if so. This is needed to
+     * ensure correct functioning of e.g. acceptable ads.
+     */
+    if (!this.elemhideEnabled
+        || this.isDocumentWhitelisted(url, referrerChainArray)
+        || this.isElemhideWhitelisted(url, referrerChainArray))
+    {
+      return new ArrayList<String>();
+    }
+    return this.filterEngine.getElementHidingSelectors(url);
+  }
+
   public void checkForUpdates()
   {
     this.filterEngine.forceUpdateCheck(this.updateCheckDoneCallback);
@@ -290,5 +338,10 @@ public final class ABPEngine
     {
       Utils.updateSubscriptionStatus(this.context, sub);
     }
+  }
+
+  public FilterEngine getFilterEngine()
+  {
+    return this.filterEngine;
   }
 }

@@ -269,27 +269,42 @@ public class AdblockPlus extends Application
   }
 
   /**
-   * Returns ElemHide selectors for domain.
+   * Returns ElemHide selectors for the supplied URL.
    *
-   * @param domain The domain
+   * @param url The URL
    * @return A list of CSS selectors
    */
-  public String[] getSelectorsForDomain(final String domain)
+  public String[] getSelectorsForDomain(final String url, String referrer)
   {
-    /* We need to ignore element hiding rules here to work around two bugs:
-     * 1. CSS is being injected even when there's an exception rule with $elemhide
-     * 2. The injected CSS causes blank pages in Chrome for Android
-     *
-     * Starting with 1.1.2, we ignored element hiding rules after download anyway, to keep the
-     * memory usage down. Doing this with libadblockplus is trickier, but would be the clean
-     * solution. */
-    return null;
-/*
-    if (!filteringEnabled)
+    if (this.abpEngine.isElemhideEnabled() && this.filteringEnabled)
+    {
+      if (referrer != null)
+      {
+        this.referrerMapping.add(url, referrer);
+      }
+      final List<String> referrerChain = this.referrerMapping.buildReferrerChain(referrer);
+      final String[] referrerChainArray = referrerChain.toArray(new String[referrerChain.size()]);
+      final List<String> selectors = this.abpEngine.getElementHidingSelectors(url, referrerChainArray);
+      // We're returning 'null' when no selectors are available to be consistent
+      // with the previous implementation
+      return selectors.isEmpty() ? null : selectors.toArray(new String[selectors.size()]);
+    }
+    else
+    {
+      /*
+       * This case is still the default for Adblock Plus for Android, as we did not yet
+       * re-enable element hiding but only enhanced/fixed the current implementation.
+       * See: https://issues.adblockplus.org/ticket/3364
+       */
+      /* We need to ignore element hiding rules here to work around two bugs:
+       * 1. CSS is being injected even when there's an exception rule with $elemhide
+       * 2. The injected CSS causes blank pages in Chrome for Android
+       *
+       * Starting with 1.1.2, we ignored element hiding rules after download anyway, to keep the
+       * memory usage down. Doing this with libadblockplus is trickier, but would be the clean
+       * solution. */
       return null;
-
-    return abpEngine.getSelectorsForDomain(domain);
-*/
+    }
   }
 
   /**

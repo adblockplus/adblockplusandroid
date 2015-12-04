@@ -137,6 +137,16 @@ public final class FilterEngine implements Disposable
     return matches(this.ptr, url, contentType, documentUrls);
   }
 
+  public boolean isDocumentWhitelisted(String url, String[] documentUrls)
+  {
+    return isDocumentWhitelisted(this.ptr, url, documentUrls);
+  }
+
+  public boolean isElemhideWhitelisted(String url, String[] documentUrls)
+  {
+    return isElemhideWhitelisted(this.ptr, url, documentUrls);
+  }
+
   public JsValue getPref(final String pref)
   {
     return getPref(this.ptr, pref);
@@ -208,6 +218,10 @@ public final class FilterEngine implements Disposable
   private final static native Filter matches(long ptr, String url, ContentType contentType, String documentUrl);
 
   private final static native Filter matches(long ptr, String url, ContentType contentType, String[] documentUrls);
+
+  private final static native boolean isDocumentWhitelisted(long ptr, String url, String[] documentUrls);
+
+  private final static native boolean isElemhideWhitelisted(long ptr, String url, String[] documentUrls);
 
   private final static native void setPref(long ptr, String pref, long valuePtr);
 

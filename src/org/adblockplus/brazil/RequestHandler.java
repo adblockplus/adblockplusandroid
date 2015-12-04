@@ -116,9 +116,10 @@ public class RequestHandler extends BaseRequestHandler
   {
     boolean block = false;
 
+    final String referrer = request.getRequestHeader("referer");
     try
     {
-      block = application.matches(request.url, request.query, request.getRequestHeader("referer"), request.getRequestHeader("accept"));
+      block = application.matches(request.url, request.query, referrer, request.getRequestHeader("accept"));
     }
     catch (final Exception e)
     {
@@ -230,7 +231,7 @@ public class RequestHandler extends BaseRequestHandler
           // We are transparent, it's not our deal if it's malformed.
         }
 
-        selectors = application.getSelectorsForDomain(reqHost);
+        selectors = application.getSelectorsForDomain(reqHost, referrer);
       }
       // If no filters are applicable just pass through the response
       if (selectors == null || target.getResponseCode() != 200)
