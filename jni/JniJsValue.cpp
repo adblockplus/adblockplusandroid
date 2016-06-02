@@ -37,6 +37,15 @@ static jboolean JNICALL JniIsNull(JNIEnv* env, jclass clazz, jlong ptr)
   CATCH_THROW_AND_RETURN(env, JNI_FALSE)
 }
 
+static jboolean JNICALL JniIsNumber(JNIEnv* env, jclass clazz, jlong ptr)
+{
+  try
+  {
+    return JniGetJsValue(ptr)->IsNumber() ? JNI_TRUE : JNI_FALSE;
+  }
+  CATCH_THROW_AND_RETURN(env, JNI_FALSE)
+}
+
 static jboolean JNICALL JniIsString(JNIEnv* env, jclass clazz, jlong ptr)
 {
   try
@@ -192,6 +201,7 @@ static JNINativeMethod methods[] =
 {
   { (char*)"isUndefined", (char*)"(J)Z", (void*)JniIsUndefined },
   { (char*)"isNull", (char*)"(J)Z", (void*)JniIsNull },
+  { (char*)"isNumber", (char*)"(J)Z", (void*)JniIsNumber },
   { (char*)"isString", (char*)"(J)Z", (void*)JniIsString },
   { (char*)"isBoolean", (char*)"(J)Z", (void*)JniIsBoolean },
   { (char*)"isObject", (char*)"(J)Z", (void*)JniIsObject },
